@@ -19,6 +19,7 @@ namespace merxly.Application.Interfaces
         IProductVariantRepository ProductVariant { get; }
         IProductVariantMediaRepository ProductVariantMedia { get; }
         IRefundRepository Refund { get; }
+        IRefreshTokenRepository RefreshToken { get; }
         IReviewRepository Review { get; }
         IReviewMediaRepository ReviewMedia { get; }
         IStoreRepository Store { get; }

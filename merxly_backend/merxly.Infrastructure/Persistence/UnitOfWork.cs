@@ -22,6 +22,7 @@ namespace merxly.Infrastructure.Persistence
         public IProductVariantRepository ProductVariant { get; private set; }
         public IProductVariantMediaRepository ProductVariantMedia { get; private set; }
         public IRefundRepository Refund { get; private set; }
+        public IRefreshTokenRepository RefreshToken { get; private set; }
         public IReviewRepository Review { get; private set; }
         public IReviewMediaRepository ReviewMedia { get; private set; }
         public IStoreRepository Store { get; private set; }
@@ -46,6 +47,7 @@ namespace merxly.Infrastructure.Persistence
             IProductVariantRepository productVariantRepository,
             IProductVariantMediaRepository productVariantMediaRepository,
             IRefundRepository refundRepository,
+            IRefreshTokenRepository refreshTokenRepository,
             IReviewRepository reviewRepository,
             IReviewMediaRepository reviewMediaRepository,
             IStoreRepository storeRepository,
@@ -69,6 +71,7 @@ namespace merxly.Infrastructure.Persistence
             ProductVariant = productVariantRepository;
             ProductVariantMedia = productVariantMediaRepository;
             Refund = refundRepository;
+            RefreshToken = refreshTokenRepository;
             Review = reviewRepository;
             ReviewMedia = reviewMediaRepository;
             Store = storeRepository;
