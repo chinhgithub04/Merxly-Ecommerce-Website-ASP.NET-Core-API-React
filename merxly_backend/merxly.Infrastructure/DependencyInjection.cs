@@ -1,9 +1,20 @@
-﻿using merxly.Domain.Entities;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using merxly.Application.Interfaces;
+using merxly.Application.Interfaces.Repositories;
+using merxly.Application.Interfaces.Services;
+using merxly.Application.Settings;
+using merxly.Domain.Entities;
 using merxly.Infrastructure.Persistence;
+using merxly.Infrastructure.Persistence.Repositories;
+using merxly.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace merxly.Infrastructure
 {
@@ -49,6 +60,66 @@ namespace merxly.Infrastructure
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+            // JWT Configuration
+            var jwtSettings = configuration.GetSection("JWT").Get<JwtSettings>()
+                ?? throw new InvalidOperationException("JWT settings not found in configuration.");
+
+            services.Configure<JwtSettings>(configuration.GetSection("JWT"));
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            // Repository Registration
+            services.AddScoped<IAddressRepository, AddressRepository>();
+            services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<ICartItemRepository, CartItemRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+            services.AddScoped<IOrderStatusHistoryRepository, OrderStatusHistoryRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IProductAttributeRepository, ProductAttributeRepository>();
+            services.AddScoped<IProductAttributeValueRepository, ProductAttributeValueRepository>();
+            services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
+            services.AddScoped<IProductVariantMediaRepository, ProductVariantMediaRepository>();
+            services.AddScoped<IRefundRepository, RefundRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IReviewMediaRepository, ReviewMediaRepository>();
+            services.AddScoped<IStoreRepository, StoreRepository>();
+            services.AddScoped<IStoreAddressRepository, StoreAddressRepository>();
+            services.AddScoped<IWishlistRepository, WishlistRepository>();
+            services.AddScoped<IWishlistItemRepository, WishlistItemRepository>();
+
+            // Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Service Registration
+            services.AddScoped<IAuthService, AuthService>();
+
+            // FluentValidation
+            services.AddValidatorsFromAssemblyContaining<merxly.Application.Validators.Auth.RegisterDtoValidator>();
+            services.AddFluentValidationAutoValidation();
 
             return services;
         }
