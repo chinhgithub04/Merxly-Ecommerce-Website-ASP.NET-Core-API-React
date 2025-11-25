@@ -1,4 +1,5 @@
 using merxly.API.Middlewares;
+using merxly.Application;
 using merxly.Infrastructure;
 using merxly.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

@@ -4,6 +4,7 @@ using FluentValidation.AspNetCore;
 using merxly.Application.Interfaces;
 using merxly.Application.Interfaces.Repositories;
 using merxly.Application.Interfaces.Services;
+using merxly.Application.Mappings;
 using merxly.Application.Settings;
 using merxly.Application.Validators.Auth;
 using merxly.Domain.Entities;
@@ -11,12 +12,14 @@ using merxly.Infrastructure.Persistence;
 using merxly.Infrastructure.Persistence.Repositories;
 using merxly.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
 
 namespace merxly.Infrastructure
 {
@@ -87,6 +90,43 @@ namespace merxly.Infrastructure
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
                     ClockSkew = TimeSpan.Zero
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        
+                        var result = JsonSerializer.Serialize(new
+                        {
+                            data = (object?)null,
+                            isSuccess = false,
+                            message = "Unauthorized. Please login to access this resource.",
+                            statusCode = 401,
+                            errors = new[] { "Authentication token is missing or invalid." }
+                        });
+                        
+                        return context.Response.WriteAsync(result);
+                    },
+                    OnForbidden = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+                        
+                        var result = JsonSerializer.Serialize(new
+                        {
+                            data = (object?)null,
+                            isSuccess = false,
+                            message = "Forbidden. You don't have permission to access this resource.",
+                            statusCode = 403,
+                            errors = new[] { "Insufficient permissions." }
+                        });
+                        
+                        return context.Response.WriteAsync(result);
+                    }
+                };
             });
 
             // Repository Registration
@@ -123,6 +163,9 @@ namespace merxly.Infrastructure
             // Cloudinary Service
             var cloudinarySettings = configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>()
                 ?? throw new InvalidOperationException("Cloudinary settings not found in configuration.");
+
+            // Configure CloudinaryUrlBuilder with cloud name
+            CloudinaryUrlBuilder.Configure(cloudinarySettings.CloudName);
 
             services.AddSingleton(x =>
             {

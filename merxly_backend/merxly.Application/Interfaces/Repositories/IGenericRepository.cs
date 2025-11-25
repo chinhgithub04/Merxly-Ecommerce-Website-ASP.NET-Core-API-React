@@ -12,7 +12,7 @@ namespace merxly.Application.Interfaces.Repositories
 
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
 
-        Task<PaginatedResultDto<T>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes);
+        Task<PaginatedResultDto<T>> GetPagedAsync(PaginationQuery paginationQuery, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes);
 
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
 

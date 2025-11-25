@@ -20,7 +20,7 @@ namespace merxly.Infrastructure.Persistence.Configurations
             builder.Property(c => c.Description)
                 .HasMaxLength(1000);
 
-            builder.Property(c => c.ImageUrl)
+            builder.Property(c => c.ImagePublicId)
                 .HasMaxLength(500);
 
             builder.Property(c => c.IsActive)

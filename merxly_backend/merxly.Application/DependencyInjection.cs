@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using merxly.Application.Interfaces.Services;
+using merxly.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -13,6 +15,12 @@ namespace merxly.Application
             // FluentValidation
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddFluentValidationAutoValidation();
+
+            // Service Registrations
+            services.AddScoped<ICategoryService, CategoryService>();
+
+            // AutoMapper Configuration
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             return services;
         }

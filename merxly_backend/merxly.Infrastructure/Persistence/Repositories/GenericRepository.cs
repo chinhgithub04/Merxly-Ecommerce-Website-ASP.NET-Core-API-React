@@ -95,7 +95,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
             _dbSet.Update(entity);
         }
 
-        public async Task<PaginatedResultDto<T>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
+        public async Task<PaginatedResultDto<T>> GetPagedAsync(PaginationQuery paginationQuery, Expression<Func<T, bool>>? predicate = null, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet.AsNoTracking();
 
@@ -115,16 +115,16 @@ namespace merxly.Infrastructure.Persistence.Repositories
             var totalCount = await query.CountAsync(cancellationToken);
 
             var items = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((paginationQuery.PageNumber - 1) * paginationQuery.PageSize)
+                .Take(paginationQuery.PageSize)
                 .ToListAsync(cancellationToken);
 
             return new PaginatedResultDto<T>
             {
                 Items = items,
                 TotalCount = totalCount,
-                PageSize = pageSize,
-                PageNumber = pageNumber
+                PageSize = paginationQuery.PageSize,
+                PageNumber = paginationQuery.PageNumber
             };
         }
     }
