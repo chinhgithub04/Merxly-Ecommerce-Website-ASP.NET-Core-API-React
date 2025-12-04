@@ -21,8 +21,14 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
+            // Relationships
+            builder.HasMany(pav => pav.VariantAttributeValues)
+                .WithOne(pvav => pvav.ProductAttributeValue)
+                .HasForeignKey(pvav => pvav.ProductAttributeValueId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Indexes
-            builder.HasIndex(pav => new { pav.ProductVariantId, pav.ProductAttributeId })
+            builder.HasIndex(pav => new { pav.ProductAttributeId, pav.Value })
                 .IsUnique();
         }
     }

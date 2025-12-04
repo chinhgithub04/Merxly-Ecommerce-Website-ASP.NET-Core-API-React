@@ -32,6 +32,10 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasDefaultValue(true);
 
+            builder.Property(p => p.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.Property(p => p.MinPrice)
                 .HasPrecision(18, 2);
 

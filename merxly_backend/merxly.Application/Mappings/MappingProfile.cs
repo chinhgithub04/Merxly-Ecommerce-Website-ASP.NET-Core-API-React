@@ -5,6 +5,7 @@ using merxly.Application.DTOs.Product;
 using merxly.Application.DTOs.ProductAttribute;
 using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductVariant;
+using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.DTOs.Store;
 using merxly.Application.Interfaces.Services;
 using merxly.Domain.Entities;
@@ -49,14 +50,15 @@ namespace merxly.Application.Mappings
                     _cloudinaryUrlService.GetThumbnailImageUrl(src.MainMediaPublicId)))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
-            CreateMap<Product, DetailProductDto>()
-                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
-                    _cloudinaryUrlService.GetMediumImageUrl(src.MainMediaPublicId)))
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
-                .ForMember(dest => dest.StoreIsVerified, opt => opt.MapFrom(src => src.Store.IsVerified));
+            //CreateMap<Product, DetailProductDto>()
+            //    .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
+            //        _cloudinaryUrlService.GetMediumImageUrl(src.MainMediaPublicId)))
+            //    .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+            //    .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
+            //    .ForMember(dest => dest.StoreIsVerified, opt => opt.MapFrom(src => src.Store.IsVerified));
 
-            CreateMap<CreateProductDto, Product>();
+            CreateMap<CreateProductDto, Product>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
             CreateMap<UpdateProductDto, Product>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
@@ -64,22 +66,29 @@ namespace merxly.Application.Mappings
 
             // ProductVariant Mappings
             CreateMap<ProductVariant, ProductVariantDto>();
+            CreateMap<CreateProductVariantDto, ProductVariant>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
 
             // ProductAttribute Mappings
             CreateMap<ProductAttribute, ProductAttributeDto>();
             //CreateMap<ProductAttribute, DetailProductAttributeDto>()
             //    .ForMember(dest => dest.Values, opt => opt.MapFrom(src => src.ProductAttributeValues));
-            CreateMap<CreateProductAttributeDto, ProductAttribute>();
+            CreateMap<CreateProductAttributeDto, ProductAttribute>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
             CreateMap<UpdateProductAttributeDto, ProductAttribute>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // ProductAttributeValue Mappings
-            CreateMap<ProductAttributeValue, ProductAttributeValueDto>()
-                .ForMember(dest => dest.ProductAttributeName, opt => opt.MapFrom(src => src.ProductAttribute.Name));
-            CreateMap<ProductAttributeValue, DetailProductAttributeValueDto>();
-            CreateMap<CreateProductAttributeValueDto, ProductAttributeValue>();
+            //CreateMap<ProductAttributeValue, ProductAttributeValueDto>()
+            //    .ForMember(dest => dest.ProductAttributeName, opt => opt.MapFrom(src => src.ProductAttribute.Name));
+            //CreateMap<ProductAttributeValue, DetailProductAttributeValueDto>();
+            CreateMap<CreateProductAttributeValueDto, ProductAttributeValue>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
             CreateMap<UpdateProductAttributeValueDto, ProductAttributeValue>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // ProductVariantMedia Mappings
+            CreateMap<CreateProductVariantMediaDto, ProductVariantMedia>();
         }
     }
 }

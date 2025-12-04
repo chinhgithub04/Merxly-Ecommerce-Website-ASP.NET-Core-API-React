@@ -5,6 +5,7 @@ namespace merxly.Domain.Entities
     public class ProductVariant : ICreatedDate, IModifiedDate
     {
         public Guid Id { get; set; }
+        public string Name { get; set; }
         public string? SKU { get; set; }
         public decimal Price { get; set; }
         public decimal? Weight { get; set; }
@@ -13,6 +14,7 @@ namespace merxly.Domain.Entities
         public decimal? Height { get; set; }
         public int StockQuantity { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
@@ -21,7 +23,7 @@ namespace merxly.Domain.Entities
 
         // Navigation properties
         public Product Product { get; set; }
-        public ICollection<ProductAttributeValue> AttributeValues { get; set; } = new List<ProductAttributeValue>();
+        public ICollection<ProductVariantAttributeValue> VariantAttributeValues { get; set; } = new List<ProductVariantAttributeValue>();
         public ICollection<ProductVariantMedia> Media { get; set; } = new List<ProductVariantMedia>();
     }
 }

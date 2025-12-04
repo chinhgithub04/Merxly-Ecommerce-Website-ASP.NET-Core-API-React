@@ -8,6 +8,6 @@ namespace merxly.Application.DTOs.ProductVariantMedia
         public string MediaUrl { get; init; }
         public MediaType MediaType { get; init; }
         public int DisplayOrder { get; init; }
-        public bool IsPrimary { get; init; }
+        public bool IsMain { get; init; }
     }
 }

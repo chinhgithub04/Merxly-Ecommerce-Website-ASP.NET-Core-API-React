@@ -25,6 +25,7 @@ namespace merxly.Infrastructure.Persistence
         public DbSet<ProductAttribute> ProductAttributes { get; set; }
         public DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
         public DbSet<ProductVariant> ProductVariants { get; set; }
+        public DbSet<ProductVariantAttributeValue> ProductVariantAttributeValues { get; set; }
         public DbSet<ProductVariantMedia> ProductVariantMedia { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Review> Reviews { get; set; }

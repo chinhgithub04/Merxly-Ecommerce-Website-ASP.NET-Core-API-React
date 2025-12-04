@@ -10,6 +10,7 @@ namespace merxly.Domain.Entities
         public bool IsStoreFeatured { get; set; } // A flag to mark products as Feature Product
         public bool IsPlatformFeatured { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public int TotalStock { get; set; }

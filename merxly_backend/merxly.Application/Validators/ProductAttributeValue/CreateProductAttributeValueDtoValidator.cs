@@ -11,8 +11,8 @@ namespace merxly.Application.Validators.ProductAttributeValue
                 .NotEmpty().WithMessage("Attribute value is required.")
                 .MaximumLength(200).WithMessage("Attribute value cannot exceed 200 characters.");
 
-            RuleFor(x => x.ProductAttributeId)
-                .NotEmpty().WithMessage("Product attribute is required.");
+            //RuleFor(x => x.ProductAttributeId)
+            //    .NotEmpty().WithMessage("Product attribute is required.");
         }
     }
 }

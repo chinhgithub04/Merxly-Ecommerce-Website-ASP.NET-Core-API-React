@@ -1,6 +1,10 @@
 using AutoMapper;
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
+using merxly.Application.DTOs.ProductAttribute;
+using merxly.Application.DTOs.ProductAttributeValue;
+using merxly.Application.DTOs.ProductVariant;
+using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.Interfaces;
 using merxly.Application.Interfaces.Services;
 using merxly.Domain.Entities;
@@ -88,26 +92,91 @@ namespace merxly.Application.Services
                 throw new NotFoundException("Category not found.");
             }
 
+            // Create product
             var product = _mapper.Map<Product>(createProductDto);
             product.StoreId = store.Id;
-            product.IsActive = true;
-            product.IsPlatformFeatured = false;
-            product.TotalStock = 0;
-            product.AverageRating = 0;
-            product.ReviewCount = 0;
-            product.TotalSold = 0;
+
+            _logger.LogInformation("Product created: {ProductId}", product.Id);
+
+            // Prepare a map to track attribute value IDs
+            // Key: AttributeName_Value , Value: ProductAttributeValueId
+            // Ex: Color_Red : 123e4567-e89b-12d3-a456-426614174000
+            var valueIdMap = new Dictionary<string, Guid>();
+
+            // Create ProductAttributes and ProductAttributeValues
+            foreach (var createProductAttributeDto in createProductDto.ProductAttributes)
+            {
+                // Create ProductAttribute
+                var productAttribute = _mapper.Map<ProductAttribute>(createProductAttributeDto);
+
+                _logger.LogInformation("Adding attribute: {AttributeName} to product: {ProductId}", productAttribute.Name, product.Id);
+
+                foreach (var createValueDto in createProductAttributeDto.ProductAttributeValues)
+                {
+                    // Create ProductAttributeValue
+                    var productAttributeValue = _mapper.Map<ProductAttributeValue>(createValueDto);
+                    productAttribute.ProductAttributeValues.Add(productAttributeValue);
+
+                    // Create key for the map
+                    string key = $"{productAttribute.Name.Trim()}_{productAttributeValue.Value.Trim()}";
+                    valueIdMap[key] = productAttributeValue.Id;
+
+                    _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeName}", productAttributeValue.Value, productAttribute.Name);
+                }
+                product.ProductAttributes.Add(productAttribute);
+            }
+
+            // Create ProductVariants
+            foreach (var createVariantDto in createProductDto.Variants)
+            {
+                var productVariant = _mapper.Map<ProductVariant>(createVariantDto);
+
+                _logger.LogInformation("Adding variant to product: {ProductId}", product.Id);
+
+                // Map AttributeValues
+                foreach (var attributeValueDto in createVariantDto.AttributeSelections)
+                {
+                    string key = $"{attributeValueDto.AttributeName.Trim()}_{attributeValueDto.Value.Trim()}";
+                    if (valueIdMap.TryGetValue(key, out Guid attributeValueId))
+                    {
+                        // Create ProductVariantAttributeValue
+                        var variantAttributeValue = new ProductVariantAttributeValue
+                        {
+                            ProductVariantId = productVariant.Id,
+                            ProductAttributeValueId = attributeValueId
+                        };
+                        productVariant.VariantAttributeValues.Add(variantAttributeValue);
+
+                        _logger.LogInformation("Mapped attribute value: {AttributeValue} to variant {VariantId}", attributeValueDto.Value, productVariant.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Attribute value not found for variant mapping: {AttributeValue}", attributeValueDto.Value);
+                        throw new Exception($"Attribute value '{attributeValueDto.Value}' for attribute '{attributeValueDto.AttributeName}' not found.");
+                    }
+                }
+
+                // Create Media
+                foreach (var createMediaDto in createVariantDto.Media)
+                {
+                    var variantMedia = _mapper.Map<ProductVariantMedia>(createMediaDto);
+                    productVariant.Media.Add(variantMedia);
+
+                    _logger.LogInformation("Added media to variant {VariantId}", productVariant.Id);
+                }
+
+                product.Variants.Add(productVariant);
+            }
+
+            UpdateProductPricesAndStock(product);
+            UpdateProductMainMedia(product);
 
             await _unitOfWork.Product.AddAsync(product, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Product created successfully: {ProductId}", product.Id);
 
-            // Reload with navigation properties
-            var createdProduct = await _unitOfWork.Product.GetProductDetailsByIdAsync(
-                product.Id,
-                cancellationToken);
-
-            return _mapper.Map<DetailProductDto>(createdProduct);
+            return _mapper.Map<DetailProductDto>(product);
         }
 
         public async Task<DetailProductDto> UpdateProductAsync(
@@ -223,6 +292,112 @@ namespace merxly.Application.Services
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Product deleted successfully: {ProductId}", productId);
+        }
+
+        Task<StoreDetailProductDto> IProductService.CreateProductAsync(CreateProductDto createProductDto, Guid storeId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StoreDetailProductDto> AddProductAttributeAsync(Guid productId, CreateProductAttributeDto createProductAttributeDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StoreDetailProductDto> AddProductAttributeValueAsync(Guid productAttributeId, CreateProductAttributeValueDto createProductAttributeValueDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StoreDetailProductDto> AddProductVariantAsync(Guid productId, CreateProductVariantDto createProductVariantDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ProductVariantMediaDto> AddProductVariantMediaAsync(Guid productVariantId, CreateProductVariantMediaDto createProductVariantMediaDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<StoreDetailProductDto> IProductService.UpdateProductAsync(Guid productId, UpdateProductDto updateProductDto, Guid storeId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StoreDetailProductDto> UpdateProductAttributeAsync(Guid productAttributeId, UpdateProductAttributeDto updateAttributesDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StoreDetailProductDto> UpdateProductAttributeValueAsync(Guid productAttributeValueId, UpdateProductAttributeValueDto updateAttributeValueDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StoreDetailProductDto> UpdateProductVariantAsync(Guid productVariantId, UpdateProductVariantDto updateProductVariantDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ProductVariantMediaDto> UpdateProductVariantMediaAsync(Guid productVariantMediaId, UpdateProductVariantMediaDto updateProductVariantMediaDto, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteProductAsync(Guid productId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void UpdateProductPricesAndStock(Product product)
+        {
+            if (product.Variants == null || !product.Variants.Any())
+            {
+                product.MinPrice = null;
+                product.MaxPrice = null;
+                product.TotalStock = 0;
+                return;
+            }
+
+            var activeVariants = product.Variants.Where(v => v.IsActive && !v.IsDeleted).ToList();
+
+            if (!activeVariants.Any())
+            {
+                product.MinPrice = null;
+                product.MaxPrice = null;
+                product.TotalStock = 0;
+                return;
+            }
+
+            product.MinPrice = activeVariants.Min(v => v.Price);
+            product.MaxPrice = activeVariants.Max(v => v.Price);
+            product.TotalStock = activeVariants.Sum(v => v.StockQuantity);
+        }
+
+        private void UpdateProductMainMedia(Product product)
+        {
+            if (product.Variants == null || !product.Variants.Any())
+            {
+                product.MainMediaPublicId = null;
+                return;
+            }
+
+            var mainMedia = product.Variants
+                .Where(v => v.IsActive && !v.IsDeleted)
+                .SelectMany(v => v.Media)
+                .OrderBy(m => m.DisplayOrder)
+                .FirstOrDefault(m => m.IsMain);
+
+            if (mainMedia == null)
+            {
+                mainMedia = product.Variants
+                    .Where(v => v.IsActive && !v.IsDeleted)
+                    .SelectMany(v => v.Media)
+                    .OrderBy(m => m.DisplayOrder)
+                    .FirstOrDefault();
+            }
+
+            product.MainMediaPublicId = mainMedia?.MediaPublicId;
         }
     }
 }

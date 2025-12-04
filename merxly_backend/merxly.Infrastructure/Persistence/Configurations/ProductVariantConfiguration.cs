@@ -40,15 +40,19 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasDefaultValue(true);
 
+            builder.Property(pv => pv.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.Property(pv => pv.CreatedAt)
                 .IsRequired();
 
             builder.Property(pv => pv.UpdatedAt);
 
             // Relationships
-            builder.HasMany(pv => pv.AttributeValues)
-                .WithOne(av => av.ProductVariant)
-                .HasForeignKey(av => av.ProductVariantId)
+            builder.HasMany(pv => pv.VariantAttributeValues)
+                .WithOne(pvav => pvav.ProductVariant)
+                .HasForeignKey(pvav => pvav.ProductVariantId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(pv => pv.Media)

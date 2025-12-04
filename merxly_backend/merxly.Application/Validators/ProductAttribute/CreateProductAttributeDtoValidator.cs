@@ -14,8 +14,8 @@ namespace merxly.Application.Validators.ProductAttribute
             RuleFor(x => x.DisplayOrder)
                 .GreaterThanOrEqualTo(0).WithMessage("Display order must be non-negative.");
 
-            RuleFor(x => x.ProductAttributeDisplayType)
-                .IsInEnum().WithMessage("Invalid display type.");
+            //RuleFor(x => x.ProductAttributeDisplayType)
+            //    .IsInEnum().WithMessage("Invalid display type.");
         }
     }
 }
