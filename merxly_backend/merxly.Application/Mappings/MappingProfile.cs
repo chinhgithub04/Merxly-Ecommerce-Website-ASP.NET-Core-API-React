@@ -2,6 +2,7 @@
 using merxly.Application.DTOs.Category;
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
+using merxly.Application.DTOs.Product.Update;
 using merxly.Application.DTOs.ProductAttribute;
 using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductVariant;
@@ -57,10 +58,16 @@ namespace merxly.Application.Mappings
             //    .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
             //    .ForMember(dest => dest.StoreIsVerified, opt => opt.MapFrom(src => src.Store.IsVerified));
 
+            CreateMap<Product, StoreDetailProductDto>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+
             CreateMap<CreateProductDto, Product>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
+
             CreateMap<UpdateProductDto, Product>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Product, ResponseUpdateProductDto>();
 
             CreateMap<ToggleProductPlatformFeaturedDto, Product>();
 

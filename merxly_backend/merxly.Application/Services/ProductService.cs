@@ -1,6 +1,7 @@
 using AutoMapper;
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
+using merxly.Application.DTOs.Product.Update;
 using merxly.Application.DTOs.ProductAttribute;
 using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductVariant;
@@ -66,7 +67,7 @@ namespace merxly.Application.Services
             return _mapper.Map<DetailProductDto>(product);
         }
 
-        public async Task<DetailProductDto> CreateProductAsync(
+        public async Task<StoreDetailProductDto> CreateProductAsync(
             CreateProductDto createProductDto,
             Guid storeId,
             CancellationToken cancellationToken)
@@ -176,10 +177,10 @@ namespace merxly.Application.Services
 
             _logger.LogInformation("Product created successfully: {ProductId}", product.Id);
 
-            return _mapper.Map<DetailProductDto>(product);
+            return _mapper.Map<StoreDetailProductDto>(product);
         }
 
-        public async Task<DetailProductDto> UpdateProductAsync(
+        public async Task<ResponseUpdateProductDto> UpdateProductAsync(
             Guid productId,
             UpdateProductDto updateProductDto,
             Guid storeId,
@@ -225,12 +226,7 @@ namespace merxly.Application.Services
 
             _logger.LogInformation("Product updated successfully: {ProductId}", productId);
 
-            // Reload with navigation properties
-            var updatedProduct = await _unitOfWork.Product.GetProductDetailsByIdAsync(
-                product.Id,
-                cancellationToken);
-
-            return _mapper.Map<DetailProductDto>(updatedProduct);
+            return _mapper.Map<ResponseUpdateProductDto>(product);
         }
 
 
@@ -294,11 +290,6 @@ namespace merxly.Application.Services
             _logger.LogInformation("Product deleted successfully: {ProductId}", productId);
         }
 
-        Task<StoreDetailProductDto> IProductService.CreateProductAsync(CreateProductDto createProductDto, Guid storeId, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<StoreDetailProductDto> AddProductAttributeAsync(Guid productId, CreateProductAttributeDto createProductAttributeDto, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -315,11 +306,6 @@ namespace merxly.Application.Services
         }
 
         public Task<ProductVariantMediaDto> AddProductVariantMediaAsync(Guid productVariantId, CreateProductVariantMediaDto createProductVariantMediaDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<StoreDetailProductDto> IProductService.UpdateProductAsync(Guid productId, UpdateProductDto updateProductDto, Guid storeId, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

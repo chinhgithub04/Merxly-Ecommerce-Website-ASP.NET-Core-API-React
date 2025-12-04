@@ -1,5 +1,8 @@
-namespace merxly.Application.DTOs.Product
+namespace merxly.Application.DTOs.Product.Update
 {
+    /// <summary>
+    /// DTO for updating product basic information.
+    /// </summary>
     public record UpdateProductDto
     {
         public string? Name { get; init; }

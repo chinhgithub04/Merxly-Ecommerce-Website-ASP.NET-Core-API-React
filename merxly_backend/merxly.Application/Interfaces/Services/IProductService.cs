@@ -1,5 +1,6 @@
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
+using merxly.Application.DTOs.Product.Update;
 using merxly.Application.DTOs.ProductAttribute;
 using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductVariant;
@@ -19,7 +20,7 @@ namespace merxly.Application.Interfaces.Services
         Task<StoreDetailProductDto> AddProductAttributeValueAsync(Guid productAttributeId, CreateProductAttributeValueDto createProductAttributeValueDto, CancellationToken cancellationToken);
         Task<StoreDetailProductDto> AddProductVariantAsync(Guid productId, CreateProductVariantDto createProductVariantDto, CancellationToken cancellationToken);
         Task<ProductVariantMediaDto> AddProductVariantMediaAsync(Guid productVariantId, CreateProductVariantMediaDto createProductVariantMediaDto, CancellationToken cancellationToken);
-        Task<StoreDetailProductDto> UpdateProductAsync(Guid productId, UpdateProductDto updateProductDto, Guid storeId, CancellationToken cancellationToken);
+        Task<ResponseUpdateProductDto> UpdateProductAsync(Guid productId, UpdateProductDto updateProductDto, Guid storeId, CancellationToken cancellationToken);
         Task<StoreDetailProductDto> UpdateProductAttributeAsync(Guid productAttributeId, UpdateProductAttributeDto updateAttributesDto, CancellationToken cancellationToken);
         Task<StoreDetailProductDto> UpdateProductAttributeValueAsync(Guid productAttributeValueId, UpdateProductAttributeValueDto updateAttributeValueDto,CancellationToken cancellationToken);
         Task<StoreDetailProductDto> UpdateProductVariantAsync(Guid productVariantId, UpdateProductVariantDto updateProductVariantDto, CancellationToken cancellationToken);

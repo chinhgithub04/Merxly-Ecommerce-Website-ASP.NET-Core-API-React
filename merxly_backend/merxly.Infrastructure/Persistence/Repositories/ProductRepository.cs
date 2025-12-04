@@ -120,8 +120,9 @@ namespace merxly.Infrastructure.Persistence.Repositories
             return await _dbSet
                 .AsNoTracking()
                 .Include(p => p.Category)
-                .Include(p => p.Store)
                 .Include(p => p.Variants)
+                .Include(p => p.ProductAttributes)
+                .ThenInclude(pa => pa.ProductAttributeValues)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
         }
     }

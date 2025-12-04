@@ -3,6 +3,9 @@ using merxly.Application.DTOs.ProductVariant;
 
 namespace merxly.Application.DTOs.Product
 {
+    /// <summary>
+    /// DTO for detailed product information in the context of a store.
+    /// </summary>
     public record StoreDetailProductDto
     {
         public Guid Id { get; init; }
@@ -19,7 +22,7 @@ namespace merxly.Application.DTOs.Product
         public string CategoryName { get; init; }
                 
         // Variants
-        public List<ProductAttributeDto> Attributes { get; init; } = new();
+        public List<ProductAttributeDto> ProductAttributes { get; init; } = new();
         public List<ProductVariantDto> Variants { get; init; } = new();
     }
 }
