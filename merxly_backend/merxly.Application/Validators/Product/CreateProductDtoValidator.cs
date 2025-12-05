@@ -1,5 +1,7 @@
 using FluentValidation;
 using merxly.Application.DTOs.Product;
+using merxly.Application.Validators.ProductAttribute;
+using merxly.Application.Validators.ProductVariant;
 
 namespace merxly.Application.Validators.Product
 {
@@ -12,10 +14,23 @@ namespace merxly.Application.Validators.Product
                 .MaximumLength(300).WithMessage("Product name cannot exceed 300 characters.");
 
             RuleFor(x => x.Description)
-                .MaximumLength(5000).WithMessage("Product description cannot exceed 5000 characters.");
+                .MaximumLength(5000).WithMessage("Product description cannot exceed 5000 characters.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Description));
                 
             RuleFor(x => x.CategoryId)
                 .NotEmpty().WithMessage("Category is required.");
+
+            RuleFor(x => x.ProductAttributes)
+                .NotEmpty().WithMessage("At least one product attribute is required.");
+
+            RuleForEach(x => x.ProductAttributes)
+                .SetValidator(new CreateProductAttributeDtoValidator());
+
+            RuleFor(x => x.Variants)
+                .NotEmpty().WithMessage("At least one product variant is required.");
+
+            RuleForEach(x => x.Variants)
+                .SetValidator(new CreateProductVariantDtoValidator());
         }
     }
 }

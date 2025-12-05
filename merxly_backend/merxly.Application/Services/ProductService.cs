@@ -5,6 +5,7 @@ using merxly.Application.DTOs.Product.Update;
 using merxly.Application.DTOs.ProductAttribute;
 using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductVariant;
+using merxly.Application.DTOs.ProductVariant.Update;
 using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.Interfaces;
 using merxly.Application.Interfaces.Services;
@@ -190,8 +191,7 @@ namespace merxly.Application.Services
 
             var product = await _unitOfWork.Product.GetByIdAsync(
                 productId,
-                cancellationToken,
-                p => p.Store);
+                cancellationToken);
 
             if (product == null)
             {
@@ -200,7 +200,7 @@ namespace merxly.Application.Services
             }
 
             // Verify ownership
-            if (product.Store.Id != storeId)
+            if (product.StoreId != storeId)
             {
                 _logger.LogWarning("Store {StoreId} is not the owner of product {ProductId}", storeId, productId);
                 throw new ForbiddenAccessException("You don't have permission to update this product.");
@@ -320,9 +320,58 @@ namespace merxly.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<StoreDetailProductDto> UpdateProductVariantAsync(Guid productVariantId, UpdateProductVariantDto updateProductVariantDto, CancellationToken cancellationToken)
+        public async Task<BulkUpdateProductVariantsResponseDto> UpdateProductVariantAsync(Guid productId, BulkUpdateProductVariantsDto bulkUpdateProductVariantsDto, Guid storeId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Updating variants for product: {ProductId}", productId);
+            var product = await _unitOfWork.Product.GetProductWithVariantsByIdAsync(
+                productId,
+                cancellationToken);
+
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found: {ProductId}", productId);
+                throw new NotFoundException("Product not found.");
+            }
+
+            // Verify ownership
+            if (product.StoreId != storeId)
+            {
+                _logger.LogWarning("Store {StoreId} is not the owner of product {ProductId}", storeId, productId);
+                throw new ForbiddenAccessException("You don't have permission to update this product.");
+            }
+
+            //
+            var dbVariantsMap = product.Variants.ToDictionary(v => v.Id);
+
+            foreach (var updateVariantDto in bulkUpdateProductVariantsDto.Variants)
+            {
+                if (dbVariantsMap.TryGetValue(updateVariantDto.Id, out var variant))
+                {
+                    _mapper.Map(updateVariantDto, variant);
+                    _unitOfWork.ProductVariant.Update(variant);
+                    _logger.LogInformation("Updated variant: {VariantId} for product: {ProductId}", variant.Id, productId);
+                }
+                else
+                {
+                    _logger.LogWarning("Variant not found: {VariantId} for product: {ProductId}", updateVariantDto.Id, productId);
+                    throw new NotFoundException($"Variant with ID {updateVariantDto.Id} not found for this product.");
+                }
+            }
+
+            UpdateProductPricesAndStock(product);
+            _unitOfWork.Product.Update(product);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Variants updated successfully for product: {ProductId}", productId);
+            
+            return new BulkUpdateProductVariantsResponseDto
+            {
+                ProductId = product.Id,
+                NewMinPrice = product.MinPrice ?? 0,
+                NewMaxPrice = product.MaxPrice ?? 0,
+                NewTotalStock = product.TotalStock,
+                UpdatedVariants = _mapper.Map<List<ResponseUpdateVariantItemDto>>(product.Variants)
+            };
         }
 
         public Task<ProductVariantMediaDto> UpdateProductVariantMediaAsync(Guid productVariantMediaId, UpdateProductVariantMediaDto updateProductVariantMediaDto, CancellationToken cancellationToken)

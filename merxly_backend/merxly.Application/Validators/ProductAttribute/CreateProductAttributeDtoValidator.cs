@@ -1,5 +1,6 @@
 using FluentValidation;
 using merxly.Application.DTOs.ProductAttribute;
+using merxly.Application.Validators.ProductAttributeValue;
 
 namespace merxly.Application.Validators.ProductAttribute
 {
@@ -14,8 +15,11 @@ namespace merxly.Application.Validators.ProductAttribute
             RuleFor(x => x.DisplayOrder)
                 .GreaterThanOrEqualTo(0).WithMessage("Display order must be non-negative.");
 
-            //RuleFor(x => x.ProductAttributeDisplayType)
-            //    .IsInEnum().WithMessage("Invalid display type.");
+            RuleFor(x => x.ProductAttributeValues)
+                .NotEmpty().WithMessage("At least one attribute value is required.");
+
+            RuleForEach(x => x.ProductAttributeValues)
+                .SetValidator(new CreateProductAttributeValueDtoValidator());
         }
     }
 }

@@ -6,6 +6,7 @@ using merxly.Application.DTOs.Product.Update;
 using merxly.Application.DTOs.ProductAttribute;
 using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductVariant;
+using merxly.Application.DTOs.ProductVariant.Update;
 using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.DTOs.Store;
 using merxly.Application.Interfaces.Services;
@@ -73,8 +74,13 @@ namespace merxly.Application.Mappings
 
             // ProductVariant Mappings
             CreateMap<ProductVariant, ProductVariantDto>();
+
             CreateMap<CreateProductVariantDto, ProductVariant>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
+
+            CreateMap<BulkUpdateVariantItemDto, ProductVariant>();
+
+            CreateMap<ProductVariant, ResponseUpdateVariantItemDto>();
 
             // ProductAttribute Mappings
             CreateMap<ProductAttribute, ProductAttributeDto>();

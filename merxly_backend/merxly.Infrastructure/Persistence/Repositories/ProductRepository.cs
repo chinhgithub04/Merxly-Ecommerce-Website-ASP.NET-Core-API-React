@@ -125,5 +125,16 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .ThenInclude(pa => pa.ProductAttributeValues)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
         }
+
+        public async Task<Product?> GetProductWithVariantsByIdAsync(Guid productId, CancellationToken cancellationToken = default)
+        {
+            var product = await _dbSet
+                .AsNoTracking()
+                .Include(p => p.Variants)
+                .ThenInclude(v => v.VariantAttributeValues)
+                .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
+                
+            return product;
+        }
     }
 }
