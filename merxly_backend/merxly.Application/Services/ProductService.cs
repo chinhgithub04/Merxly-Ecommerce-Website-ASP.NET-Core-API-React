@@ -169,6 +169,7 @@ namespace merxly.Application.Services
 
                     _logger.LogInformation("Added media to variant {VariantId}", productVariant.Id);
                 }
+                EnsureSingleMainMediaPerVariant(productVariant);
 
                 product.Variants.Add(productVariant);
             }
