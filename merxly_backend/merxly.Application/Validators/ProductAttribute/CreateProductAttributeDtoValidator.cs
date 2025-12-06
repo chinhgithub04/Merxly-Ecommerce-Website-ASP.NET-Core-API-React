@@ -20,6 +20,12 @@ namespace merxly.Application.Validators.ProductAttribute
 
             RuleForEach(x => x.ProductAttributeValues)
                 .SetValidator(new CreateProductAttributeValueDtoValidator());
+
+            // Validate that attribute value names are unique within the attribute
+            RuleFor(x => x.ProductAttributeValues)
+                .Must(values => values.Select(v => v.Value.Trim().ToLower()).Distinct().Count() == values.Count)
+                .WithMessage("Attribute value names must be unique.")
+                .When(x => x.ProductAttributeValues.Any());
         }
     }
 }

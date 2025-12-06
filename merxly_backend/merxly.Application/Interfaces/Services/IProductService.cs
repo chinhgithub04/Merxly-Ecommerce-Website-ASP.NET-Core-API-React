@@ -20,10 +20,7 @@ namespace merxly.Application.Interfaces.Services
         
         // Store
         Task<StoreDetailProductDto> CreateProductAsync(CreateProductDto createProductDto, Guid storeId, CancellationToken cancellationToken);
-        Task<StoreDetailProductDto> AddProductAttributeAsync(Guid productId, CreateProductAttributeDto createProductAttributeDto, CancellationToken cancellationToken);
-        Task<StoreDetailProductDto> AddProductAttributeValueAsync(Guid productAttributeId, CreateProductAttributeValueDto createProductAttributeValueDto, CancellationToken cancellationToken);
-        Task<StoreDetailProductDto> AddProductVariantAsync(Guid productId, CreateProductVariantDto createProductVariantDto, CancellationToken cancellationToken);
-        Task<ProductVariantMediaDto> AddProductVariantMediaAsync(Guid productVariantId, CreateProductVariantMediaDto createProductVariantMediaDto, CancellationToken cancellationToken);
+        Task<StoreDetailProductDto> AddAttributesAndRegenerateVariantsAsync(Guid productId, AddAttributeWithVariantsDto addAttributeWithVariantsDto, Guid storeId, CancellationToken cancellationToken);
         Task<ResponseUpdateProductDto> UpdateProductAsync(Guid productId, UpdateProductDto updateProductDto, Guid storeId, CancellationToken cancellationToken);
         Task<BulkUpdateProductAttributesResponseDto> UpdateProductAttributeAsync(Guid productId, BulkUpdateProductAttributesDto bulkUpdateProductAttributesDto, Guid storeId, CancellationToken cancellationToken);
         Task<BulkUpdateProductAttributeValuesResponseDto> UpdateProductAttributeValueAsync(Guid productAttributeId, BulkUpdateProductAttributeValuesDto bulkUpdateProductAttributeValuesDto, Guid storeId, CancellationToken cancellationToken);

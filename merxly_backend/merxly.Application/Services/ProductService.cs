@@ -192,6 +192,83 @@ namespace merxly.Application.Services
             return _mapper.Map<StoreDetailProductDto>(product);
         }
 
+        public async Task<StoreDetailProductDto> AddAttributesAndRegenerateVariantsAsync(
+            Guid productId,
+            AddAttributeWithVariantsDto addAttributeWithVariantsDto,
+            Guid storeId,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Adding attributes and regenerating variants for product: {ProductId}", productId);
+
+            var product = await _unitOfWork.Product.GetProductWithAttributesByIdAsync(
+                productId,
+                cancellationToken);
+
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found: {ProductId}", productId);
+                throw new NotFoundException("Product not found.");
+            }
+
+            // Verify ownership
+            if (product.StoreId != storeId)
+            {
+                _logger.LogWarning("Store {StoreId} is not the owner of product {ProductId}", storeId, productId);
+                throw new ForbiddenAccessException("You don't have permission to update this product.");
+            }
+
+            // Validate maximum 3 attributes per product (including new ones)
+            int totalAttributesAfterAdd = product.ProductAttributes.Count + addAttributeWithVariantsDto.ProductAttributes.Count;
+            if (totalAttributesAfterAdd > 3)
+            {
+                _logger.LogWarning("Product cannot have more than 3 attributes. Current: {Current}, Adding: {Adding}", 
+                    product.ProductAttributes.Count, addAttributeWithVariantsDto.ProductAttributes.Count);
+                throw new InvalidOperationException($"A product can have a maximum of 3 attributes. Current: {product.ProductAttributes.Count}, attempting to add: {addAttributeWithVariantsDto.ProductAttributes.Count}.");
+            }
+
+            // Add new ProductAttributes and ProductAttributeValues
+            foreach (var createProductAttributeDto in addAttributeWithVariantsDto.ProductAttributes)
+            {
+                // Check for duplicate attribute name
+                bool isDuplicateName = product.ProductAttributes
+                    .Any(a => a.Name.Equals(createProductAttributeDto.Name, StringComparison.OrdinalIgnoreCase));
+
+                if (isDuplicateName)
+                {
+                    _logger.LogWarning("Duplicate attribute name: {AttributeName} for product: {ProductId}", createProductAttributeDto.Name, productId);
+                    throw new ConflictException($"Attribute name '{createProductAttributeDto.Name}' already exists for this product.");
+                }
+
+                // Create ProductAttribute
+                var productAttribute = _mapper.Map<ProductAttribute>(createProductAttributeDto);
+                _logger.LogInformation("Adding attribute: {AttributeName} to product: {ProductId}", productAttribute.Name, product.Id);
+
+                foreach (var createValueDto in createProductAttributeDto.ProductAttributeValues)
+                {
+                    // Create ProductAttributeValue
+                    var productAttributeValue = _mapper.Map<ProductAttributeValue>(createValueDto);
+                    productAttribute.ProductAttributeValues.Add(productAttributeValue);
+
+                    _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeName}", 
+                        productAttributeValue.Value, productAttribute.Name);
+                }
+                product.ProductAttributes.Add(productAttribute);
+            }
+
+            // Regenerate variants
+            RegenerateVariantsInternal(product, addAttributeWithVariantsDto.ProductAttributeValues);
+
+            UpdateProductPricesAndStock(product);
+            UpdateProductMainMedia(product);
+
+            _unitOfWork.Product.Update(product);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Attributes added and variants regenerated successfully for product: {ProductId}", productId);
+
+            return _mapper.Map<StoreDetailProductDto>(product);
+        }
+
         public async Task<ResponseUpdateProductDto> UpdateProductAsync(
             Guid productId,
             UpdateProductDto updateProductDto,
@@ -299,26 +376,6 @@ namespace merxly.Application.Services
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Product deleted successfully: {ProductId}", productId);
-        }
-
-        public Task<StoreDetailProductDto> AddProductAttributeAsync(Guid productId, CreateProductAttributeDto createProductAttributeDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<StoreDetailProductDto> AddProductAttributeValueAsync(Guid productAttributeId, CreateProductAttributeValueDto createProductAttributeValueDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<StoreDetailProductDto> AddProductVariantAsync(Guid productId, CreateProductVariantDto createProductVariantDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ProductVariantMediaDto> AddProductVariantMediaAsync(Guid productVariantId, CreateProductVariantMediaDto createProductVariantMediaDto, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<BulkUpdateProductAttributesResponseDto> UpdateProductAttributeAsync(Guid productId, BulkUpdateProductAttributesDto bulkUpdateProductAttributesDto, Guid storeId, CancellationToken cancellationToken)
@@ -599,6 +656,83 @@ namespace merxly.Application.Services
         public Task DeleteProductAsync(Guid productId, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
+        }
+
+        private void RegenerateVariantsInternal(
+            Product product,
+            List<CreateProductVariantDto> newVariantDtos)
+        {
+            _logger.LogInformation("Regenerating variants for product: {ProductId}", product.Id);
+
+            // Build valueIdMap from all product attributes
+            var valueIdMap = new Dictionary<string, Guid>();
+            foreach (var attribute in product.ProductAttributes)
+            {
+                foreach (var attributeValue in attribute.ProductAttributeValues)
+                {
+                    string key = $"{attribute.Name.Trim()}_{attributeValue.Value.Trim()}";
+                    valueIdMap[key] = attributeValue.Id;
+                }
+            }
+
+            // Soft delete all existing variants
+            foreach (var existingVariant in product.Variants.Where(v => !v.IsDeleted).ToList())
+            {
+                existingVariant.IsDeleted = true;
+                existingVariant.IsActive = false;
+                // Append timestamp to SKU to avoid conflicts
+                if (!string.IsNullOrEmpty(existingVariant.SKU))
+                {
+                    existingVariant.SKU = $"{existingVariant.SKU}_DELETED_{DateTime.UtcNow:yyyyMMddHHmmss}";
+                }
+                _unitOfWork.ProductVariant.Update(existingVariant);
+                _logger.LogInformation("Soft deleted variant: {VariantId}", existingVariant.Id);
+            }
+
+            // Create new variants from DTO
+            foreach (var createVariantDto in newVariantDtos)
+            {
+                var productVariant = _mapper.Map<ProductVariant>(createVariantDto);
+                _logger.LogInformation("Creating new variant for product: {ProductId}", product.Id);
+
+                // Map AttributeValues
+                foreach (var attributeValueDto in createVariantDto.AttributeSelections)
+                {
+                    string key = $"{attributeValueDto.AttributeName.Trim()}_{attributeValueDto.Value.Trim()}";
+                    if (valueIdMap.TryGetValue(key, out Guid attributeValueId))
+                    {
+                        // Create ProductVariantAttributeValue
+                        var variantAttributeValue = new ProductVariantAttributeValue
+                        {
+                            ProductVariantId = productVariant.Id,
+                            ProductAttributeValueId = attributeValueId
+                        };
+                        productVariant.VariantAttributeValues.Add(variantAttributeValue);
+                        _logger.LogInformation("Mapped attribute value: {AttributeValue} to new variant {VariantId}", 
+                            attributeValueDto.Value, productVariant.Id);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Attribute value not found for variant mapping: {AttributeName}_{Value}", 
+                            attributeValueDto.AttributeName, attributeValueDto.Value);
+                        throw new NotFoundException($"Attribute value '{attributeValueDto.Value}' for attribute '{attributeValueDto.AttributeName}' not found.");
+                    }
+                }
+
+                // Create Media
+                foreach (var createMediaDto in createVariantDto.Media)
+                {
+                    var variantMedia = _mapper.Map<ProductVariantMedia>(createMediaDto);
+                    productVariant.Media.Add(variantMedia);
+                    _logger.LogInformation("Added media to new variant {VariantId}", productVariant.Id);
+                }
+
+                EnsureSingleMainMediaPerVariant(productVariant);
+                product.Variants.Add(productVariant);
+            }
+
+            UpdateProductVariantNames(product);
+            _logger.LogInformation("Variants regenerated successfully for product: {ProductId}", product.Id);
         }
 
         private void UpdateProductPricesAndStock(Product product)

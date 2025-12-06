@@ -27,6 +27,11 @@ namespace merxly.Application.Validators.Product
             RuleForEach(x => x.ProductAttributes)
                 .SetValidator(new CreateProductAttributeDtoValidator());
 
+            RuleFor(x => x.ProductAttributes)
+                .Must(attributes => attributes.Select(a => a.Name.Trim().ToLower()).Distinct().Count() == attributes.Count)
+                .WithMessage("Attribute names must be unique.")
+                .When(x => x.ProductAttributes.Any());
+
             RuleFor(x => x.Variants)
                 .NotEmpty().WithMessage("At least one product variant is required.");
 
