@@ -1,0 +1,15 @@
+:root {
+  --primary-700: #1E5A96;
+  --primary-800: #0F3D6E;
+  --primary-900: #072544;
+
+  --warning-500: #FFCC00;
+  --warning-300: #FFE680;
+
+  --gray-00: #FFFFFF;
+  --gray-50: #F7F7F7;
+  --gray-500: #68707A;
+  --gray-600: #4B5563;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+}

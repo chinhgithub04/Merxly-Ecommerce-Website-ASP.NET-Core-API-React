@@ -1,0 +1,124 @@
+.footer {
+  background: #0b0f19;
+  color: #c9d0db;
+  padding-top: 60px;
+  padding-bottom: 40px;
+  font-size: 14px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 260px 180px 180px 180px 1fr;
+  gap: 60px;
+}
+
+/* ------------ LOGO ------------ */
+.footer-logo {
+  font-size: 26px;
+  font-weight: 700;
+  color: #ff8c32;
+  margin-bottom: 20px;
+}
+
+/* ------------ CONTACT SECTION ------------ */
+.footer-contact p {
+  margin-bottom: 8px;
+}
+
+.footer-phone {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.footer-mail {
+  margin-top: 12px;
+}
+
+/* ------------ HEADINGS ------------ */
+.footer-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+/* ------------ LIST LINKS ------------ */
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: 0.2s;
+}
+
+.footer-links li:hover {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.footer-browse {
+  display: inline-block;
+  margin-top: 12px;
+  color: #ffca60;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ------------ APP DOWNLOAD ------------ */
+.download-app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-btn {
+  background: #1e2630;
+  border: none;
+  padding: 12px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #e2e6eb;
+  text-align: left;
+}
+
+.app-btn strong {
+  display: block;
+  color: white;
+  font-size: 14px;
+}
+
+/* ------------ TAGS ------------ */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag {
+  background: #1e2630;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.tag:hover {
+  background: #2c333e;
+}
+
+/* ------------ COPYRIGHT ------------ */
+.footer-bottom {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #1c222c;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.6;
+}
