@@ -160,5 +160,21 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 
             return product;
         }
+
+        public async Task<Product?> GetProductDetailByIdForStoreAsync(Guid productId, CancellationToken cancellationToken = default)
+        {
+            var product = await _dbSet
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.ProductAttributes)
+                    .ThenInclude(pa => pa.ProductAttributeValues)
+                .Include(p => p.Variants)
+                    .ThenInclude(v => v.VariantAttributeValues)
+                .Include(p => p.Variants)
+                    .ThenInclude(v => v.Media)
+                .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
+                
+            return product;
+        }
     }
 }

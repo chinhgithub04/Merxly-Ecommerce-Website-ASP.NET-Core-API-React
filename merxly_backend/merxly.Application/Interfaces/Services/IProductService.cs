@@ -31,7 +31,8 @@ namespace merxly.Application.Interfaces.Services
         Task<BulkUpdateProductVariantsResponseDto> UpdateProductVariantAsync(Guid productId, BulkUpdateProductVariantsDto bulkUpdateProductVariantsDto, Guid storeId,CancellationToken cancellationToken);
         Task<BulkUpdateProductMediaResponseDto> UpdateProductVariantMediaAsync(Guid productId, BulkUpdateProductMediaRequestDto bulkUpdateProductMediaRequestDto, Guid storeId, CancellationToken cancellationToken);
         Task<BulkDeleteVariantsResponseDto> DeleteProductVariantsAsync(Guid productId, BulkDeleteVariantsDto bulkDeleteVariantsDto, Guid storeId, CancellationToken cancellationToken);
-        Task DeleteProductAsync(Guid productId, CancellationToken cancellationToken);
+        Task<StoreDetailProductDto> GetProductByIdForStoreAsync(Guid productId, Guid storeId, CancellationToken cancellationToken);
+        Task DeleteProductAsync(Guid productId, Guid storeId, CancellationToken cancellationToken);
 
         // Admin
         Task<DetailProductDto> ToggleProductPlatformFeaturedAsync(Guid productId, ToggleProductPlatformFeaturedDto toggleDto, CancellationToken cancellationToken);

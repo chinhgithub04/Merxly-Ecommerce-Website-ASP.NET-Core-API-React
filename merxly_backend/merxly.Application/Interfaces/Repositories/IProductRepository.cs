@@ -11,5 +11,6 @@ namespace merxly.Application.Interfaces.Repositories
         Task<Product?> GetProductWithVariantsByIdAsync(Guid productId, CancellationToken cancellationToken = default);
         Task<Product?> GetProductWithAttributesByIdAsync(Guid productId, CancellationToken cancellationToken = default);
         Task<Product?> GetProductWithVariantsAndMediaByIdAsync(Guid productId, CancellationToken cancellationToken = default);
+        Task<Product?> GetProductDetailByIdForStoreAsync(Guid productId, CancellationToken cancellationToken = default);
     }
 }

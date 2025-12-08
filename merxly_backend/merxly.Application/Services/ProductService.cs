@@ -554,7 +554,9 @@ namespace merxly.Application.Services
                 throw new ForbiddenAccessException("You don't have permission to delete this product.");
             }
 
-            _unitOfWork.Product.Remove(product);
+            product.IsDeleted = true;
+            product.IsActive = false;
+            _unitOfWork.Product.Update(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Product deleted successfully: {ProductId}", productId);
@@ -1212,6 +1214,28 @@ namespace merxly.Application.Services
                 _unitOfWork.ProductVariantMedia.Update(firstMedia);
                 _logger.LogInformation("Set first media as main for variant: {VariantId}, media: {MediaId}", variant.Id, firstMedia.Id);
             }
+        }
+
+        public async Task<StoreDetailProductDto> GetProductByIdForStoreAsync(Guid productId, Guid storeId, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Fetching product by ID: {ProductId} for store: {StoreId}", productId, storeId);
+
+            var product = await _unitOfWork.Product.GetProductDetailByIdForStoreAsync(productId, cancellationToken);
+
+            if (product == null)
+            {
+                _logger.LogWarning("Product not found: {ProductId}", productId);
+                throw new NotFoundException("Product not found.");
+            }
+
+            // Verify ownership
+            if (product.StoreId != storeId)
+            {
+                _logger.LogWarning("Store {StoreId} is not the owner of product {ProductId}", storeId, productId);
+                throw new ForbiddenAccessException("You don't have permission to access this product.");
+            }
+
+        return _mapper.Map<StoreDetailProductDto>(product);
         }
     }
 }
