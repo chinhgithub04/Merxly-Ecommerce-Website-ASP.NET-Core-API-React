@@ -1,4 +1,5 @@
-﻿using merxly.Application.DTOs.Common;
+﻿using merxly.Application.DTOs.Category;
+using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
 using merxly.Application.DTOs.Product.Update;
 using merxly.Application.Interfaces.Repositories;
@@ -31,6 +32,15 @@ namespace merxly.API.Controllers
             var result = await _productService.GetAllProductsForStoreAsync(storeId.Value, parameters, cancellationToken);
 
             return OkResponse(result, "Products retrieved successfully.");
+        }
+
+        [HttpGet("used-categories")]
+        public async Task<ActionResult<ResponseDto<IEnumerable<CategoryForStoreDto>>>> GetUsedCategories(CancellationToken cancellationToken)
+        {
+            var storeId = await GetStoreIdForCurrentUserAsync(_storeRepository, cancellationToken);
+            var result = await _productService.GetUsedCategoriesByStoreIdAsync(storeId.Value, cancellationToken);
+
+            return OkResponse(result, "Used categories retrieved successfully.");
         }
 
         [HttpPost]

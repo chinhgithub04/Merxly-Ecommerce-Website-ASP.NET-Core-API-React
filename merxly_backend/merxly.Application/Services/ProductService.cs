@@ -1,4 +1,5 @@
 using AutoMapper;
+using merxly.Application.DTOs.Category;
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
 using merxly.Application.DTOs.Product.Update;
@@ -1252,6 +1253,29 @@ namespace merxly.Application.Services
             _logger.LogInformation("Fetched {TotalCount} products for store: {StoreId}", paginatedResult.TotalCount, storeId);
 
             return paginatedResult;
+        }
+
+        public async Task<IEnumerable<CategoryForStoreDto>> GetUsedCategoriesByStoreIdAsync(Guid storeId, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Fetching used categories for store: {StoreId}", storeId);
+
+            // Get all products for the store with their categories
+            var products = await _unitOfWork.Product.FindAsync(
+                p => p.StoreId == storeId && p.Category != null,
+                cancellationToken,
+                p => p.Category);
+
+            // Get distinct categories
+            var usedCategories = products
+                .Select(p => p.Category)
+                .DistinctBy(c => c.Id)
+                .OrderBy(c => c.Name);
+
+            var result = _mapper.Map<IEnumerable<CategoryForStoreDto>>(usedCategories);
+
+            _logger.LogInformation("Fetched {Count} used categories for store: {StoreId}", result.Count(), storeId);
+
+            return result;
         }
     }
 }

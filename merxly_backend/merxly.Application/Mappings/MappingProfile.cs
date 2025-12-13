@@ -37,6 +37,8 @@ namespace merxly.Application.Mappings
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.SubCategories));
 
+            CreateMap<Category, CategoryForStoreDto>();
+
             CreateMap<Category, DetailCategoryDto>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
                     _cloudinaryUrlService.GetMediumImageUrl(src.ImagePublicId)));
