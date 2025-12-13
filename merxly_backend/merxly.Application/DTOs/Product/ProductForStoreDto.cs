@@ -8,10 +8,7 @@ namespace merxly.Application.DTOs.Product
         public bool IsActive { get; init; }
         public int TotalStock { get; init; }
         public int TotalVariants { get; init; }
-        public string? MainImageUrl { get; init; }
-        public double AverageRating { get; set; }
-        public int ReviewCount { get; set; }
-        public int TotalSold { get; set; }
+        public string? MainMediaUrl { get; init; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public Guid CategoryId { get; set; }

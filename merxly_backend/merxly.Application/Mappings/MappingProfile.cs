@@ -31,28 +31,33 @@ namespace merxly.Application.Mappings
 
             // Category Mappings
             CreateMap<Category, ParentCategoryDto>()
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => 
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
                     _cloudinaryUrlService.GetThumbnailImageUrl(src.ImagePublicId)));
 
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.SubCategories));
 
             CreateMap<Category, DetailCategoryDto>()
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => 
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
                     _cloudinaryUrlService.GetMediumImageUrl(src.ImagePublicId)));
-            
+
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // Store Mappings
             CreateMap<Store, DetailStoreDto>()
-                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => 
+                .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src =>
                     $"{src.Owner.FirstName} {src.Owner.LastName}"));
             CreateMap<CreateStoreDto, Store>();
 
             // Product Mappings
             CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
+                    _cloudinaryUrlService.GetThumbnailImageUrl(src.MainMediaPublicId)))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+
+            CreateMap<Product, ProductForStoreDto>()
                 .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
                     _cloudinaryUrlService.GetThumbnailImageUrl(src.MainMediaPublicId)))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
@@ -124,8 +129,8 @@ namespace merxly.Application.Mappings
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<ProductVariantMedia, ResponseUpdateVariantMediaItemDto>()
-                .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom(src => 
-                    src.MediaType == MediaType.Image 
+                .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom(src =>
+                    src.MediaType == MediaType.Image
                         ? _cloudinaryUrlService.GetThumbnailImageUrl(src.MediaPublicId)
                         : _cloudinaryUrlService.GetVideoUrl(src.MediaPublicId)));
         }

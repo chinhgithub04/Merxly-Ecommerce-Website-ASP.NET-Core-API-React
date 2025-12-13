@@ -24,6 +24,15 @@ namespace merxly.API.Controllers
         }
 
         #region 1. Product CRUD (Basic)
+        [HttpGet]
+        public async Task<ActionResult<ResponseDto<PaginatedResultDto<ProductForStoreDto>>>> GetAllProducts([FromQuery] ProductQueryParametersForStore parameters, CancellationToken cancellationToken)
+        {
+            var storeId = await GetStoreIdForCurrentUserAsync(_storeRepository, cancellationToken);
+            var result = await _productService.GetAllProductsForStoreAsync(storeId.Value, parameters, cancellationToken);
+
+            return OkResponse(result, "Products retrieved successfully.");
+        }
+
         [HttpPost]
         public async Task<ActionResult<ResponseDto<StoreDetailProductDto>>> CreateProduct([FromBody] CreateProductDto createProductDto, CancellationToken cancellationToken)
         {

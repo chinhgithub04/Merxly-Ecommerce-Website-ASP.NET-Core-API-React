@@ -96,7 +96,75 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 _ => query.OrderByDescending(p => p.IsPlatformFeatured)
                 .ThenByDescending(p => p.TotalSold)
                 .ThenByDescending(p => p.AverageRating)
-                .ThenByDescending(p => p.CreatedAt)     
+                .ThenByDescending(p => p.CreatedAt)
+            };
+
+            // Pagination
+            int totalCount = await query.CountAsync(cancellationToken);
+            var items = await query
+                .Skip((queryParameters.PageNumber - 1) * queryParameters.PageSize)
+                .Take(queryParameters.PageSize)
+                .ToListAsync(cancellationToken);
+
+            return new PaginatedResultDto<Product>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = queryParameters.PageSize,
+                PageNumber = queryParameters.PageNumber
+            };
+        }
+
+        public async Task<PaginatedResultDto<Product>> GetPaginatedProductsForStoreAsync(Guid storeId, ProductQueryParametersForStore queryParameters, CancellationToken cancellationToken = default)
+        {
+            IQueryable<Product> query = _dbSet.AsNoTracking()
+                .Where(p => p.StoreId == storeId)
+                .Include(p => p.Category);
+
+
+            // Filtering
+            if (!string.IsNullOrEmpty(queryParameters.SearchTerm))
+            {
+                string searchTerm = queryParameters.SearchTerm.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(searchTerm) ||
+                                        (p.Description != null && p.Description.ToLower().Contains(searchTerm)));
+            }
+
+            if (queryParameters.CategoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == queryParameters.CategoryId.Value);
+            }
+
+            if (queryParameters.IsStoreFeatured.HasValue)
+            {
+                query = query.Where(p => p.IsStoreFeatured == queryParameters.IsStoreFeatured.Value);
+            }
+
+            if (queryParameters.IsActive.HasValue)
+            {
+                query = query.Where(p => p.IsActive == queryParameters.IsActive.Value);
+            }
+
+            bool isDescending = queryParameters.SortOrder == StoreProductSortOrder.Descending;
+
+            // Sorting
+            query = queryParameters.SortBy switch
+            {
+                StoreProductSortBy.UpdatedAt => isDescending
+                ? query.OrderBy(t => t.UpdatedAt == null).ThenByDescending(t => t.UpdatedAt ?? t.CreatedAt)
+                : query.OrderBy(t => t.UpdatedAt == null).ThenBy(t => t.UpdatedAt ?? t.CreatedAt),
+
+                StoreProductSortBy.ProductName => isDescending
+                ? query.OrderByDescending(p => p.Name)
+                : query.OrderBy(p => p.Name),
+
+                StoreProductSortBy.TotalStock => isDescending
+                ? query.OrderByDescending(p => p.TotalStock)
+                : query.OrderBy(p => p.TotalStock),
+
+                StoreProductSortBy.CreatedAt or _ => isDescending
+                ? query.OrderByDescending(p => p.CreatedAt)
+                : query.OrderBy(p => p.CreatedAt),
             };
 
             // Pagination
@@ -133,7 +201,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .Include(p => p.Variants)
                 .ThenInclude(v => v.VariantAttributeValues)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
-                
+
             return product;
         }
 
@@ -146,7 +214,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .Include(p => p.Variants)
                 .ThenInclude(pa => pa.VariantAttributeValues)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
-                
+
             return product;
         }
 
@@ -157,7 +225,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .Include(p => p.Variants)
                 .ThenInclude(v => v.Media)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
-                
+
             return product;
         }
 
@@ -173,7 +241,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .Include(p => p.Variants)
                     .ThenInclude(v => v.Media)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
-                
+
             return product;
         }
     }

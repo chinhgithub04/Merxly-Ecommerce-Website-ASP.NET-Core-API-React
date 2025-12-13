@@ -223,7 +223,7 @@ namespace merxly.Application.Services
             int totalAttributesAfterAdd = product.ProductAttributes.Count + addAttributeWithVariantsDto.ProductAttributes.Count;
             if (totalAttributesAfterAdd > 3)
             {
-                _logger.LogWarning("Product cannot have more than 3 attributes. Current: {Current}, Adding: {Adding}", 
+                _logger.LogWarning("Product cannot have more than 3 attributes. Current: {Current}, Adding: {Adding}",
                     product.ProductAttributes.Count, addAttributeWithVariantsDto.ProductAttributes.Count);
                 throw new InvalidOperationException($"A product can have a maximum of 3 attributes. Current: {product.ProductAttributes.Count}, attempting to add: {addAttributeWithVariantsDto.ProductAttributes.Count}.");
             }
@@ -254,7 +254,7 @@ namespace merxly.Application.Services
                     var productAttributeValue = _mapper.Map<ProductAttributeValue>(createValueDto);
                     productAttribute.ProductAttributeValues.Add(productAttributeValue);
 
-                    _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeName}", 
+                    _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeName}",
                         productAttributeValue.Value, productAttribute.Name);
                 }
                 product.ProductAttributes.Add(productAttribute);
@@ -319,7 +319,7 @@ namespace merxly.Application.Services
 
                 if (productAttribute == null)
                 {
-                    _logger.LogWarning("Product attribute not found: {AttributeId} for product: {ProductId}", 
+                    _logger.LogWarning("Product attribute not found: {AttributeId} for product: {ProductId}",
                         attributeValueAddition.ProductAttributeId, productId);
                     throw new NotFoundException($"Product attribute with ID {attributeValueAddition.ProductAttributeId} not found for this product.");
                 }
@@ -332,7 +332,7 @@ namespace merxly.Application.Services
 
                     if (isDuplicateValue)
                     {
-                        _logger.LogWarning("Duplicate attribute value: {AttributeValue} for attribute: {AttributeId}", 
+                        _logger.LogWarning("Duplicate attribute value: {AttributeValue} for attribute: {AttributeId}",
                             newValueDto.Value, attributeValueAddition.ProductAttributeId);
                         throw new ConflictException($"Attribute value '{newValueDto.Value}' already exists for this attribute.");
                     }
@@ -342,7 +342,7 @@ namespace merxly.Application.Services
                     productAttribute.ProductAttributeValues.Add(productAttributeValue);
                     addedAttributeValues.Add(productAttributeValue);
 
-                    _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeId}", 
+                    _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeId}",
                         productAttributeValue.Value, productAttribute.Id);
                 }
             }
@@ -491,7 +491,7 @@ namespace merxly.Application.Services
                 // Soft delete the variant
                 variant.IsDeleted = true;
                 variant.IsActive = false;
-                
+
                 // Append timestamp to SKU to avoid conflicts
                 if (!string.IsNullOrEmpty(variant.SKU))
                 {
@@ -506,7 +506,7 @@ namespace merxly.Application.Services
 
             // Check if at least one variant remains active
             var remainingActiveVariants = product.Variants.Where(v => !v.IsDeleted && v.IsActive).ToList();
-            
+
             if (!remainingActiveVariants.Any())
             {
                 _logger.LogWarning("Cannot delete all variants. At least one variant must remain active for product: {ProductId}", productId);
@@ -725,7 +725,7 @@ namespace merxly.Application.Services
                         deletedAttributeValueIds.Add(attributeValueId);
                         found = true;
 
-                        _logger.LogInformation("Deleted attribute value: {AttributeValueId} from attribute: {AttributeId}", 
+                        _logger.LogInformation("Deleted attribute value: {AttributeValueId} from attribute: {AttributeId}",
                             attributeValueId, attribute.Id);
 
                         // Check if this attribute now has 0 values
@@ -743,7 +743,7 @@ namespace merxly.Application.Services
 
                 if (!found)
                 {
-                    _logger.LogWarning("Attribute value not found: {ze} for product: {ProductId}", 
+                    _logger.LogWarning("Attribute value not found: {ze} for product: {ProductId}",
                         attributeValueId, productId);
                     throw new NotFoundException($"Attribute value with ID {attributeValueId} not found for this product.");
                 }
@@ -907,7 +907,7 @@ namespace merxly.Application.Services
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Variants updated successfully for product: {ProductId}", productId);
-            
+
             return new BulkUpdateProductVariantsResponseDto
             {
                 ProductId = product.Id,
@@ -943,7 +943,7 @@ namespace merxly.Application.Services
             foreach (var variantMediaWrapper in bulkUpdateProductMediaRequestDto.ProductVariantMedias)
             {
                 var variant = product.Variants.FirstOrDefault(v => v.Id == variantMediaWrapper.ProductVariantId);
-                
+
                 if (variant == null)
                 {
                     _logger.LogWarning("Variant not found: {VariantId} for product: {ProductId}", variantMediaWrapper.ProductVariantId, productId);
@@ -976,7 +976,7 @@ namespace merxly.Application.Services
                     {
                         // Update existing media item
                         var existingMedia = variant.Media.FirstOrDefault(m => m.Id == mediaItemDto.Id.Value);
-                        
+
                         if (existingMedia == null)
                         {
                             _logger.LogWarning("Media item not found: {MediaId} for variant: {VariantId}", mediaItemDto.Id.Value, variant.Id);
@@ -1015,7 +1015,7 @@ namespace merxly.Application.Services
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             _logger.LogInformation("Variant media updated successfully for product: {ProductId}", productId);
-            
+
             return new BulkUpdateProductMediaResponseDto
             {
                 ProductVariantMedias = responseWrappers
@@ -1077,12 +1077,12 @@ namespace merxly.Application.Services
                             ProductAttributeValueId = attributeValueId
                         };
                         productVariant.VariantAttributeValues.Add(variantAttributeValue);
-                        _logger.LogInformation("Mapped attribute value: {AttributeValue} to new variant {VariantId}", 
+                        _logger.LogInformation("Mapped attribute value: {AttributeValue} to new variant {VariantId}",
                             attributeValueDto.Value, productVariant.Id);
                     }
                     else
                     {
-                        _logger.LogWarning("Attribute value not found for variant mapping: {AttributeName}_{Value}", 
+                        _logger.LogWarning("Attribute value not found for variant mapping: {AttributeName}_{Value}",
                             attributeValueDto.AttributeName, attributeValueDto.Value);
                         throw new NotFoundException($"Attribute value '{attributeValueDto.Value}' for attribute '{attributeValueDto.AttributeName}' not found.");
                     }
@@ -1235,7 +1235,23 @@ namespace merxly.Application.Services
                 throw new ForbiddenAccessException("You don't have permission to access this product.");
             }
 
-        return _mapper.Map<StoreDetailProductDto>(product);
+            return _mapper.Map<StoreDetailProductDto>(product);
+        }
+
+        public async Task<PaginatedResultDto<ProductForStoreDto>> GetAllProductsForStoreAsync(Guid storeId, ProductQueryParametersForStore parameters, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Fetching all products for store: {StoreId} with parameters: {@Parameters}", storeId, parameters);
+
+            var paginatedProducts = await _unitOfWork.Product.GetPaginatedProductsForStoreAsync(
+                storeId,
+                parameters,
+                cancellationToken);
+
+            var paginatedResult = _mapper.Map<PaginatedResultDto<ProductForStoreDto>>(paginatedProducts);
+
+            _logger.LogInformation("Fetched {TotalCount} products for store: {StoreId}", paginatedResult.TotalCount, storeId);
+
+            return paginatedResult;
         }
     }
 }
