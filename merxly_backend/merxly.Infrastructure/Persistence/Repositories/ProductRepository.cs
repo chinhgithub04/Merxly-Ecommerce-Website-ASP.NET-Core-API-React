@@ -118,7 +118,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
         public async Task<PaginatedResultDto<Product>> GetPaginatedProductsForStoreAsync(Guid storeId, ProductQueryParametersForStore queryParameters, CancellationToken cancellationToken = default)
         {
             IQueryable<Product> query = _dbSet.AsNoTracking()
-                .Where(p => p.StoreId == storeId)
+                .Where(p => p.StoreId == storeId && !p.IsDeleted)
                 .Include(p => p.Category);
 
 
