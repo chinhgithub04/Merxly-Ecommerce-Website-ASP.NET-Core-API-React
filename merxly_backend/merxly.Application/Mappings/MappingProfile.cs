@@ -12,7 +12,7 @@ using merxly.Application.DTOs.ProductVariant.Update;
 using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.DTOs.ProductVariantMedia.Update;
 using merxly.Application.DTOs.Store;
-using merxly.Application.Interfaces.Services;
+using merxly.Application.Mappings.ValueResolvers;
 using merxly.Domain.Entities;
 using merxly.Domain.Enums;
 
@@ -20,19 +20,14 @@ namespace merxly.Application.Mappings
 {
     public class MappingProfile : Profile
     {
-        private readonly ICloudinaryUrlService _cloudinaryUrlService;
-
-        public MappingProfile(ICloudinaryUrlService cloudinaryUrlService)
+        public MappingProfile()
         {
-            _cloudinaryUrlService = cloudinaryUrlService;
-
             // Paginated Result Mapping
             CreateMap(typeof(PaginatedResultDto<>), typeof(PaginatedResultDto<>));
 
             // Category Mappings
             CreateMap<Category, ParentCategoryDto>()
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
-                    _cloudinaryUrlService.GetThumbnailImageUrl(src.ImagePublicId)));
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom<ThumbnailImageUrlResolver<Category, ParentCategoryDto>, string?>(src => src.ImagePublicId));
 
             CreateMap<Category, CategoryDto>()
                 .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.SubCategories));
@@ -40,8 +35,7 @@ namespace merxly.Application.Mappings
             CreateMap<Category, CategoryForStoreDto>();
 
             CreateMap<Category, DetailCategoryDto>()
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
-                    _cloudinaryUrlService.GetMediumImageUrl(src.ImagePublicId)));
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom<MediumImageUrlResolver<Category, DetailCategoryDto>, string?>(src => src.ImagePublicId));
 
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>()
@@ -55,13 +49,11 @@ namespace merxly.Application.Mappings
 
             // Product Mappings
             CreateMap<Product, ProductDto>()
-                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
-                    _cloudinaryUrlService.GetThumbnailImageUrl(src.MainMediaPublicId)))
+                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom<ThumbnailImageUrlResolver<Product, ProductDto>, string?>(src => src.MainMediaPublicId))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
             CreateMap<Product, ProductForStoreDto>()
-                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
-                    _cloudinaryUrlService.GetThumbnailImageUrl(src.MainMediaPublicId)))
+                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom<ThumbnailImageUrlResolver<Product, ProductForStoreDto>, string?>(src => src.MainMediaPublicId))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
             //CreateMap<Product, DetailProductDto>()
@@ -131,10 +123,7 @@ namespace merxly.Application.Mappings
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<ProductVariantMedia, ResponseUpdateVariantMediaItemDto>()
-                .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom(src =>
-                    src.MediaType == MediaType.Image
-                        ? _cloudinaryUrlService.GetThumbnailImageUrl(src.MediaPublicId)
-                        : _cloudinaryUrlService.GetVideoUrl(src.MediaPublicId)));
+                .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom<ProductVariantMediaUrlResolver>());
         }
     }
 }

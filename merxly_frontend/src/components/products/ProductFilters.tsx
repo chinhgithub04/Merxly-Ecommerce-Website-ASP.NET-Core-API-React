@@ -1,4 +1,4 @@
-import type { CategoryForStore } from '../../types/api/product';
+import type { CategoryForStore } from '../../types/models/category';
 
 interface ProductFiltersProps {
   activeFilter: 'all' | 'active' | 'draft' | 'featured';

@@ -1,4 +1,4 @@
-import type { ProductForStore } from '../../types/api/product';
+import type { ProductForStore } from '../../types/models/product';
 import { Badge } from '../ui';
 
 interface ProductTableProps {

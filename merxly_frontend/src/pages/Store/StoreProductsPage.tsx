@@ -1,4 +1,5 @@
 import { PlusIcon, CubeIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui';
 import { ProductFilters } from '../../components/products/ProductFilters';
 import { ProductSearchAndSort } from '../../components/products/ProductSearchAndSort';
@@ -6,6 +7,7 @@ import { ProductTable } from '../../components/products/ProductTable';
 import { useStoreProducts } from '../../hooks/useStoreProducts';
 
 export const StoreProductsPage = () => {
+  const navigate = useNavigate();
   const {
     selectedProducts,
     activeFilter,
@@ -35,7 +37,10 @@ export const StoreProductsPage = () => {
           </div>
           <h1 className='text-3xl font-bold text-neutral-900'>Products</h1>
         </div>
-        <Button className='cursor-pointer'>
+        <Button
+          className='cursor-pointer'
+          onClick={() => navigate('/store/products/new')}
+        >
           <PlusIcon className='h-5 w-5 mr-2' />
           Add Product
         </Button>

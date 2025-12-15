@@ -25,31 +25,61 @@ namespace merxly.Application.Services
         }
 
         /// <summary>
-        /// Retrieves the category tree with subcategories.
-        /// This method currently only loads one level of subcategories.
+        /// Retrieves the category tree with all nested subcategories recursively.
         /// </summary>
         public async Task<PaginatedResultDto<CategoryDto>> GetCategoryTreeAsync(PaginationQuery paginationQuery, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Retrieving category tree. PageNumber: {PageNumber}, PageSize: {PageSize}", paginationQuery.PageNumber, paginationQuery.PageSize);
 
-            var paginatedCategories = await _unitOfWork.Category.GetPagedAsync(
+            // Get paginated root categories
+            var paginatedRootCategories = await _unitOfWork.Category.GetPagedAsync(
                 paginationQuery,
                 c => c.IsActive && c.ParentCategoryId == null,
-                cancellationToken,
-                c => c.SubCategories
+                cancellationToken
             );
 
-            var paginatedResult = _mapper.Map<PaginatedResultDto<CategoryDto>>(paginatedCategories);
+            // Load all active categories to build the tree structure
+            var allCategories = await _unitOfWork.Category.FindAsync(
+                c => c.IsActive,
+                cancellationToken
+            );
 
-            _logger.LogInformation("Successfully retrieved {Count} categories with hierarchy.", paginatedResult.Items.Count);
+            // Build the tree structure recursively
+            var categoryDtos = paginatedRootCategories.Items.Select(root => BuildCategoryTree(root, allCategories)).ToList();
+
+            var paginatedResult = new PaginatedResultDto<CategoryDto>
+            {
+                Items = categoryDtos,
+                TotalCount = paginatedRootCategories.TotalCount,
+                PageNumber = paginatedRootCategories.PageNumber,
+                PageSize = paginatedRootCategories.PageSize
+            };
+
+            _logger.LogInformation("Successfully retrieved {Count} categories with full hierarchy.", paginatedResult.Items.Count);
 
             return paginatedResult;
+        }
+
+        private CategoryDto BuildCategoryTree(Category category, IReadOnlyList<Category> allCategories)
+        {
+            var categoryDto = new CategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                ParentCategoryId = category.ParentCategoryId,
+                Children = allCategories
+                    .Where(c => c.ParentCategoryId == category.Id)
+                    .Select(child => BuildCategoryTree(child, allCategories))
+                    .ToList()
+            };
+
+            return categoryDto;
         }
 
         public async Task<PaginatedResultDto<ParentCategoryDto>> GetParentCategoriesAsync(PaginationQuery paginationQuery, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Retrieving parent categories. PageNumber: {PageNumber}, PageSize: {PageSize}", paginationQuery.PageNumber, paginationQuery.PageSize);
-            
+
             var paginatedCategories = await _unitOfWork.Category.GetPagedAsync(
                 paginationQuery,
                 c => c.IsActive && c.ParentCategoryId == null,
@@ -85,7 +115,8 @@ namespace merxly.Application.Services
         {
             _logger.LogInformation("Creating new category with name: {CategoryName}", createCategoryDto.Name);
 
-            if (createCategoryDto.ParentCategoryId.HasValue){
+            if (createCategoryDto.ParentCategoryId.HasValue)
+            {
                 if (!await _unitOfWork.Category.AnyAsync(c => c.Id == createCategoryDto.ParentCategoryId.Value, cancellationToken))
                 {
                     _logger.LogWarning("Parent category with ID: {ParentCategoryId} not found.", createCategoryDto.ParentCategoryId.Value);
@@ -115,7 +146,8 @@ namespace merxly.Application.Services
                 throw new NotFoundException($"Category with ID: {categoryId} not found.");
             }
 
-            if (updateCategoryDto.ParentCategoryId.HasValue){
+            if (updateCategoryDto.ParentCategoryId.HasValue)
+            {
                 if (updateCategoryDto.ParentCategoryId.Value == categoryId)
                 {
                     _logger.LogWarning("Category with ID: {CategoryId} cannot be its own parent.", categoryId);
@@ -129,7 +161,7 @@ namespace merxly.Application.Services
                 }
             }
 
-            if (!string.IsNullOrEmpty(updateCategoryDto.ImagePublicId) 
+            if (!string.IsNullOrEmpty(updateCategoryDto.ImagePublicId)
                 && updateCategoryDto.ImagePublicId != category.ImagePublicId
                 && category.ImagePublicId != null)
             {

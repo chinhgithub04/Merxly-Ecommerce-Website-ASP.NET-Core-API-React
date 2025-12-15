@@ -9,6 +9,7 @@ import {
   StoreProductsPage,
   StoreSettingsPage,
 } from './pages/Store';
+import { CreateProductPage } from './pages/Store/CreateProductPage';
 import { UserRole } from './types/enums';
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
       <Routes>
         <Route path='/login' element={<LoginPage />} />
 
-        {/* Store Owner Routes */}
+        {/* Store Owner Routes with Layout */}
         <Route
           path='/store'
           element={
@@ -33,6 +34,16 @@ function App() {
           <Route path='products' element={<StoreProductsPage />} />
           <Route path='settings' element={<StoreSettingsPage />} />
         </Route>
+
+        {/* Create Product Route - Without Layout */}
+        <Route
+          path='/store/products/new'
+          element={
+            <ProtectedRoute requiredRoles={[UserRole.StoreOwner]}>
+              <CreateProductPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Home Route */}
         <Route

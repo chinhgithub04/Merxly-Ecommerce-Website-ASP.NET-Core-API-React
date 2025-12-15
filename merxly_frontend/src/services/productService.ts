@@ -1,9 +1,10 @@
 import type { Response, PagedResponse } from '../types/api/common';
+import type { CategoryForStore } from '../types/models/category';
 import type {
   ProductForStore,
-  CategoryForStore,
   ProductQueryParameters,
-} from '../types/api/product';
+  CreateProductDto,
+} from '../types/models/product';
 import apiClient from './apiClient';
 
 export const getStoreProducts = async (
@@ -20,6 +21,16 @@ export const getUsedCategories = async (): Promise<
 > => {
   const response = await apiClient.get<Response<CategoryForStore[]>>(
     '/StoreProducts/used-categories'
+  );
+  return response.data;
+};
+
+export const createProduct = async (
+  product: CreateProductDto
+): Promise<Response<ProductForStore>> => {
+  const response = await apiClient.post<Response<ProductForStore>>(
+    '/StoreProducts',
+    product
   );
   return response.data;
 };

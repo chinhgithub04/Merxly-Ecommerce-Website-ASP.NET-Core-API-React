@@ -1,4 +1,6 @@
 import type { StoreProductSortBy, StoreProductSortOrder } from '../enums';
+import type { CreateProductAttributeDto } from './productAttribute';
+import type { CreateProductVariantDto } from './productVariant';
 
 export interface ProductForStore {
   id: string;
@@ -14,12 +16,6 @@ export interface ProductForStore {
   categoryName: string;
 }
 
-export interface CategoryForStore {
-  id: string;
-  name: string;
-  productCount: number;
-}
-
 export interface ProductQueryParameters {
   pageNumber?: number;
   pageSize?: number;
@@ -29,4 +25,14 @@ export interface ProductQueryParameters {
   searchTerm?: string;
   sortBy?: StoreProductSortBy;
   sortOrder?: StoreProductSortOrder;
+}
+
+export interface CreateProductDto {
+  name: string;
+  description: string | null;
+  isStoreFeatured: boolean;
+  isActive: boolean;
+  categoryId: string;
+  productAttributes: CreateProductAttributeDto[];
+  variants: CreateProductVariantDto[];
 }

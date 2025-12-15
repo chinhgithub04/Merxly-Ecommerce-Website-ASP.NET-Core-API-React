@@ -4,7 +4,7 @@ import {
   getStoreProducts,
   getUsedCategories,
 } from '../services/productService';
-import type { ProductQueryParameters } from '../types/api/product';
+import type { ProductQueryParameters } from '../types/models/product';
 import type { StoreProductSortBy, StoreProductSortOrder } from '../types/enums';
 
 export const useStoreProducts = () => {
