@@ -15,21 +15,15 @@ export const CreateProductPage = () => {
     attributes,
     variants,
     groupBy,
-    groupedVariants,
+    errors,
     setProductName,
     setDescription,
     setCategoryId,
     setIsActive,
     setIsStoreFeatured,
+    setAttributes,
+    setVariants,
     setGroupBy,
-    addAttribute,
-    updateAttributeName,
-    deleteAttribute,
-    addAttributeValue,
-    updateAttributeValue,
-    deleteAttributeValue,
-    regenerateVariants,
-    updateVariant,
     handleSubmit,
     handleDiscard,
     isSubmitting,
@@ -60,21 +54,25 @@ export const CreateProductPage = () => {
                 onCategoryChange={setCategoryId}
               />
 
+              {errors.productName && (
+                <p className='text-sm text-red-600'>{errors.productName}</p>
+              )}
+              {errors.categoryId && (
+                <p className='text-sm text-red-600'>{errors.categoryId}</p>
+              )}
+
               <ProductVariantsSection
                 attributes={attributes}
                 variants={variants}
                 groupBy={groupBy}
-                groupedVariants={groupedVariants}
-                onAddAttribute={addAttribute}
-                onUpdateAttributeName={updateAttributeName}
-                onDeleteAttribute={deleteAttribute}
-                onAddAttributeValue={addAttributeValue}
-                onUpdateAttributeValue={updateAttributeValue}
-                onDeleteAttributeValue={deleteAttributeValue}
-                onRegenerateVariants={regenerateVariants}
-                onUpdateVariant={updateVariant}
-                onSetGroupBy={setGroupBy}
+                onAttributesChange={setAttributes}
+                onVariantsChange={setVariants}
+                onGroupByChange={setGroupBy}
               />
+
+              {errors.variants && (
+                <p className='text-sm text-red-600'>{errors.variants}</p>
+              )}
             </div>
 
             {/* Right Column - Sidebar (1/3) */}

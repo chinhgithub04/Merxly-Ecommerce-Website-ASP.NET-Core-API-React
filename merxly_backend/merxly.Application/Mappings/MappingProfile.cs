@@ -64,10 +64,14 @@ namespace merxly.Application.Mappings
             //    .ForMember(dest => dest.StoreIsVerified, opt => opt.MapFrom(src => src.Store.IsVerified));
 
             CreateMap<Product, StoreDetailProductDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.ProductAttributes, opt => opt.MapFrom(src => src.ProductAttributes))
+                .ForMember(dest => dest.Variants, opt => opt.MapFrom(src => src.Variants));
 
             CreateMap<CreateProductDto, Product>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.ProductAttributes, opt => opt.Ignore())
+                .ForMember(dest => dest.Variants, opt => opt.Ignore());
 
             CreateMap<UpdateProductDto, Product>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
@@ -77,10 +81,14 @@ namespace merxly.Application.Mappings
             CreateMap<ToggleProductPlatformFeaturedDto, Product>();
 
             // ProductVariant Mappings
-            CreateMap<ProductVariant, ProductVariantDto>();
+            CreateMap<ProductVariant, ProductVariantDto>()
+                .ForMember(dest => dest.ProductAttributeValues, opt => opt.MapFrom(src =>
+                    src.VariantAttributeValues.Select(vav => vav.ProductAttributeValue)))
+                .ForMember(dest => dest.ProductVariantMedia, opt => opt.MapFrom(src => src.Media));
 
             CreateMap<CreateProductVariantDto, ProductVariant>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.Media, opt => opt.Ignore());
 
             CreateMap<BulkUpdateVariantItemDto, ProductVariant>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
@@ -88,11 +96,13 @@ namespace merxly.Application.Mappings
             CreateMap<ProductVariant, ResponseUpdateVariantItemDto>();
 
             // ProductAttribute Mappings
-            CreateMap<ProductAttribute, ProductAttributeDto>();
+            CreateMap<ProductAttribute, ProductAttributeDto>()
+                .ForMember(dest => dest.ProductAttributeValues, opt => opt.MapFrom(src => src.ProductAttributeValues));
             //CreateMap<ProductAttribute, DetailProductAttributeDto>()
             //    .ForMember(dest => dest.Values, opt => opt.MapFrom(src => src.ProductAttributeValues));
             CreateMap<CreateProductAttributeDto, ProductAttribute>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
+                .ForMember(dest => dest.ProductAttributeValues, opt => opt.Ignore());
 
             CreateMap<UpdateProductAttributeDto, ProductAttribute>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
@@ -100,6 +110,7 @@ namespace merxly.Application.Mappings
             CreateMap<BulkUpdateAttributeItemDto, ProductAttribute>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<ProductAttributeValue, ProductAttributeValueDto>();
             CreateMap<ProductAttribute, ResponseUpdateAttributeItemDto>();
 
             // ProductAttributeValue Mappings
@@ -117,6 +128,9 @@ namespace merxly.Application.Mappings
             CreateMap<ProductAttributeValue, ResponseUpdateAttributeValueItemDto>();
 
             // ProductVariantMedia Mappings
+            CreateMap<ProductVariantMedia, ProductVariantMediaDto>()
+                .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom<ProductVariantMediaUrlResolver>());
+
             CreateMap<CreateProductVariantMediaDto, ProductVariantMedia>();
 
             CreateMap<BulkUpdateVariantMediaItemDto, ProductVariantMedia>()

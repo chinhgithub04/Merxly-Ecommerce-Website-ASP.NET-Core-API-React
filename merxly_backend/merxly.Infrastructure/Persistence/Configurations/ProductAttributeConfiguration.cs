@@ -28,8 +28,8 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .HasForeignKey(pav => pav.ProductAttributeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Indexes
-            builder.HasIndex(a => a.Name)
+            // Indexes - Unique constraint on ProductId and Name combination
+            builder.HasIndex(a => new { a.ProductId, a.Name })
                 .IsUnique();
         }
     }

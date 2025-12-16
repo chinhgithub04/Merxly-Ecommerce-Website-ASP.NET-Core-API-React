@@ -26,17 +26,26 @@ interface Variant {
   sku: string;
 }
 
-interface ProductVariantsSelectorProps {}
+interface ProductVariantsSectionProps {
+  attributes: Attribute[];
+  variants: Variant[];
+  groupBy: string | null;
+  onAttributesChange: (attributes: Attribute[]) => void;
+  onVariantsChange: (variants: Variant[]) => void;
+  onGroupByChange: (groupBy: string | null) => void;
+}
 
-export const ProductVariantsSection = (
-  _props: ProductVariantsSelectorProps
-) => {
-  const [attributes, setAttributes] = useState<Attribute[]>([]);
+export const ProductVariantsSection = ({
+  attributes,
+  variants,
+  groupBy,
+  onAttributesChange,
+  onVariantsChange,
+  onGroupByChange,
+}: ProductVariantsSectionProps) => {
   const [editingAttributeId, setEditingAttributeId] = useState<string | null>(
     null
   );
-  const [variants, setVariants] = useState<Variant[]>([]);
-  const [groupBy, setGroupBy] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [validationErrors, setValidationErrors] = useState<{
     name?: string;
@@ -112,7 +121,7 @@ export const ProductVariantsSection = (
       values: [{ id: `val-${Date.now()}`, value: '' }],
     };
 
-    setAttributes([...attributes, newAttr]);
+    onAttributesChange([...attributes, newAttr]);
     setEditingAttributeId(newAttr.id);
   };
 
@@ -121,11 +130,11 @@ export const ProductVariantsSection = (
     const updated = attributes.map((attr) =>
       attr.id === id ? { ...attr, name } : attr
     );
-    setAttributes(updated);
+    onAttributesChange(updated);
 
     // Regenerate variants
     const newVariants = generateVariants(updated);
-    setVariants(newVariants);
+    onVariantsChange(newVariants);
 
     // Set default group by if needed
     if (
@@ -133,7 +142,7 @@ export const ProductVariantsSection = (
         2 &&
       !groupBy
     ) {
-      setGroupBy(updated.find((a) => a.name)?.id || null);
+      onGroupByChange(updated.find((a) => a.name)?.id || null);
     }
   };
 
@@ -160,11 +169,11 @@ export const ProductVariantsSection = (
       return attr;
     });
 
-    setAttributes(updated);
+    onAttributesChange(updated);
 
     // Regenerate variants
     const newVariants = generateVariants(updated);
-    setVariants(newVariants);
+    onVariantsChange(newVariants);
 
     // Set default group by if needed
     if (
@@ -172,7 +181,7 @@ export const ProductVariantsSection = (
         2 &&
       !groupBy
     ) {
-      setGroupBy(updated.find((a) => a.name)?.id || null);
+      onGroupByChange(updated.find((a) => a.name)?.id || null);
     }
   };
 
@@ -190,25 +199,25 @@ export const ProductVariantsSection = (
       return attr;
     });
 
-    setAttributes(updated);
+    onAttributesChange(updated);
 
     // Regenerate variants
     const newVariants = generateVariants(updated);
-    setVariants(newVariants);
+    onVariantsChange(newVariants);
   };
 
   // Delete attribute
   const handleDeleteAttribute = (id: string) => {
     const updated = attributes.filter((attr) => attr.id !== id);
-    setAttributes(updated);
+    onAttributesChange(updated);
 
     // Regenerate variants
     const newVariants = generateVariants(updated);
-    setVariants(newVariants);
+    onVariantsChange(newVariants);
 
     // Reset group by if needed
     if (groupBy === id) {
-      setGroupBy(updated.find((a) => a.name)?.id || null);
+      onGroupByChange(updated.find((a) => a.name)?.id || null);
     }
 
     setEditingAttributeId(null);
@@ -231,7 +240,7 @@ export const ProductVariantsSection = (
     const [draggedAttr] = reordered.splice(draggedAttrIndex, 1);
     reordered.splice(targetIndex, 0, draggedAttr);
 
-    setAttributes(reordered);
+    onAttributesChange(reordered);
     setDraggedAttrIndex(null);
 
     // Update groupBy if needed
@@ -240,13 +249,13 @@ export const ProductVariantsSection = (
         (a) => a.name && a.values.some((v) => v.value)
       );
       if (validAttrs.length >= 2) {
-        setGroupBy(validAttrs[0].id);
+        onGroupByChange(validAttrs[0].id);
       }
     }
 
     // Regenerate variants with new order
     const newVariants = generateVariants(reordered);
-    setVariants(newVariants);
+    onVariantsChange(newVariants);
   };
 
   // Drag handlers for option values
@@ -276,12 +285,12 @@ export const ProductVariantsSection = (
       return attr;
     });
 
-    setAttributes(updated);
+    onAttributesChange(updated);
     setDraggedValueIndex(null);
 
     // Regenerate variants with new value order
     const newVariants = generateVariants(updated);
-    setVariants(newVariants);
+    onVariantsChange(newVariants);
   };
 
   // Done editing attribute
@@ -359,7 +368,7 @@ export const ProductVariantsSection = (
     const updated = variants.map((v) =>
       v.id === id ? { ...v, [field]: value } : v
     );
-    setVariants(updated);
+    onVariantsChange(updated);
   };
 
   // Toggle group expansion
@@ -541,14 +550,14 @@ export const ProductVariantsSection = (
                   <button
                     type='button'
                     onClick={() => handleDeleteAttribute(attr.id)}
-                    className='px-4 py-2 text-sm text-red-600 hover:text-red-700 font-medium transition-colors'
+                    className='cursor-pointer px-4 py-2 text-sm text-red-600 hover:text-red-700 font-medium transition-colors'
                   >
                     Delete
                   </button>
                   <button
                     type='button'
                     onClick={handleDoneEditing}
-                    className='px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 font-medium transition-colors'
+                    className='cursor-pointer px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700 font-medium transition-colors'
                   >
                     Done
                   </button>
@@ -589,7 +598,7 @@ export const ProductVariantsSection = (
           <button
             type='button'
             onClick={handleAddAttribute}
-            className='w-full px-4 py-3 border-2 border-dashed border-neutral-300 rounded-lg text-sm text-neutral-600 hover:border-neutral-400 hover:text-neutral-700 font-medium transition-colors'
+            className='cursor-pointer w-full px-4 py-3 border-2 border-dashed border-neutral-300 rounded-lg text-sm text-neutral-600 hover:border-neutral-400 hover:text-neutral-700 font-medium transition-colors'
           >
             {attributes.length === 0
               ? 'Add options like color or size'
@@ -609,7 +618,7 @@ export const ProductVariantsSection = (
               </label>
               <select
                 value={groupBy || ''}
-                onChange={(e) => setGroupBy(e.target.value || null)}
+                onChange={(e) => onGroupByChange(e.target.value || null)}
                 className='px-3 py-1.5 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
               >
                 {attributes
@@ -654,7 +663,7 @@ export const ProductVariantsSection = (
                             <button
                               type='button'
                               onClick={() => toggleGroupExpansion(groupValueId)}
-                              className='text-xs text-primary-600 hover:text-primary-700 text-left mt-1 flex items-center gap-1'
+                              className='cursor-pointer text-xs text-primary-600 hover:text-primary-700 text-left mt-1 flex items-center gap-1'
                             >
                               <span>{groupVariants.length} variants</span>
                               {isExpanded ? (

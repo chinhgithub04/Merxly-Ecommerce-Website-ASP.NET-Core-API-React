@@ -4,6 +4,7 @@ import type {
   ProductForStore,
   ProductQueryParameters,
   CreateProductDto,
+  StoreDetailProductDto,
 } from '../types/models/product';
 import apiClient from './apiClient';
 
@@ -27,8 +28,8 @@ export const getUsedCategories = async (): Promise<
 
 export const createProduct = async (
   product: CreateProductDto
-): Promise<Response<ProductForStore>> => {
-  const response = await apiClient.post<Response<ProductForStore>>(
+): Promise<Response<StoreDetailProductDto>> => {
+  const response = await apiClient.post<Response<StoreDetailProductDto>>(
     '/StoreProducts',
     product
   );

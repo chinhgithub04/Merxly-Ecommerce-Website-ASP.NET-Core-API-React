@@ -145,6 +145,7 @@ namespace merxly.Application.Services
             foreach (var createVariantDto in createProductDto.Variants)
             {
                 var productVariant = _mapper.Map<ProductVariant>(createVariantDto);
+                productVariant.IsActive = true;
 
                 _logger.LogInformation("Adding variant to product: {ProductId}", product.Id);
 
@@ -186,6 +187,7 @@ namespace merxly.Application.Services
 
             UpdateProductPricesAndStock(product);
             UpdateProductMainMedia(product);
+            UpdateProductVariantNames(product);
 
             await _unitOfWork.Product.AddAsync(product, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -1163,6 +1165,21 @@ namespace merxly.Application.Services
                 return;
             }
 
+            // Build a lookup map: ProductAttributeValueId -> (AttributeName, AttributeValue, DisplayOrder)
+            var attributeValueLookup = new Dictionary<Guid, (string AttributeName, string Value, int DisplayOrder)>();
+
+            foreach (var attribute in product.ProductAttributes)
+            {
+                foreach (var attributeValue in attribute.ProductAttributeValues)
+                {
+                    attributeValueLookup[attributeValue.Id] = (
+                        attribute.Name,
+                        attributeValue.Value,
+                        attribute.DisplayOrder
+                    );
+                }
+            }
+
             foreach (var variant in product.Variants)
             {
                 if (variant.VariantAttributeValues == null || !variant.VariantAttributeValues.Any())
@@ -1173,8 +1190,12 @@ namespace merxly.Application.Services
 
                 // Get attribute values ordered by the attribute's display order
                 var attributeValues = variant.VariantAttributeValues
-                    .OrderBy(vav => vav.ProductAttributeValue.ProductAttribute.DisplayOrder)
-                    .Select(vav => vav.ProductAttributeValue.Value)
+                    .Select(vav => attributeValueLookup.TryGetValue(vav.ProductAttributeValueId, out var info)
+                        ? info
+                        : (AttributeName: "", Value: "", DisplayOrder: 0))
+                    .Where(info => !string.IsNullOrEmpty(info.Value))
+                    .OrderBy(info => info.DisplayOrder)
+                    .Select(info => info.Value)
                     .ToList();
 
                 // Create variant name: Product Name - Attribute Value 1 / Attribute Value 2
