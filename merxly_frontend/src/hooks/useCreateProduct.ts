@@ -5,6 +5,7 @@ import { createProduct } from '../services/productService';
 import type { CreateProductDto } from '../types/models/product';
 import type { CreateProductAttributeDto } from '../types/models/productAttribute';
 import type { CreateProductVariantDto } from '../types/models/productVariant';
+import type { CreateProductVariantMediaDto } from '../types/models/productVariantMedia';
 
 // Internal types for UI state (matches ProductVariantsSection)
 interface AttributeValue {
@@ -24,6 +25,7 @@ interface Variant {
   price: number;
   available: number;
   sku: string;
+  media?: CreateProductVariantMediaDto[];
 }
 
 export const useCreateProduct = () => {
@@ -126,7 +128,7 @@ export const useCreateProduct = () => {
         price: variant.price,
         stockQuantity: variant.available,
         attributeSelections,
-        media: [],
+        media: variant.media || [],
       };
     });
 

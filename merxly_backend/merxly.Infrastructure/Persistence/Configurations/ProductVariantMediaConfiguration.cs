@@ -41,9 +41,7 @@ namespace merxly.Infrastructure.Persistence.Configurations
 
             // Indexes
             builder.HasIndex(pvm => new { pvm.ProductVariantId, pvm.DisplayOrder });
-            builder.HasIndex(pvm => pvm.ProductVariantId)
-                .IsUnique()
-                .HasFilter("`IsMain` = 1");
+            builder.HasIndex(pvm => new { pvm.ProductVariantId, pvm.IsMain });
         }
     }
 }

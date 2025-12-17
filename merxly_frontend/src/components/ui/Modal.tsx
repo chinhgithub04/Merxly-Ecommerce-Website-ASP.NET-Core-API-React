@@ -10,6 +10,7 @@ interface ModalProps {
   children: React.ReactNode;
   doneLabel?: string;
   cancelLabel?: string;
+  doneDisabled?: boolean;
 }
 
 export const Modal = ({
@@ -20,6 +21,7 @@ export const Modal = ({
   children,
   doneLabel = 'Done',
   cancelLabel = 'Cancel',
+  doneDisabled = false,
 }: ModalProps) => {
   if (!isOpen) return null;
 
@@ -57,7 +59,11 @@ export const Modal = ({
             <Button variant='outline' onClick={onClose}>
               {cancelLabel}
             </Button>
-            <Button variant='primary' onClick={onDone || onClose}>
+            <Button
+              variant='primary'
+              onClick={onDone || onClose}
+              disabled={doneDisabled}
+            >
               {doneLabel}
             </Button>
           </div>

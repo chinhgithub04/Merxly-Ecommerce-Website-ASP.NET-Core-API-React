@@ -144,6 +144,20 @@ namespace merxly.Application.Services
             // Create ProductVariants
             foreach (var createVariantDto in createProductDto.Variants)
             {
+                // Validate media constraints
+                if (createVariantDto.Media.Count > 9)
+                {
+                    _logger.LogWarning("Variant cannot have more than 9 media items. Requested: {Count}", createVariantDto.Media.Count);
+                    throw new InvalidOperationException("A variant can have a maximum of 9 media items.");
+                }
+
+                var videoCount = createVariantDto.Media.Count(m => m.MediaType == Domain.Enums.MediaType.Video);
+                if (videoCount > 1)
+                {
+                    _logger.LogWarning("Variant cannot have more than 1 video. Requested: {Count}", videoCount);
+                    throw new InvalidOperationException("A variant can have a maximum of 1 video.");
+                }
+
                 var productVariant = _mapper.Map<ProductVariant>(createVariantDto);
                 productVariant.IsActive = true;
 
@@ -1224,7 +1238,6 @@ namespace merxly.Application.Services
                 foreach (var media in mainMediaItems.Where(m => m.Id != firstMain.Id))
                 {
                     media.IsMain = false;
-                    _unitOfWork.ProductVariantMedia.Update(media);
                 }
                 _logger.LogInformation("Ensured single main media for variant: {VariantId}, kept media: {MediaId}", variant.Id, firstMain.Id);
             }
@@ -1233,7 +1246,6 @@ namespace merxly.Application.Services
                 // No main media found - set the first one as main
                 var firstMedia = orderedMedia.First();
                 firstMedia.IsMain = true;
-                _unitOfWork.ProductVariantMedia.Update(firstMedia);
                 _logger.LogInformation("Set first media as main for variant: {VariantId}, media: {MediaId}", variant.Id, firstMedia.Id);
             }
         }

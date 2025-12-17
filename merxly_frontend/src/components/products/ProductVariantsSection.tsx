@@ -7,6 +7,8 @@ import {
   PhotoIcon,
 } from '@heroicons/react/24/outline';
 import { VariantMediaModal } from './VariantMediaModal';
+import type { CreateProductVariantMediaDto } from '../../types/models/productVariantMedia';
+import { getMediaThumbnailUrl } from '../../utils/cloudinaryHelpers';
 
 // Internal types
 interface AttributeValue {
@@ -26,16 +28,7 @@ interface Variant {
   price: number;
   available: number;
   sku: string;
-  media?: MediaFile[];
-}
-
-interface MediaFile {
-  id: string;
-  file: File;
-  preview: string;
-  isMain: boolean;
-  timestamp: Date;
-  displayOrder: number;
+  media?: CreateProductVariantMediaDto[];
 }
 
 interface ProductVariantsSectionProps {
@@ -463,7 +456,7 @@ export const ProductVariantsSection = ({
     setMediaModalOpen(true);
   };
 
-  const handleSaveMedia = (files: MediaFile[]) => {
+  const handleSaveMedia = (files: CreateProductVariantMediaDto[]) => {
     if (!selectedVariantId) return;
 
     const updated = variants.map((v) =>
@@ -472,14 +465,19 @@ export const ProductVariantsSection = ({
     onVariantsChange(updated);
   };
 
-  const getVariantMedia = (variantId: string): MediaFile[] => {
+  const getVariantMedia = (
+    variantId: string
+  ): CreateProductVariantMediaDto[] => {
     return variants.find((v) => v.id === variantId)?.media || [];
   };
 
   const getMainMediaPreview = (variantId: string): string | null => {
     const media = getVariantMedia(variantId);
     const mainMedia = media.find((m) => m.isMain);
-    return mainMedia ? mainMedia.preview : null;
+
+    if (!mainMedia) return null;
+
+    return getMediaThumbnailUrl(mainMedia.mediaPublicId, mainMedia.mediaType);
   };
 
   return (
@@ -833,7 +831,7 @@ export const ProductVariantsSection = ({
                       <button
                         type='button'
                         onClick={() => handleOpenMediaModal(variant.id)}
-                        className='w-12 h-12 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors overflow-hidden bg-neutral-50'
+                        className='cursor-pointer w-12 h-12 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors overflow-hidden bg-neutral-50'
                       >
                         {getMainMediaPreview(variant.id) ? (
                           <img

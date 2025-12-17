@@ -51,6 +51,9 @@ namespace merxly.Infrastructure.Services
                 {
                     PublicId = result.PublicId,
                     OriginalUrl = result.SecureUrl.ToString(),
+                    FileName = file.FileName,
+                    FileExtension = Path.GetExtension(file.FileName).TrimStart('.'),
+                    FileSizeInBytes = file.Length
                 };
             }
             catch (Exception ex) when (ex is not InvalidOperationException)
@@ -60,8 +63,8 @@ namespace merxly.Infrastructure.Services
             }
         }
 
-        public async Task<CustomFileUploadResult> UploadVideoAsync(IFormFile file, string folderName) 
-        { 
+        public async Task<CustomFileUploadResult> UploadVideoAsync(IFormFile file, string folderName)
+        {
             ValidateVideo(file);
 
             _logger.LogInformation("Uploading file {FileName} ({Size} bytes) to folder {FolderName}", file.FileName, file.Length, folderName);
@@ -88,6 +91,9 @@ namespace merxly.Infrastructure.Services
                 {
                     PublicId = result.PublicId,
                     OriginalUrl = result.SecureUrl.ToString(),
+                    FileName = file.FileName,
+                    FileExtension = Path.GetExtension(file.FileName).TrimStart('.'),
+                    FileSizeInBytes = file.Length
                 };
             }
             catch (Exception ex) when (ex is not InvalidOperationException)

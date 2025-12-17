@@ -7,3 +7,13 @@ export interface ProductVariantMediaDto {
   displayOrder: number;
   isMain: boolean;
 }
+
+export interface CreateProductVariantMediaDto {
+  mediaPublicId: string;
+  fileName: string;
+  fileExtension: string;
+  fileSizeInBytes: number;
+  displayOrder: number;
+  isMain: boolean;
+  mediaType: MediaType;
+}

@@ -29,5 +29,12 @@ namespace merxly.API.Controllers
             var result = await _fileStorageService.UploadVideoAsync(file, folderName);
             return OkResponse(result, "Video uploaded successfully");
         }
+
+        [HttpDelete("media/{publicId}")]
+        public async Task<ActionResult> DeleteMedia(string publicId)
+        {
+            await _fileStorageService.DeleteFileAsync(publicId);
+            return NoContent();
+        }
     }
 }

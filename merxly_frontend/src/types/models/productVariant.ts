@@ -1,5 +1,8 @@
 import type { ProductAttributeValueDto } from './productAttributeValue';
-import type { ProductVariantMediaDto } from './productVariantMedia';
+import type {
+  ProductVariantMediaDto,
+  CreateProductVariantMediaDto,
+} from './productVariantMedia';
 
 export interface ProductVariantAttributeSelectionDto {
   attributeName: string;
@@ -11,7 +14,7 @@ export interface CreateProductVariantDto {
   price: number;
   stockQuantity: number;
   attributeSelections: ProductVariantAttributeSelectionDto[];
-  media: [];
+  media: CreateProductVariantMediaDto[];
 }
 
 export interface ProductVariantDto {
