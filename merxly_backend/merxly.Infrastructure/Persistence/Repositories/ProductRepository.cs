@@ -238,6 +238,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                     .ThenInclude(pa => pa.ProductAttributeValues)
                 .Include(p => p.Variants)
                     .ThenInclude(v => v.VariantAttributeValues)
+                        .ThenInclude(vav => vav.ProductAttributeValue)
                 .Include(p => p.Variants)
                     .ThenInclude(v => v.Media)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);

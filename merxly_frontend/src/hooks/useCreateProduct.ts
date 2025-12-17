@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { createProduct } from '../services/productService';
+import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useNavigate, useParams } from 'react-router-dom';
+import { createProduct, getProductById } from '../services/productService';
 import type { CreateProductDto } from '../types/models/product';
 import type { CreateProductAttributeDto } from '../types/models/productAttribute';
 import type { CreateProductVariantDto } from '../types/models/productVariant';
@@ -30,6 +30,8 @@ interface Variant {
 
 export const useCreateProduct = () => {
   const navigate = useNavigate();
+  const { id: productId } = useParams<{ id: string }>();
+  const isEditMode = !!productId;
 
   // Basic product information
   const [productName, setProductName] = useState('');
@@ -49,6 +51,95 @@ export const useCreateProduct = () => {
     categoryId?: string;
     variants?: string;
   }>({});
+
+  // Load product data if in edit mode
+  const { data: productData, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => getProductById(productId!),
+    enabled: isEditMode,
+  });
+
+  // Map loaded product data to UI state
+  useEffect(() => {
+    if (productData?.data && isEditMode) {
+      const product = productData.data;
+
+      // Set basic info
+      setProductName(product.name);
+      setDescription(product.description || '');
+      setCategoryId(product.categoryId);
+      setIsActive(product.isActive);
+      setIsStoreFeatured(product.isStoreFeatured);
+
+      // Map attributes
+      const mappedAttributes: Attribute[] = product.productAttributes
+        .filter((attr) => attr != null)
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .map((attr) => ({
+          id: attr.id,
+          name: attr.name,
+          values: (attr.productAttributeValues || [])
+            .filter((val) => val != null)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map((val) => ({
+              id: val.id,
+              value: val.value,
+            })),
+        }));
+
+      setAttributes(mappedAttributes);
+
+      // Map variants
+      const mappedVariants: Variant[] = product.variants
+        .filter((variant) => variant != null)
+        .map((variant) => {
+          // Build attributeValues mapping from productAttributeValues
+          const attributeValues: Record<string, string> = {};
+          (variant.productAttributeValues || [])
+            .filter((val) => val != null && val.id)
+            .forEach((val) => {
+              // Find which attribute this value belongs to
+              const attr = mappedAttributes.find((a) =>
+                a.values.some((v) => v.id === val.id)
+              );
+              if (attr) {
+                attributeValues[attr.id] = val.id;
+              }
+            });
+
+          // Map media
+          const media: CreateProductVariantMediaDto[] = (
+            variant.productVariantMedia || []
+          )
+            .filter((m) => m != null && m.mediaPublicId)
+            .map((m) => ({
+              mediaPublicId: m.mediaPublicId,
+              fileName: '',
+              fileExtension: '',
+              fileSizeInBytes: 0,
+              displayOrder: m.displayOrder,
+              isMain: m.isMain,
+              mediaType: m.mediaType,
+            }));
+
+          return {
+            id: variant.id,
+            attributeValues,
+            price: variant.price,
+            available: variant.stockQuantity,
+            sku: variant.sku || '',
+            media,
+          };
+        });
+
+      setVariants(mappedVariants);
+
+      // Set default groupBy if needed
+      if (mappedAttributes.length >= 2) {
+        setGroupBy(mappedAttributes[0].id);
+      }
+    }
+  }, [productData, isEditMode]);
 
   // Build DTO for submission
   const buildCreateProductDto = (): CreateProductDto | null => {
@@ -197,5 +288,7 @@ export const useCreateProduct = () => {
 
     // Status
     isSubmitting: createMutation.isPending,
+    isLoading: isLoadingProduct,
+    isEditMode,
   };
 };

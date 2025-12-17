@@ -1,5 +1,6 @@
 import type { ProductForStore } from '../../types/models/product';
 import { Badge } from '../ui';
+import { useNavigate } from 'react-router-dom';
 
 interface ProductTableProps {
   products: ProductForStore[];
@@ -14,6 +15,7 @@ export const ProductTable = ({
   onSelectProduct,
   onSelectAll,
 }: ProductTableProps) => {
+  const navigate = useNavigate();
   const allSelected =
     products.length > 0 && products.every((p) => selectedProducts.has(p.id));
 
@@ -62,6 +64,7 @@ export const ProductTable = ({
               products.map((product) => (
                 <tr
                   key={product.id}
+                  onClick={() => navigate(`/store/products/${product.id}`)}
                   className='hover:bg-neutral-50 transition-colors cursor-pointer'
                 >
                   <td className='px-4 py-4'>
@@ -69,6 +72,7 @@ export const ProductTable = ({
                       type='checkbox'
                       checked={selectedProducts.has(product.id)}
                       onChange={() => onSelectProduct(product.id)}
+                      onClick={(e) => e.stopPropagation()}
                       className='w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-2 focus:ring-primary-600 cursor-pointer'
                     />
                   </td>

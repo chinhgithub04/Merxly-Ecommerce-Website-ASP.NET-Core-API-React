@@ -428,6 +428,12 @@ export const ProductVariantsSection = ({
   if (shouldShowGrouping && groupBy) {
     variants.forEach((variant) => {
       const groupValueId = variant.attributeValues[groupBy];
+
+      // Skip if groupValueId is undefined
+      if (!groupValueId) {
+        return;
+      }
+
       const groupLabel = getAttributeValue(groupBy, groupValueId);
 
       if (!groupedVariants[groupValueId]) {

@@ -45,6 +45,16 @@ function App() {
           }
         />
 
+        {/* Edit Product Route - Without Layout */}
+        <Route
+          path='/store/products/:id'
+          element={
+            <ProtectedRoute requiredRoles={[UserRole.StoreOwner]}>
+              <CreateProductPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Home Route */}
         <Route
           path='/'

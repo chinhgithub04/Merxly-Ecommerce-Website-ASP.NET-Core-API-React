@@ -27,7 +27,21 @@ export const CreateProductPage = () => {
     handleSubmit,
     handleDiscard,
     isSubmitting,
+    isLoading,
+    isEditMode,
   } = useCreateProduct();
+
+  // Show loading state while fetching product data
+  if (isLoading && isEditMode) {
+    return (
+      <div className='h-screen flex items-center justify-center bg-neutral-50'>
+        <div className='text-center'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto'></div>
+          <p className='mt-4 text-neutral-600'>Loading product...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='h-screen flex flex-col bg-neutral-50'>

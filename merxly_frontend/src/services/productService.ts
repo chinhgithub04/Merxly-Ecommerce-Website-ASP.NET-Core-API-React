@@ -35,3 +35,12 @@ export const createProduct = async (
   );
   return response.data;
 };
+
+export const getProductById = async (
+  productId: string
+): Promise<Response<StoreDetailProductDto>> => {
+  const response = await apiClient.get<Response<StoreDetailProductDto>>(
+    `/StoreProducts/${productId}`
+  );
+  return response.data;
+};

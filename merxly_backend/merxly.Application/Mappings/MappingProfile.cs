@@ -128,8 +128,7 @@ namespace merxly.Application.Mappings
             CreateMap<ProductAttributeValue, ResponseUpdateAttributeValueItemDto>();
 
             // ProductVariantMedia Mappings
-            CreateMap<ProductVariantMedia, ProductVariantMediaDto>()
-                .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom<ProductVariantMediaUrlResolver>());
+            CreateMap<ProductVariantMedia, ProductVariantMediaDto>();
 
             CreateMap<CreateProductVariantMediaDto, ProductVariantMedia>();
 
