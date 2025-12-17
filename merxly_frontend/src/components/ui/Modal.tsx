@@ -43,7 +43,7 @@ export const Modal = ({
             <button
               type='button'
               onClick={onClose}
-              className='p-1.5 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors'
+              className='cursor-pointer p-1.5 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors'
             >
               <XMarkIcon className='w-5 h-5' />
             </button>

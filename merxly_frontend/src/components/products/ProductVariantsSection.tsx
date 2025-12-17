@@ -35,6 +35,7 @@ interface MediaFile {
   preview: string;
   isMain: boolean;
   timestamp: Date;
+  displayOrder: number;
 }
 
 interface ProductVariantsSectionProps {
@@ -475,6 +476,12 @@ export const ProductVariantsSection = ({
     return variants.find((v) => v.id === variantId)?.media || [];
   };
 
+  const getMainMediaPreview = (variantId: string): string | null => {
+    const media = getVariantMedia(variantId);
+    const mainMedia = media.find((m) => m.isMain);
+    return mainMedia ? mainMedia.preview : null;
+  };
+
   return (
     <div className='bg-white rounded-lg border border-neutral-200 p-6'>
       <h2 className='text-base font-semibold text-neutral-900 mb-4'>
@@ -669,7 +676,7 @@ export const ProductVariantsSection = ({
           {/* Table Header */}
           <div className='grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 bg-neutral-50 border-b border-neutral-200 text-xs font-semibold text-neutral-700'>
             <div className='w-6'></div>
-            <div className='w-10'></div>
+            <div className='w-12'></div>
             <div>Variant</div>
             <div>Price</div>
             <div>Available</div>
@@ -708,7 +715,7 @@ export const ProductVariantsSection = ({
                               )}
                             </button>
                           </div>
-                          <div className='pl-[52px]'>
+                          <div>
                             <input
                               type='text'
                               value={getGroupPrice(groupVariants)}
@@ -743,18 +750,26 @@ export const ProductVariantsSection = ({
                               <div className='w-6 flex items-center pl-4'>
                                 <input type='checkbox' className='rounded' />
                               </div>
-                              <div className='w-10 flex items-center pl-4'>
+                              <div className='flex items-center pl-4'>
                                 <button
                                   type='button'
                                   onClick={() =>
                                     handleOpenMediaModal(variant.id)
                                   }
-                                  className='w-8 h-8 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors'
+                                  className='cursor-pointer w-12 h-12 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors overflow-hidden bg-neutral-50'
                                 >
-                                  <PhotoIcon className='w-4 h-4 text-neutral-400' />
+                                  {getMainMediaPreview(variant.id) ? (
+                                    <img
+                                      src={getMainMediaPreview(variant.id)!}
+                                      alt='Variant media'
+                                      className='w-full h-full object-cover'
+                                    />
+                                  ) : (
+                                    <PhotoIcon className='w-5 h-5 text-neutral-400' />
+                                  )}
                                 </button>
                               </div>
-                              <div className='text-sm text-neutral-700 pl-4'>
+                              <div className='text-sm text-neutral-700 pl-4 flex items-center'>
                                 {getVariantName(variant)}
                               </div>
                               <div>
@@ -814,16 +829,24 @@ export const ProductVariantsSection = ({
                     <div className='w-6 flex items-center'>
                       <input type='checkbox' className='rounded' />
                     </div>
-                    <div className='w-10 flex items-center'>
+                    <div className='flex items-center'>
                       <button
                         type='button'
                         onClick={() => handleOpenMediaModal(variant.id)}
-                        className='w-8 h-8 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors'
+                        className='w-12 h-12 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors overflow-hidden bg-neutral-50'
                       >
-                        <PhotoIcon className='w-4 h-4 text-neutral-400' />
+                        {getMainMediaPreview(variant.id) ? (
+                          <img
+                            src={getMainMediaPreview(variant.id)!}
+                            alt='Variant media'
+                            className='w-full h-full object-cover'
+                          />
+                        ) : (
+                          <PhotoIcon className='w-5 h-5 text-neutral-400' />
+                        )}
                       </button>
                     </div>
-                    <div className='text-sm text-neutral-700'>
+                    <div className='text-sm text-neutral-700 flex items-center'>
                       {getVariantName(variant)}
                     </div>
                     <div>

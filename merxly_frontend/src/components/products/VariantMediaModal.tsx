@@ -3,6 +3,7 @@ import {
   PhotoIcon,
   VideoCameraIcon,
   XMarkIcon,
+  Bars3Icon,
 } from '@heroicons/react/24/outline';
 import { Modal } from '../ui/Modal';
 
@@ -12,6 +13,7 @@ interface MediaFile {
   preview: string;
   isMain: boolean;
   timestamp: Date;
+  displayOrder: number;
 }
 
 interface VariantMediaModalProps {
@@ -31,6 +33,9 @@ export const VariantMediaModal = ({
 }: VariantMediaModalProps) => {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(initialFiles);
   const [error, setError] = useState<string>('');
+  const [draggedMediaIndex, setDraggedMediaIndex] = useState<number | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync mediaFiles with initialFiles when modal opens
@@ -69,6 +74,7 @@ export const VariantMediaModal = ({
         preview,
         isMain: mediaFiles.length === 0 && newMediaFiles.length === 0,
         timestamp: new Date(),
+        displayOrder: mediaFiles.length + newMediaFiles.length,
       };
 
       newMediaFiles.push(mediaFile);
@@ -107,6 +113,32 @@ export const VariantMediaModal = ({
         isMain: f.id === id,
       }))
     );
+  };
+
+  const handleMediaDragStart = (index: number) => {
+    setDraggedMediaIndex(index);
+  };
+
+  const handleMediaDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleMediaDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedMediaIndex === null || draggedMediaIndex === targetIndex) return;
+
+    const reordered = [...mediaFiles];
+    const [draggedMedia] = reordered.splice(draggedMediaIndex, 1);
+    reordered.splice(targetIndex, 0, draggedMedia);
+
+    // Update displayOrder for all items
+    const updatedWithOrder = reordered.map((media, index) => ({
+      ...media,
+      displayOrder: index,
+    }));
+
+    setMediaFiles(updatedWithOrder);
+    setDraggedMediaIndex(null);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -184,15 +216,22 @@ export const VariantMediaModal = ({
         {mediaFiles.length > 0 && (
           <div className='border border-neutral-200 rounded-lg overflow-hidden'>
             <div className='divide-y divide-neutral-100'>
-              {mediaFiles.map((media) => {
+              {mediaFiles.map((media, index) => {
                 const isVideo = media.file.type.startsWith('video/');
                 const extension = media.file.name.split('.').pop() || '';
 
                 return (
                   <div
                     key={media.id}
-                    className='flex items-center gap-4 p-3 hover:bg-neutral-50 transition-colors'
+                    draggable
+                    onDragStart={() => handleMediaDragStart(index)}
+                    onDragOver={handleMediaDragOver}
+                    onDrop={(e) => handleMediaDrop(e, index)}
+                    className='flex items-center gap-4 p-3 hover:bg-neutral-50 transition-colors cursor-move'
                   >
+                    {/* Drag Handle */}
+                    <Bars3Icon className='w-4 h-4 text-neutral-400 shrink-0' />
+
                     {/* Checkbox */}
                     <input type='checkbox' className='rounded shrink-0' />
 
@@ -248,7 +287,7 @@ export const VariantMediaModal = ({
                     <button
                       type='button'
                       onClick={() => handleRemoveFile(media.id)}
-                      className='p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors shrink-0'
+                      className='cursor-pointer p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors shrink-0'
                     >
                       <XMarkIcon className='w-5 h-5' />
                     </button>
