@@ -130,6 +130,25 @@ export const useCreateProduct = () => {
             sku: variant.sku || '',
             media,
           };
+        })
+        // Sort variants by attribute value order
+        .sort((a, b) => {
+          // Compare variants by each attribute in order
+          for (const attr of mappedAttributes) {
+            const aValueId = a.attributeValues[attr.id];
+            const bValueId = b.attributeValues[attr.id];
+
+            if (!aValueId || !bValueId) continue;
+
+            // Find the index of each value in the attribute's values array
+            const aIndex = attr.values.findIndex((v) => v.id === aValueId);
+            const bIndex = attr.values.findIndex((v) => v.id === bValueId);
+
+            if (aIndex !== bIndex) {
+              return aIndex - bIndex;
+            }
+          }
+          return 0;
         });
 
       setVariants(mappedVariants);
