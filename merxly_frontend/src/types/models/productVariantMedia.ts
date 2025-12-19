@@ -3,6 +3,9 @@ import type { MediaType } from '../enums/MediaType';
 export interface ProductVariantMediaDto {
   id: string;
   mediaPublicId: string;
+  fileName: string;
+  fileExtension: string;
+  fileSizeInBytes: number;
   mediaType: MediaType;
   displayOrder: number;
   isMain: boolean;

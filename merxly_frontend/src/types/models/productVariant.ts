@@ -19,11 +19,23 @@ export interface CreateProductVariantDto {
 
 export interface ProductVariantDto {
   id: string;
-  mainImageUrl: string | null;
   sku: string | null;
   price: number;
   stockQuantity: number;
   isActive: boolean;
   productAttributeValues: ProductAttributeValueDto[];
   productVariantMedia: ProductVariantMediaDto[];
+}
+
+export interface ResponseUpdateVariantItemDto {
+  id: string;
+  name: string;
+  sku: string | null;
+  price: number;
+  weight: number | null;
+  length: number | null;
+  width: number | null;
+  height: number | null;
+  stockQuantity: number;
+  isActive: boolean;
 }

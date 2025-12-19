@@ -13,7 +13,6 @@ namespace merxly.Infrastructure.Persistence.Repositories
         public async Task<ProductAttribute?> GetProductAttributeWithValuesByIdAsync(Guid productAttributeId, CancellationToken cancellationToken = default)
         {
             var productAttribute = await _dbSet
-                .AsNoTracking()
                 .Include(pa => pa.ProductAttributeValues)
                 .Include(pa => pa.Product)
                 .ThenInclude(p => p.Variants)
@@ -21,7 +20,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .ThenInclude(vav => vav.ProductAttributeValue)
                 .ThenInclude(pav => pav.ProductAttribute)
                 .FirstOrDefaultAsync(pa => pa.Id == productAttributeId, cancellationToken);
-                
+
             return productAttribute;
         }
     }

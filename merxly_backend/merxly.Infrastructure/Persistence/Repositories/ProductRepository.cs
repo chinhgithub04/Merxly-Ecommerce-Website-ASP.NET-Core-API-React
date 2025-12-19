@@ -236,10 +236,10 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 .Include(p => p.Category)
                 .Include(p => p.ProductAttributes)
                     .ThenInclude(pa => pa.ProductAttributeValues)
-                .Include(p => p.Variants)
+                .Include(p => p.Variants.Where(v => !v.IsDeleted))
                     .ThenInclude(v => v.VariantAttributeValues)
                         .ThenInclude(vav => vav.ProductAttributeValue)
-                .Include(p => p.Variants)
+                .Include(p => p.Variants.Where(v => !v.IsDeleted))
                     .ThenInclude(v => v.Media)
                 .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
 

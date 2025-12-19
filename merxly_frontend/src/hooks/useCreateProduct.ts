@@ -5,6 +5,8 @@ import {
   createProduct,
   getProductById,
   updateProduct,
+  addAttributeValues,
+  updateAttributeValues,
 } from '../services/productService';
 import type {
   CreateProductDto,
@@ -13,6 +15,10 @@ import type {
 import type { CreateProductAttributeDto } from '../types/models/productAttribute';
 import type { CreateProductVariantDto } from '../types/models/productVariant';
 import type { CreateProductVariantMediaDto } from '../types/models/productVariantMedia';
+import type {
+  AddAttributeValuesAndVariants,
+  BulkUpdateProductAttributeValuesDto,
+} from '../types/models/productAttributeValue';
 
 // Internal types for UI state (matches ProductVariantsSection)
 interface AttributeValue {
@@ -55,6 +61,9 @@ export const useCreateProduct = () => {
     isActive: boolean;
     isStoreFeatured: boolean;
   } | null>(null);
+
+  // Initial attributes snapshot for edit mode (to track attribute value changes)
+  const [initialAttributes, setInitialAttributes] = useState<Attribute[]>([]);
 
   // Attributes and variants (managed by ProductVariantsSection)
   const [attributes, setAttributes] = useState<Attribute[]>([]);
@@ -112,7 +121,19 @@ export const useCreateProduct = () => {
             })),
         }));
 
-      setAttributes(mappedAttributes);
+      // Capture initial attributes snapshot
+      setInitialAttributes(JSON.parse(JSON.stringify(mappedAttributes)));
+
+      // In edit mode, add one empty value input to each attribute for better UX
+      const attributesWithEmptyInputs = mappedAttributes.map((attr) => ({
+        ...attr,
+        values: [
+          ...attr.values,
+          { id: `val-new-${Date.now()}-${attr.id}`, value: '' },
+        ],
+      }));
+
+      setAttributes(attributesWithEmptyInputs);
 
       // Map variants
       const mappedVariants: Variant[] = product.variants
@@ -278,8 +299,103 @@ export const useCreateProduct = () => {
     };
   };
 
-  // Check if basic info has changed (dirty state)
-  const isDirty = isEditMode
+  // Detect new attribute values (requires POST)
+  const hasNewAttributeValues = (): boolean => {
+    if (!isEditMode || initialAttributes.length === 0) return false;
+
+    const currentAttrsFiltered = attributes.map((attr) => ({
+      ...attr,
+      values: attr.values.filter((v) => v.value.trim()),
+    }));
+
+    for (const currentAttr of currentAttrsFiltered) {
+      const initialAttr = initialAttributes.find(
+        (a) => a.id === currentAttr.id
+      );
+      if (!initialAttr) continue;
+
+      const initialValueIds = new Set(initialAttr.values.map((v) => v.id));
+      for (const currVal of currentAttr.values) {
+        if (!initialValueIds.has(currVal.id)) return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Detect updated attribute values (requires PATCH)
+  const hasUpdatedAttributeValues = (): boolean => {
+    if (!isEditMode || initialAttributes.length === 0) return false;
+
+    const currentAttrsFiltered = attributes.map((attr) => ({
+      ...attr,
+      values: attr.values.filter((v) => v.value.trim()),
+    }));
+
+    for (const currentAttr of currentAttrsFiltered) {
+      const initialAttr = initialAttributes.find(
+        (a) => a.id === currentAttr.id
+      );
+      if (!initialAttr) continue;
+
+      for (let i = 0; i < currentAttr.values.length; i++) {
+        const currVal = currentAttr.values[i];
+        const initialVal = initialAttr.values.find((v) => v.id === currVal.id);
+        if (
+          initialVal &&
+          (initialVal.value !== currVal.value ||
+            initialAttr.values.findIndex((v) => v.id === currVal.id) !== i)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  // Check if attribute values have changed (for dirty state in attributes section)
+  const hasAttributeChanges = (): boolean => {
+    if (!isEditMode || initialAttributes.length === 0) return false;
+
+    // Filter out empty values from current attributes
+    const currentAttrsFiltered = attributes.map((attr) => ({
+      ...attr,
+      values: attr.values.filter((v) => v.value.trim()),
+    }));
+
+    for (const currentAttr of currentAttrsFiltered) {
+      const initialAttr = initialAttributes.find(
+        (a) => a.id === currentAttr.id
+      );
+      if (!initialAttr) continue;
+
+      const initialValueIds = new Set(initialAttr.values.map((v) => v.id));
+
+      // Check for new values
+      for (const currVal of currentAttr.values) {
+        if (!initialValueIds.has(currVal.id)) return true;
+      }
+
+      // Check for renamed or reordered values
+      for (let i = 0; i < currentAttr.values.length; i++) {
+        const currVal = currentAttr.values[i];
+        const initialVal = initialAttr.values.find((v) => v.id === currVal.id);
+        if (
+          initialVal &&
+          (initialVal.value !== currVal.value ||
+            initialAttr.values.findIndex((v) => v.id === currVal.id) !== i)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  // Separate dirty flags for precise detection
+  const isBasicInfoDirty = isEditMode
     ? initialBasicInfo !== null &&
       (productName !== initialBasicInfo.name ||
         description !== initialBasicInfo.description ||
@@ -287,6 +403,9 @@ export const useCreateProduct = () => {
         isActive !== initialBasicInfo.isActive ||
         isStoreFeatured !== initialBasicInfo.isStoreFeatured)
     : false;
+
+  // Overall dirty state for button enablement
+  const isDirty = isEditMode ? isBasicInfoDirty || hasAttributeChanges() : true; // In create mode, always allow save/discard (original behavior)
 
   // Create mutation
   const createMutation = useMutation({
@@ -316,7 +435,6 @@ export const useCreateProduct = () => {
           isActive: updated.isActive,
           isStoreFeatured: updated.isStoreFeatured,
         });
-        alert('Product saved');
       }
     },
     onError: (error: any) => {
@@ -327,17 +445,231 @@ export const useCreateProduct = () => {
     },
   });
 
-  const handleSubmit = () => {
+  // Add attribute values mutation (creates new variants)
+  const addAttributeValuesMutation = useMutation({
+    mutationFn: (data: AddAttributeValuesAndVariants) =>
+      addAttributeValues(productId!, data),
+    onSuccess: (response) => {
+      const data = response.data;
+      if (data) {
+        // Update initialAttributes to include new values
+        const updatedInitialAttrs = initialAttributes.map((attr) => {
+          const newValues = data.addedAttributeValues.filter(
+            (av) => av.productAttributeId === attr.id
+          );
+          if (newValues.length > 0) {
+            return {
+              ...attr,
+              values: [
+                ...attr.values,
+                ...newValues.map((nv) => ({ id: nv.id, value: nv.value })),
+              ],
+            };
+          }
+          return attr;
+        });
+        setInitialAttributes(updatedInitialAttrs);
+        // Alert shown at end of sequential execution
+      }
+    },
+    onError: (error: any) => {
+      console.error('Failed to add attribute values:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to add attribute values';
+      setErrors({ variants: errorMessage });
+    },
+  });
+
+  // Update attribute values mutation (no variant regeneration)
+  const updateAttributeValuesMutation = useMutation({
+    mutationFn: (data: {
+      productAttributeId: string;
+      dto: BulkUpdateProductAttributeValuesDto;
+    }) => updateAttributeValues(data.productAttributeId, data.dto),
+    onSuccess: (response) => {
+      const data = response.data;
+      if (data) {
+        // Update initialAttributes with new values and display orders
+        const updatedInitialAttrs = initialAttributes.map((attr) => {
+          const hasUpdates = data.updatedAttributeValues.some(
+            (av) => av.productAttributeId === attr.id
+          );
+          if (hasUpdates) {
+            return {
+              ...attr,
+              values: data.updatedAttributeValues
+                .filter((av) => av.productAttributeId === attr.id)
+                .sort((a, b) => a.displayOrder - b.displayOrder)
+                .map((av) => ({ id: av.id, value: av.value })),
+            };
+          }
+          return attr;
+        });
+        setInitialAttributes(updatedInitialAttrs);
+        // Alert moved to final step in sequential execution
+      }
+    },
+    onError: (error: any) => {
+      console.error('Failed to update attribute values:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to update attribute values';
+      setErrors({ variants: errorMessage });
+    },
+  });
+
+  const handleSubmit = async () => {
     if (isEditMode) {
-      // Build update DTO with only basic info fields
-      const updateDto: UpdateProductDto = {
-        name: productName.trim(),
-        description: description.trim() || null,
-        categoryId: categoryId!,
-        isActive,
-        isStoreFeatured,
-      };
-      updateMutation.mutate(updateDto);
+      // Sequential execution: PATCH /basic → PATCH /attribute-values → POST /attribute-values
+      try {
+        // Step 1: Update basic info if changed
+        if (isBasicInfoDirty) {
+          const updateDto: UpdateProductDto = {
+            name: productName.trim(),
+            description: description.trim() || null,
+            categoryId: categoryId!,
+            isActive,
+            isStoreFeatured,
+          };
+          await updateMutation.mutateAsync(updateDto);
+        }
+
+        // Prepare attribute change data
+        const currentAttrsFiltered = attributes.map((attr) => ({
+          ...attr,
+          values: attr.values.filter((v) => v.value.trim()),
+        }));
+
+        // Step 2: Update existing attribute values (rename/reorder) if changed
+        if (hasUpdatedAttributeValues()) {
+          for (const currentAttr of currentAttrsFiltered) {
+            const initialAttr = initialAttributes.find(
+              (a) => a.id === currentAttr.id
+            );
+            if (!initialAttr) continue;
+
+            const updates: Array<{
+              id: string;
+              value: string;
+              displayOrder: number;
+            }> = [];
+
+            currentAttr.values.forEach((currVal, index) => {
+              const initialVal = initialAttr.values.find(
+                (v) => v.id === currVal.id
+              );
+              const initialIndex = initialAttr.values.findIndex(
+                (v) => v.id === currVal.id
+              );
+              if (
+                initialVal &&
+                (initialVal.value !== currVal.value || initialIndex !== index)
+              ) {
+                updates.push({
+                  id: currVal.id,
+                  value: currVal.value,
+                  displayOrder: index,
+                });
+              }
+            });
+
+            if (updates.length > 0) {
+              const updateDto: BulkUpdateProductAttributeValuesDto = {
+                attributeValues: updates.map((u) => ({
+                  id: u.id,
+                  value: u.value,
+                  displayOrder: u.displayOrder,
+                })),
+              };
+              await updateAttributeValuesMutation.mutateAsync({
+                productAttributeId: currentAttr.id,
+                dto: updateDto,
+              });
+            }
+          }
+        }
+
+        // Step 3: Add new attribute values (with variant regeneration) if added
+        if (hasNewAttributeValues()) {
+          for (const currentAttr of currentAttrsFiltered) {
+            const initialAttr = initialAttributes.find(
+              (a) => a.id === currentAttr.id
+            );
+            if (!initialAttr) continue;
+
+            const initialValueIds = new Set(
+              initialAttr.values.map((v) => v.id)
+            );
+            const newValues: AttributeValue[] = [];
+
+            currentAttr.values.forEach((currVal) => {
+              if (!initialValueIds.has(currVal.id)) {
+                newValues.push(currVal);
+              }
+            });
+
+            if (newValues.length > 0) {
+              const addDto: AddAttributeValuesAndVariants = {
+                attributeValueAdditions: [
+                  {
+                    productAttributeId: currentAttr.id,
+                    attributeValues: newValues.map((val) => {
+                      // Find actual index in reordered list
+                      const actualIndex = currentAttr.values.findIndex(
+                        (v) => v.id === val.id
+                      );
+                      return {
+                        value: val.value,
+                        displayOrder: actualIndex,
+                      };
+                    }),
+                  },
+                ],
+                productVariants: buildCreateProductDto()?.variants || [],
+              };
+              await addAttributeValuesMutation.mutateAsync(addDto);
+            }
+          }
+        }
+
+        // Show success message if any update was performed
+        if (
+          isBasicInfoDirty ||
+          hasUpdatedAttributeValues() ||
+          hasNewAttributeValues()
+        ) {
+          alert('Product saved');
+
+          // Reset dirty state by syncing snapshots with current state
+          // This disables Save/Discard buttons after successful save
+          setInitialBasicInfo({
+            name: productName,
+            description: description,
+            categoryId: categoryId,
+            isActive: isActive,
+            isStoreFeatured: isStoreFeatured,
+          });
+
+          // Sync attributes snapshot (exclude empty values)
+          const syncedAttributes = attributes.map((attr) => ({
+            ...attr,
+            values: attr.values.filter((v) => v.value.trim()),
+          }));
+          setInitialAttributes(JSON.parse(JSON.stringify(syncedAttributes)));
+
+          // Update working attributes to match (re-add empty inputs for edit UX)
+          const attributesWithEmptyInputs = syncedAttributes.map((attr) => ({
+            ...attr,
+            values: [
+              ...attr.values,
+              { id: `val-new-${Date.now()}-${attr.id}`, value: '' },
+            ],
+          }));
+          setAttributes(attributesWithEmptyInputs);
+        }
+      } catch (error) {
+        // Error already handled in mutation's onError
+        console.error('Save failed:', error);
+      }
     } else {
       // Create mode - existing logic
       const dto = buildCreateProductDto();
@@ -359,6 +691,18 @@ export const useCreateProduct = () => {
       setCategoryId(initialBasicInfo.categoryId);
       setIsActive(initialBasicInfo.isActive);
       setIsStoreFeatured(initialBasicInfo.isStoreFeatured);
+
+      // Restore attributes to original state (with empty input for edit mode UX)
+      if (initialAttributes.length > 0) {
+        const attributesWithEmptyInputs = initialAttributes.map((attr) => ({
+          ...attr,
+          values: [
+            ...JSON.parse(JSON.stringify(attr.values)),
+            { id: `val-new-${Date.now()}-${attr.id}`, value: '' },
+          ],
+        }));
+        setAttributes(attributesWithEmptyInputs);
+      }
     } else {
       // Create mode: navigate back
       navigate('/store/products');
@@ -393,9 +737,14 @@ export const useCreateProduct = () => {
     handleDiscard,
 
     // Status
-    isSubmitting: createMutation.isPending || updateMutation.isPending,
+    isSubmitting:
+      createMutation.isPending ||
+      updateMutation.isPending ||
+      addAttributeValuesMutation.isPending ||
+      updateAttributeValuesMutation.isPending,
     isLoading: isLoadingProduct,
     isEditMode,
     isDirty,
+    hasAttributeChanges: hasAttributeChanges(),
   };
 };

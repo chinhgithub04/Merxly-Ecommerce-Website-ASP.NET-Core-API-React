@@ -279,12 +279,17 @@ namespace merxly.Application.Services
             }
 
             // Regenerate variants
-            RegenerateVariantsInternal(product, addAttributeWithVariantsDto.ProductAttributeValues);
+            var newVariants = RegenerateVariantsInternal(product, addAttributeWithVariantsDto.ProductAttributeValues);
+
+            // Explicitly add new variants to context
+            foreach (var variant in newVariants)
+            {
+                await _unitOfWork.ProductVariant.AddAsync(variant, cancellationToken);
+            }
 
             UpdateProductPricesAndStock(product);
             UpdateProductMainMedia(product);
 
-            _unitOfWork.Product.Update(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Attributes added and variants regenerated successfully for product: {ProductId}", productId);
@@ -356,6 +361,11 @@ namespace merxly.Application.Services
 
                     // Create new ProductAttributeValue
                     var productAttributeValue = _mapper.Map<ProductAttributeValue>(newValueDto);
+                    productAttributeValue.ProductAttributeId = productAttribute.Id;
+
+                    await _unitOfWork.ProductAttributeValue.AddAsync(productAttributeValue, cancellationToken);
+
+                    // Add to the in-memory collection so it's available for RegenerateVariantsInternal
                     productAttribute.ProductAttributeValues.Add(productAttributeValue);
                     addedAttributeValues.Add(productAttributeValue);
 
@@ -365,12 +375,17 @@ namespace merxly.Application.Services
             }
 
             // Regenerate variants with new attribute values
-            RegenerateVariantsInternal(product, addAttributeValuesAndVariants.ProductVariants);
+            var newVariants = RegenerateVariantsInternal(product, addAttributeValuesAndVariants.ProductVariants);
+
+            // Add new variants to context
+            foreach (var variant in newVariants)
+            {
+                await _unitOfWork.ProductVariant.AddAsync(variant, cancellationToken);
+            }
 
             UpdateProductPricesAndStock(product);
             UpdateProductMainMedia(product);
 
-            _unitOfWork.Product.Update(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Attribute values added and variants regenerated successfully for product: {ProductId}", productId);
@@ -783,12 +798,17 @@ namespace merxly.Application.Services
             }
 
             // Regenerate variants with remaining attribute values
-            RegenerateVariantsInternal(product, deleteAttributeValuesWithVariantsDto.ProductVariants);
+            var newVariants = RegenerateVariantsInternal(product, deleteAttributeValuesWithVariantsDto.ProductVariants);
+
+            // Explicitly add new variants to context
+            foreach (var variant in newVariants)
+            {
+                await _unitOfWork.ProductVariant.AddAsync(variant, cancellationToken);
+            }
 
             UpdateProductPricesAndStock(product);
             UpdateProductMainMedia(product);
 
-            _unitOfWork.Product.Update(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Attribute values deleted and variants regenerated successfully for product: {ProductId}", productId);
@@ -859,12 +879,17 @@ namespace merxly.Application.Services
             }
 
             // Regenerate variants with remaining attributes
-            RegenerateVariantsInternal(product, deleteAttributesWithVariantsDto.ProductVariants);
+            var newVariants = RegenerateVariantsInternal(product, deleteAttributesWithVariantsDto.ProductVariants);
+
+            // Explicitly add new variants to context
+            foreach (var variant in newVariants)
+            {
+                await _unitOfWork.ProductVariant.AddAsync(variant, cancellationToken);
+            }
 
             UpdateProductPricesAndStock(product);
             UpdateProductMainMedia(product);
 
-            _unitOfWork.Product.Update(product);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Attributes deleted and variants regenerated successfully for product: {ProductId}", productId);
@@ -1044,11 +1069,12 @@ namespace merxly.Application.Services
             throw new NotImplementedException();
         }
 
-        private void RegenerateVariantsInternal(
+        private List<ProductVariant> RegenerateVariantsInternal(
             Product product,
             List<CreateProductVariantDto> newVariantDtos)
         {
             _logger.LogInformation("Regenerating variants for product: {ProductId}", product.Id);
+            var createdVariants = new List<ProductVariant>();
 
             // Build valueIdMap from all product attributes
             var valueIdMap = new Dictionary<string, Guid>();
@@ -1079,6 +1105,8 @@ namespace merxly.Application.Services
             foreach (var createVariantDto in newVariantDtos)
             {
                 var productVariant = _mapper.Map<ProductVariant>(createVariantDto);
+                productVariant.ProductId = product.Id;
+                productVariant.IsActive = true;
                 _logger.LogInformation("Creating new variant for product: {ProductId}", product.Id);
 
                 // Map AttributeValues
@@ -1114,11 +1142,16 @@ namespace merxly.Application.Services
                 }
 
                 EnsureSingleMainMediaPerVariant(productVariant);
+
+                // Add to product's collection for in-memory operations
                 product.Variants.Add(productVariant);
+                createdVariants.Add(productVariant);
             }
 
             UpdateProductVariantNames(product);
             _logger.LogInformation("Variants regenerated successfully for product: {ProductId}", product.Id);
+
+            return createdVariants;
         }
 
         private void UpdateProductPricesAndStock(Product product)

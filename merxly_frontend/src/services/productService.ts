@@ -8,6 +8,12 @@ import type {
   UpdateProductDto,
   ResponseUpdateProductDto,
 } from '../types/models/product';
+import type {
+  AddAttributeValuesAndVariants,
+  AddAttributeValuesWithVariantsResponseDto,
+  BulkUpdateProductAttributeValuesDto,
+  BulkUpdateProductAttributeValuesResponseDto,
+} from '../types/models/productAttributeValue';
 import apiClient from './apiClient';
 
 export const getStoreProducts = async (
@@ -55,5 +61,25 @@ export const updateProduct = async (
     `/StoreProducts/${productId}/basic`,
     product
   );
+  return response.data;
+};
+
+export const addAttributeValues = async (
+  productId: string,
+  data: AddAttributeValuesAndVariants
+): Promise<Response<AddAttributeValuesWithVariantsResponseDto>> => {
+  const response = await apiClient.post<
+    Response<AddAttributeValuesWithVariantsResponseDto>
+  >(`/StoreProducts/${productId}/attribute-values`, data);
+  return response.data;
+};
+
+export const updateAttributeValues = async (
+  productAttributeId: string,
+  data: BulkUpdateProductAttributeValuesDto
+): Promise<Response<BulkUpdateProductAttributeValuesResponseDto>> => {
+  const response = await apiClient.patch<
+    Response<BulkUpdateProductAttributeValuesResponseDto>
+  >(`/StoreProducts/attribute-values/${productAttributeId}`, data);
   return response.data;
 };
