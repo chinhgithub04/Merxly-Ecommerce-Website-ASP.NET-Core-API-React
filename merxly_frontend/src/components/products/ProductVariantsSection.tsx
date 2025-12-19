@@ -39,6 +39,7 @@ interface ProductVariantsSectionProps {
   onVariantsChange: (variants: Variant[]) => void;
   onGroupByChange: (groupBy: string | null) => void;
   onDeleteAttributeValue?: (valueId: string) => void;
+  onDeleteAttribute?: (attributeId: string) => void;
   isEditMode?: boolean;
 }
 
@@ -50,6 +51,7 @@ export const ProductVariantsSection = ({
   onVariantsChange,
   onGroupByChange,
   onDeleteAttributeValue,
+  onDeleteAttribute,
   isEditMode = false,
 }: ProductVariantsSectionProps) => {
   const [editingAttributeId, setEditingAttributeId] = useState<string | null>(
@@ -231,6 +233,11 @@ export const ProductVariantsSection = ({
 
   // Delete attribute
   const handleDeleteAttribute = (id: string) => {
+    // Track deletion for backend if in edit mode and attribute exists
+    if (isEditMode && !id.startsWith('attr-new-') && onDeleteAttribute) {
+      onDeleteAttribute(id);
+    }
+
     const updated = attributes.filter((attr) => attr.id !== id);
     onAttributesChange(updated);
 

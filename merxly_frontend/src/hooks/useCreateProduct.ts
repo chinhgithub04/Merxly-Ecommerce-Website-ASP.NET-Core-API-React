@@ -8,12 +8,20 @@ import {
   addAttributeValues,
   updateAttributeValues,
   deleteAttributeValues,
+  addAttributes,
+  updateAttributes,
+  deleteAttributes,
 } from '../services/productService';
 import type {
   CreateProductDto,
   UpdateProductDto,
 } from '../types/models/product';
-import type { CreateProductAttributeDto } from '../types/models/productAttribute';
+import type {
+  CreateProductAttributeDto,
+  AddAttributeWithVariantsDto,
+  BulkUpdateProductAttributesDto,
+  DeleteAttributesWithVariantsDto,
+} from '../types/models/productAttribute';
 import type { CreateProductVariantDto } from '../types/models/productVariant';
 import type { CreateProductVariantMediaDto } from '../types/models/productVariantMedia';
 import type {
@@ -71,6 +79,9 @@ export const useCreateProduct = () => {
   const [deletedAttributeValueIds, setDeletedAttributeValueIds] = useState<
     string[]
   >([]);
+
+  // Track deleted attribute IDs (for attributes that existed in initial snapshot)
+  const [deletedAttributeIds, setDeletedAttributeIds] = useState<string[]>([]);
 
   // Attributes and variants (managed by ProductVariantsSection)
   const [attributes, setAttributes] = useState<Attribute[]>([]);
@@ -311,6 +322,46 @@ export const useCreateProduct = () => {
     return deletedAttributeValueIds.length > 0;
   };
 
+  // Detect deleted attributes (requires DELETE)
+  const hasDeletedAttributes = (): boolean => {
+    return deletedAttributeIds.length > 0;
+  };
+
+  // Detect new attributes (requires POST)
+  const hasNewAttributes = (): boolean => {
+    if (!isEditMode || initialAttributes.length === 0) return false;
+
+    const currentAttrsFiltered = attributes.filter(
+      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+    );
+
+    const initialAttrIds = new Set(initialAttributes.map((a) => a.id));
+    return currentAttrsFiltered.some((attr) => !initialAttrIds.has(attr.id));
+  };
+
+  // Detect updated attributes (requires PATCH)
+  const hasUpdatedAttributes = (): boolean => {
+    if (!isEditMode || initialAttributes.length === 0) return false;
+
+    const currentAttrsFiltered = attributes.filter(
+      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+    );
+
+    for (let i = 0; i < currentAttrsFiltered.length; i++) {
+      const currAttr = currentAttrsFiltered[i];
+      const initialAttr = initialAttributes.find((a) => a.id === currAttr.id);
+      if (
+        initialAttr &&
+        (initialAttr.name !== currAttr.name ||
+          initialAttributes.findIndex((a) => a.id === currAttr.id) !== i)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   // Detect new attribute values (requires POST)
   const hasNewAttributeValues = (): boolean => {
     if (!isEditMode || initialAttributes.length === 0) return false;
@@ -373,13 +424,37 @@ export const useCreateProduct = () => {
     // Check for deleted values
     if (deletedAttributeValueIds.length > 0) return true;
 
-    // Filter out empty values from current attributes
-    const currentAttrsFiltered = attributes.map((attr) => ({
+    // Check for deleted attributes
+    if (deletedAttributeIds.length > 0) return true;
+
+    // Check for new attributes
+    const currentAttrsFiltered = attributes.filter(
+      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+    );
+    const initialAttrIds = new Set(initialAttributes.map((a) => a.id));
+    if (currentAttrsFiltered.some((attr) => !initialAttrIds.has(attr.id)))
+      return true;
+
+    // Check for updated attributes (renamed or reordered)
+    for (let i = 0; i < currentAttrsFiltered.length; i++) {
+      const currAttr = currentAttrsFiltered[i];
+      const initialAttr = initialAttributes.find((a) => a.id === currAttr.id);
+      if (
+        initialAttr &&
+        (initialAttr.name !== currAttr.name ||
+          initialAttributes.findIndex((a) => a.id === currAttr.id) !== i)
+      ) {
+        return true;
+      }
+    }
+
+    // Filter out empty values from current attributes for value-level checks
+    const currentAttrsWithFilteredValues = attributes.map((attr) => ({
       ...attr,
       values: attr.values.filter((v) => v.value.trim()),
     }));
 
-    for (const currentAttr of currentAttrsFiltered) {
+    for (const currentAttr of currentAttrsWithFilteredValues) {
       const initialAttr = initialAttributes.find(
         (a) => a.id === currentAttr.id
       );
@@ -559,6 +634,93 @@ export const useCreateProduct = () => {
     },
   });
 
+  // Add attributes mutation (regenerates variants)
+  const addAttributesMutation = useMutation({
+    mutationFn: (data: AddAttributeWithVariantsDto) =>
+      addAttributes(productId!, data),
+    onSuccess: (response) => {
+      const data = response.data;
+      if (data) {
+        // Update initialAttributes to include new attributes
+        const newAttrs = data.addedAttributes.map((attr) => ({
+          id: attr.id,
+          name: attr.name,
+          values: data.addedAttributeValues
+            .filter((val) => val.productAttributeId === attr.id)
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map((val) => ({ id: val.id, value: val.value })),
+        }));
+        setInitialAttributes([...initialAttributes, ...newAttrs]);
+      }
+    },
+    onError: (error: any) => {
+      console.error('Failed to add attributes:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to add attributes';
+      setErrors({ variants: errorMessage });
+    },
+  });
+
+  // Update attributes mutation (no variant regeneration)
+  const updateAttributesMutation = useMutation({
+    mutationFn: (data: BulkUpdateProductAttributesDto) =>
+      updateAttributes(productId!, data),
+    onSuccess: (response) => {
+      const data = response.data;
+      if (data) {
+        // Update initialAttributes with new names and display orders
+        const updatedInitialAttrs = initialAttributes.map((attr) => {
+          const updated = data.updatedAttributes.find((u) => u.id === attr.id);
+          return updated ? { ...attr, name: updated.name } : attr;
+        });
+        // Re-sort by updated display order
+        const sortedAttrs = updatedInitialAttrs.sort((a, b) => {
+          const aOrder = data.updatedAttributes.find(
+            (u) => u.id === a.id
+          )?.displayOrder;
+          const bOrder = data.updatedAttributes.find(
+            (u) => u.id === b.id
+          )?.displayOrder;
+          if (aOrder !== undefined && bOrder !== undefined) {
+            return aOrder - bOrder;
+          }
+          return 0;
+        });
+        setInitialAttributes(sortedAttrs);
+      }
+    },
+    onError: (error: any) => {
+      console.error('Failed to update attributes:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to update attributes';
+      setErrors({ variants: errorMessage });
+    },
+  });
+
+  // Delete attributes mutation (regenerates variants)
+  const deleteAttributesMutation = useMutation({
+    mutationFn: (data: DeleteAttributesWithVariantsDto) =>
+      deleteAttributes(productId!, data),
+    onSuccess: (response) => {
+      const data = response.data;
+      if (data) {
+        // Update initialAttributes to remove deleted attributes
+        const updatedInitialAttrs = initialAttributes.filter(
+          (attr) => !data.deletedAttributeIds.includes(attr.id)
+        );
+        setInitialAttributes(updatedInitialAttrs);
+        // Clear deleted tracking
+        setDeletedAttributeIds([]);
+      }
+    },
+    onError: (error: any) => {
+      console.error('Failed to delete attributes:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to delete attributes';
+      setErrors({ variants: errorMessage });
+    },
+  });
+
   const handleSubmit = async () => {
     if (isEditMode) {
       // Sequential execution: PATCH /basic → DELETE /attribute-values → PATCH /attribute-values → POST /attribute-values
@@ -688,12 +850,114 @@ export const useCreateProduct = () => {
           }
         }
 
+        // Step 5: Delete attributes if any deletions
+        if (hasDeletedAttributes()) {
+          const deleteDto: DeleteAttributesWithVariantsDto = {
+            attributeIds: deletedAttributeIds,
+            productVariants: buildCreateProductDto()?.variants || [],
+          };
+          await deleteAttributesMutation.mutateAsync(deleteDto);
+        }
+
+        // Step 6: Update existing attributes (rename/reorder) if changed
+        if (hasUpdatedAttributes()) {
+          const updates: Array<{
+            id: string;
+            name?: string;
+            displayOrder?: number;
+          }> = [];
+
+          const currentAttrsFiltered = attributes.filter(
+            (attr) =>
+              attr.name.trim() && attr.values.some((v) => v.value.trim())
+          );
+
+          currentAttrsFiltered.forEach((currAttr, index) => {
+            // Skip if this attribute was deleted
+            if (deletedAttributeIds.includes(currAttr.id)) return;
+
+            const initialAttr = initialAttributes.find(
+              (a) => a.id === currAttr.id
+            );
+            const initialIndex = initialAttributes.findIndex(
+              (a) => a.id === currAttr.id
+            );
+            if (
+              initialAttr &&
+              (initialAttr.name !== currAttr.name || initialIndex !== index)
+            ) {
+              updates.push({
+                id: currAttr.id,
+                name: currAttr.name,
+                displayOrder: index,
+              });
+            }
+          });
+
+          if (updates.length > 0) {
+            const updateDto: BulkUpdateProductAttributesDto = {
+              attributes: updates.map((u) => ({
+                id: u.id,
+                name: u.name,
+                displayOrder: u.displayOrder,
+              })),
+            };
+            await updateAttributesMutation.mutateAsync(updateDto);
+          }
+        }
+
+        // Step 7: Add new attributes (with variant regeneration) if added
+        if (hasNewAttributes()) {
+          const currentAttrsFiltered = attributes.filter(
+            (attr) =>
+              attr.name.trim() && attr.values.some((v) => v.value.trim())
+          );
+
+          const initialAttrIds = new Set(initialAttributes.map((a) => a.id));
+          const newAttrs: Attribute[] = [];
+
+          currentAttrsFiltered.forEach((currAttr) => {
+            // Skip if this attribute was deleted
+            if (deletedAttributeIds.includes(currAttr.id)) return;
+
+            if (!initialAttrIds.has(currAttr.id)) {
+              newAttrs.push(currAttr);
+            }
+          });
+
+          if (newAttrs.length > 0) {
+            const addDto: AddAttributeWithVariantsDto = {
+              productAttributes: newAttrs.map((attr) => {
+                // Find actual index in reordered list
+                const actualIndex = currentAttrsFiltered.findIndex(
+                  (a) => a.id === attr.id
+                );
+                return {
+                  name: attr.name,
+                  displayOrder: actualIndex,
+                  productAttributeValues: attr.values
+                    .filter((v) => v.value.trim())
+                    .map((val, valIndex) => ({
+                      value: val.value,
+                      displayOrder: valIndex,
+                    })),
+                };
+              }),
+              productAttributeValues: buildCreateProductDto()?.variants || [],
+            };
+            await addAttributesMutation.mutateAsync(addDto);
+          }
+        }
+
         // Show success message if any update was performed
         if (
           isBasicInfoDirty ||
           hasDeletedAttributeValues() ||
           hasUpdatedAttributeValues() ||
-          hasNewAttributeValues()
+          hasNewAttributeValues() ||
+          hasDeletedAttributes() ||
+          hasUpdatedAttributes() ||
+          hasNewAttributes()
         ) {
           alert('Product saved');
 
@@ -707,17 +971,21 @@ export const useCreateProduct = () => {
             isStoreFeatured: isStoreFeatured,
           });
 
-          // Sync attributes snapshot (exclude empty values and deleted values)
-          const syncedAttributes = attributes.map((attr) => ({
-            ...attr,
-            values: attr.values.filter(
-              (v) => v.value.trim() && !deletedAttributeValueIds.includes(v.id)
-            ),
-          }));
+          // Sync attributes snapshot (exclude empty values, deleted values, and deleted attributes)
+          const syncedAttributes = attributes
+            .filter((attr) => !deletedAttributeIds.includes(attr.id))
+            .map((attr) => ({
+              ...attr,
+              values: attr.values.filter(
+                (v) =>
+                  v.value.trim() && !deletedAttributeValueIds.includes(v.id)
+              ),
+            }));
           setInitialAttributes(JSON.parse(JSON.stringify(syncedAttributes)));
 
           // Clear deleted tracking
           setDeletedAttributeValueIds([]);
+          setDeletedAttributeIds([]);
 
           // Update working attributes to match (re-add empty inputs for edit UX)
           const attributesWithEmptyInputs = syncedAttributes.map((attr) => ({
@@ -766,6 +1034,10 @@ export const useCreateProduct = () => {
         }));
         setAttributes(attributesWithEmptyInputs);
       }
+
+      // Clear deleted tracking
+      setDeletedAttributeValueIds([]);
+      setDeletedAttributeIds([]);
     } else {
       // Create mode: navigate back
       navigate('/store/products');
@@ -794,6 +1066,7 @@ export const useCreateProduct = () => {
     setVariants,
     setGroupBy,
     setDeletedAttributeValueIds,
+    setDeletedAttributeIds,
 
     // Actions
     handleSubmit,
@@ -806,7 +1079,10 @@ export const useCreateProduct = () => {
       updateMutation.isPending ||
       deleteAttributeValuesMutation.isPending ||
       addAttributeValuesMutation.isPending ||
-      updateAttributeValuesMutation.isPending,
+      updateAttributeValuesMutation.isPending ||
+      deleteAttributesMutation.isPending ||
+      addAttributesMutation.isPending ||
+      updateAttributesMutation.isPending,
     isLoading: isLoadingProduct,
     isEditMode,
     isDirty,

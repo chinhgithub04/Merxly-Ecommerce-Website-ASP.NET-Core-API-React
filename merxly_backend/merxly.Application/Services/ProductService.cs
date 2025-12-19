@@ -263,17 +263,28 @@ namespace merxly.Application.Services
 
                 // Create ProductAttribute
                 var productAttribute = _mapper.Map<ProductAttribute>(createProductAttributeDto);
+                productAttribute.ProductId = product.Id; // Ensure FK is set
                 _logger.LogInformation("Adding attribute: {AttributeName} to product: {ProductId}", productAttribute.Name, product.Id);
 
                 foreach (var createValueDto in createProductAttributeDto.ProductAttributeValues)
                 {
                     // Create ProductAttributeValue
                     var productAttributeValue = _mapper.Map<ProductAttributeValue>(createValueDto);
+                    productAttributeValue.ProductAttributeId = productAttribute.Id; // Ensure FK is set
+
+                    await _unitOfWork.ProductAttributeValue.AddAsync(productAttributeValue, cancellationToken);
+
+                    // Add to in-memory collection for RegenerateVariantsInternal
                     productAttribute.ProductAttributeValues.Add(productAttributeValue);
 
                     _logger.LogInformation("Added attribute value: {AttributeValue} to attribute: {AttributeName}",
                         productAttributeValue.Value, productAttribute.Name);
                 }
+
+                // Add attribute to context
+                await _unitOfWork.ProductAttribute.AddAsync(productAttribute, cancellationToken);
+
+                // Add to in-memory collection
                 product.ProductAttributes.Add(productAttribute);
                 addedAttributes.Add(productAttribute);
             }

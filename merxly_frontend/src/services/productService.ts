@@ -9,6 +9,14 @@ import type {
   ResponseUpdateProductDto,
 } from '../types/models/product';
 import type {
+  AddAttributeWithVariantsDto,
+  AddAttributesWithVariantsResponseDto,
+  BulkUpdateProductAttributesDto,
+  BulkUpdateProductAttributesResponseDto,
+  DeleteAttributesWithVariantsDto,
+  BulkDeleteAttributesResponseDto,
+} from '../types/models/productAttribute';
+import type {
   AddAttributeValuesAndVariants,
   AddAttributeValuesWithVariantsResponseDto,
   BulkUpdateProductAttributeValuesDto,
@@ -93,5 +101,35 @@ export const deleteAttributeValues = async (
   const response = await apiClient.delete<
     Response<BulkDeleteAttributeValuesResponseDto>
   >(`/StoreProducts/${productId}/attribute-values`, { data });
+  return response.data;
+};
+
+export const addAttributes = async (
+  productId: string,
+  data: AddAttributeWithVariantsDto
+): Promise<Response<AddAttributesWithVariantsResponseDto>> => {
+  const response = await apiClient.post<
+    Response<AddAttributesWithVariantsResponseDto>
+  >(`/StoreProducts/${productId}/attributes`, data);
+  return response.data;
+};
+
+export const updateAttributes = async (
+  productId: string,
+  data: BulkUpdateProductAttributesDto
+): Promise<Response<BulkUpdateProductAttributesResponseDto>> => {
+  const response = await apiClient.patch<
+    Response<BulkUpdateProductAttributesResponseDto>
+  >(`/StoreProducts/${productId}/attributes`, data);
+  return response.data;
+};
+
+export const deleteAttributes = async (
+  productId: string,
+  data: DeleteAttributesWithVariantsDto
+): Promise<Response<BulkDeleteAttributesResponseDto>> => {
+  const response = await apiClient.delete<
+    Response<BulkDeleteAttributesResponseDto>
+  >(`/StoreProducts/${productId}/attributes`, { data });
   return response.data;
 };
