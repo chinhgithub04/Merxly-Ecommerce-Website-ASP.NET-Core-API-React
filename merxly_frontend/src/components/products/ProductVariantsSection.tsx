@@ -72,6 +72,9 @@ export const ProductVariantsSection = ({
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     null
   );
+  const [selectedVariants, setSelectedVariants] = useState<Set<string>>(
+    new Set()
+  );
 
   // Generate variants based on attributes (Cartesian product)
   const generateVariants = (attrs: Attribute[]): Variant[] => {
@@ -507,6 +510,72 @@ export const ProductVariantsSection = ({
     return getMediaThumbnailUrl(mainMedia.mediaPublicId, mainMedia.mediaType);
   };
 
+  // Checkbox selection handlers
+  const handleToggleVariant = (variantId: string) => {
+    const newSelected = new Set(selectedVariants);
+    if (newSelected.has(variantId)) {
+      newSelected.delete(variantId);
+    } else {
+      newSelected.add(variantId);
+    }
+    setSelectedVariants(newSelected);
+  };
+
+  const handleToggleGroup = (groupVariants: Variant[]) => {
+    const groupIds = groupVariants.map((v) => v.id);
+    const allSelected = groupIds.every((id) => selectedVariants.has(id));
+    const newSelected = new Set(selectedVariants);
+
+    if (allSelected) {
+      // Deselect all in group
+      groupIds.forEach((id) => newSelected.delete(id));
+    } else {
+      // Select all in group
+      groupIds.forEach((id) => newSelected.add(id));
+    }
+    setSelectedVariants(newSelected);
+  };
+
+  const handleToggleAll = () => {
+    const allIds = variants.map((v) => v.id);
+    const allSelected = allIds.every((id) => selectedVariants.has(id));
+
+    if (allSelected) {
+      setSelectedVariants(new Set());
+    } else {
+      setSelectedVariants(new Set(allIds));
+    }
+  };
+
+  const isGroupIndeterminate = (groupVariants: Variant[]): boolean => {
+    const groupIds = groupVariants.map((v) => v.id);
+    const selectedCount = groupIds.filter((id) =>
+      selectedVariants.has(id)
+    ).length;
+    return selectedCount > 0 && selectedCount < groupIds.length;
+  };
+
+  const isGroupChecked = (groupVariants: Variant[]): boolean => {
+    const groupIds = groupVariants.map((v) => v.id);
+    return (
+      groupIds.length > 0 && groupIds.every((id) => selectedVariants.has(id))
+    );
+  };
+
+  const isAllIndeterminate = (): boolean => {
+    const allIds = variants.map((v) => v.id);
+    const selectedCount = allIds.filter((id) =>
+      selectedVariants.has(id)
+    ).length;
+    return selectedCount > 0 && selectedCount < allIds.length;
+  };
+
+  const isAllChecked = (): boolean => {
+    return (
+      variants.length > 0 && variants.every((v) => selectedVariants.has(v.id))
+    );
+  };
+
   return (
     <div className='bg-white rounded-lg border border-neutral-200 p-6'>
       <h2 className='text-base font-semibold text-neutral-900 mb-4'>
@@ -678,31 +747,59 @@ export const ProductVariantsSection = ({
         <div className='border border-neutral-200 rounded-lg overflow-hidden'>
           {/* Group By Selector */}
           {shouldShowGrouping && (
-            <div className='px-4 py-3 bg-neutral-50 border-b border-neutral-200'>
-              <label className='text-sm font-medium text-neutral-700 mr-3'>
-                Group by:
-              </label>
-              <select
-                value={groupBy || ''}
-                onChange={(e) => onGroupByChange(e.target.value || null)}
-                className='px-3 py-1.5 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
-              >
-                {attributes
-                  .filter((a) => a.name && a.values.some((v) => v.value))
-                  .map((attr) => (
-                    <option key={attr.id} value={attr.id}>
-                      {attr.name}
-                    </option>
-                  ))}
-              </select>
+            <div className='px-4 py-3 border-b border-neutral-200 flex items-center justify-between'>
+              <div>
+                <label className='text-sm font-medium text-neutral-700 mr-3'>
+                  Group by:
+                </label>
+                <select
+                  value={groupBy || ''}
+                  onChange={(e) => onGroupByChange(e.target.value || null)}
+                  className='px-3 py-1.5 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
+                >
+                  {attributes
+                    .filter((a) => a.name && a.values.some((v) => v.value))
+                    .map((attr) => (
+                      <option key={attr.id} value={attr.id}>
+                        {attr.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              {selectedVariants.size > 0 && (
+                <div className='flex items-center gap-2'>
+                  <button
+                    type='button'
+                    className='cursor-pointer px-3 py-1.5 text-sm border border-neutral-300 rounded-md font-medium text-neutral-700 hover:bg-neutral-100 transition-colors'
+                  >
+                    Bulk edit
+                  </button>
+                  <button
+                    type='button'
+                    className='cursor-pointer px-3 py-1.5 text-sm border border-error-600 rounded-md text-error-600 font-medium hover:bg-error-600 hover:text-white transition-colors'
+                  >
+                    Delete variants
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {/* Table Header */}
-          <div className='grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 bg-neutral-50 border-b border-neutral-200 text-xs font-semibold text-neutral-700'>
-            <div className='w-6'></div>
-            <div className='w-12'></div>
+          <div className='grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 bg-neutral-100 border-b border-neutral-200 text-xs font-semibold text-neutral-700'>
+            <div className='w-6 flex items-center'>
+              <input
+                type='checkbox'
+                className='rounded cursor-pointer'
+                checked={isAllChecked()}
+                ref={(el) => {
+                  if (el) el.indeterminate = isAllIndeterminate();
+                }}
+                onChange={handleToggleAll}
+              />
+            </div>
             <div>Variant</div>
+            <div className='w-12'></div>
             <div>Price</div>
             <div>Available</div>
             <div>SKU</div>
@@ -719,9 +816,26 @@ export const ProductVariantsSection = ({
                     return (
                       <div key={groupValueId}>
                         {/* Group Header Row */}
-                        <div className='grid grid-cols-[auto_1fr_120px_120px_150px] gap-4 px-4 py-3 bg-white hover:bg-neutral-50'>
+                        <div
+                          className={`grid grid-cols-[auto_1fr_120px_120px_150px] gap-4 px-4 py-3 hover:bg-neutral-100 ${
+                            isGroupChecked(groupVariants) ||
+                            isGroupIndeterminate(groupVariants)
+                              ? 'bg-neutral-50'
+                              : 'bg-white'
+                          }`}
+                        >
                           <div className='w-6 flex items-center'>
-                            <input type='checkbox' className='rounded' />
+                            <input
+                              type='checkbox'
+                              className='rounded cursor-pointer'
+                              checked={isGroupChecked(groupVariants)}
+                              ref={(el) => {
+                                if (el)
+                                  el.indeterminate =
+                                    isGroupIndeterminate(groupVariants);
+                              }}
+                              onChange={() => handleToggleGroup(groupVariants)}
+                            />
                           </div>
                           <div className='flex flex-col'>
                             <span className='text-sm font-semibold text-neutral-900'>
@@ -740,14 +854,18 @@ export const ProductVariantsSection = ({
                               )}
                             </button>
                           </div>
-                          <div>
+                          <div className='relative flex items-center'>
+                            <span className='absolute left-3 text-md text-neutral-500'>
+                              ₫
+                            </span>
                             <input
                               type='text'
                               value={getGroupPrice(groupVariants)}
                               readOnly
-                              className='w-full px-2 py-1.5 border border-neutral-200 rounded text-sm bg-neutral-50 text-neutral-700 cursor-default'
+                              className='w-full pl-7 pr-2 py-1.5 border border-neutral-200 rounded text-sm bg-neutral-50 text-neutral-700 cursor-default'
                             />
                           </div>
+
                           <div>
                             <input
                               type='number'
@@ -770,10 +888,21 @@ export const ProductVariantsSection = ({
                           groupVariants.map((variant) => (
                             <div
                               key={variant.id}
-                              className='grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 bg-neutral-50/30 hover:bg-neutral-50'
+                              className={`grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 hover:bg-neutral-100 ${
+                                selectedVariants.has(variant.id)
+                                  ? 'bg-neutral-50'
+                                  : 'bg-white'
+                              }`}
                             >
                               <div className='w-6 flex items-center pl-4'>
-                                <input type='checkbox' className='rounded' />
+                                <input
+                                  type='checkbox'
+                                  className='rounded cursor-pointer'
+                                  checked={selectedVariants.has(variant.id)}
+                                  onChange={() =>
+                                    handleToggleVariant(variant.id)
+                                  }
+                                />
                               </div>
                               <div className='flex items-center pl-4'>
                                 <button
@@ -797,7 +926,10 @@ export const ProductVariantsSection = ({
                               <div className='text-sm text-neutral-700 pl-4 flex items-center'>
                                 {getVariantName(variant)}
                               </div>
-                              <div>
+                              <div className='relative flex items-center'>
+                                <span className='absolute left-3 text-md text-neutral-500'>
+                                  ₫
+                                </span>
                                 <input
                                   type='number'
                                   value={variant.price}
@@ -808,7 +940,7 @@ export const ProductVariantsSection = ({
                                       parseFloat(e.target.value) || 0
                                     )
                                   }
-                                  className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
+                                  className='w-full pl-7 pr-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
                                 />
                               </div>
                               <div>
@@ -849,10 +981,17 @@ export const ProductVariantsSection = ({
                 variants.map((variant) => (
                   <div
                     key={variant.id}
-                    className='grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 hover:bg-neutral-50'
+                    className={`grid grid-cols-[auto_auto_1fr_120px_120px_150px] gap-4 px-4 py-3 hover:bg-neutral-100 ${
+                      selectedVariants.has(variant.id) ? 'bg-neutral-50' : ''
+                    }`}
                   >
                     <div className='w-6 flex items-center'>
-                      <input type='checkbox' className='rounded' />
+                      <input
+                        type='checkbox'
+                        className='rounded cursor-pointer'
+                        checked={selectedVariants.has(variant.id)}
+                        onChange={() => handleToggleVariant(variant.id)}
+                      />
                     </div>
                     <div className='flex items-center'>
                       <button
@@ -874,7 +1013,10 @@ export const ProductVariantsSection = ({
                     <div className='text-sm text-neutral-700 flex items-center'>
                       {getVariantName(variant)}
                     </div>
-                    <div>
+                    <div className='relative'>
+                      <span className='absolute left-2 top-1/2 -translate-y-1/2 text-sm text-neutral-500'>
+                        ₫
+                      </span>
                       <input
                         type='number'
                         value={variant.price}
@@ -885,7 +1027,7 @@ export const ProductVariantsSection = ({
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
+                        className='w-full pl-6 pr-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
                       />
                     </div>
                     <div>
