@@ -13,11 +13,9 @@ namespace merxly.Application.Validators.ProductVariant
                 .When(x => !string.IsNullOrWhiteSpace(x.SKU));
 
             RuleFor(x => x.Price)
-                .NotEmpty().WithMessage("Price is required.")
                 .GreaterThanOrEqualTo(0).WithMessage("Price must be non-negative.");
 
             RuleFor(x => x.StockQuantity)
-                .NotEmpty().WithMessage("Stock quantity is required.")
                 .GreaterThanOrEqualTo(0).WithMessage("Stock quantity must be non-negative.");
 
             RuleFor(x => x.AttributeSelections)

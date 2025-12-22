@@ -95,6 +95,11 @@ export const ProductVariantsSection = forwardRef<
     const [markedForDeletion, setMarkedForDeletion] = useState<Set<string>>(
       new Set()
     );
+    const [editingField, setEditingField] = useState<{
+      variantId: string;
+      field: 'price' | 'available';
+      value: string;
+    } | null>(null);
 
     // Expose reset method to parent via ref
     useImperativeHandle(ref, () => ({
@@ -436,6 +441,48 @@ export const ProductVariantsSection = forwardRef<
       onVariantsChange(updated);
     };
 
+    // Handle input change for price and available (allows empty during edit)
+    const handleInputChange = (
+      variantId: string,
+      field: 'price' | 'available',
+      value: string
+    ) => {
+      setEditingField({ variantId, field, value });
+    };
+
+    // Handle input blur (convert empty to 0)
+    const handleInputBlur = (
+      variantId: string,
+      field: 'price' | 'available'
+    ) => {
+      if (
+        editingField?.variantId === variantId &&
+        editingField?.field === field
+      ) {
+        const numValue =
+          field === 'price'
+            ? parseFloat(editingField.value) || 0
+            : parseInt(editingField.value) || 0;
+        handleUpdateVariant(variantId, field, numValue);
+        setEditingField(null);
+      }
+    };
+
+    // Get display value for input (use editing value if currently editing, otherwise actual value)
+    const getInputValue = (
+      variantId: string,
+      field: 'price' | 'available',
+      actualValue: number
+    ): string => {
+      if (
+        editingField?.variantId === variantId &&
+        editingField?.field === field
+      ) {
+        return editingField.value;
+      }
+      return actualValue.toString();
+    };
+
     // Toggle group expansion
     const toggleGroupExpansion = (groupKey: string) => {
       const newExpanded = new Set(expandedGroups);
@@ -609,9 +656,11 @@ export const ProductVariantsSection = forwardRef<
     };
 
     const handleMarkForDeletion = () => {
-      setMarkedForDeletion(new Set(selectedVariants));
+      const newMarked = new Set(markedForDeletion);
+      selectedVariants.forEach((id) => newMarked.add(id));
+      setMarkedForDeletion(newMarked);
       setSelectedVariants(new Set());
-      onMarkedForDeletionChange?.(Array.from(selectedVariants));
+      onMarkedForDeletionChange?.(Array.from(newMarked));
     };
 
     const handleUndoDeletion = (variantId: string) => {
@@ -1065,13 +1114,20 @@ export const ProductVariantsSection = forwardRef<
                                       </span>
                                       <input
                                         type='number'
-                                        value={variant.price}
+                                        value={getInputValue(
+                                          variant.id,
+                                          'price',
+                                          variant.price
+                                        )}
                                         onChange={(e) =>
-                                          handleUpdateVariant(
+                                          handleInputChange(
                                             variant.id,
                                             'price',
-                                            parseFloat(e.target.value) || 0
+                                            e.target.value
                                           )
+                                        }
+                                        onBlur={() =>
+                                          handleInputBlur(variant.id, 'price')
                                         }
                                         className='w-full pl-7 pr-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
                                       />
@@ -1079,12 +1135,22 @@ export const ProductVariantsSection = forwardRef<
                                     <div className='flex items-center'>
                                       <input
                                         type='number'
-                                        value={variant.available}
+                                        value={getInputValue(
+                                          variant.id,
+                                          'available',
+                                          variant.available
+                                        )}
                                         onChange={(e) =>
-                                          handleUpdateVariant(
+                                          handleInputChange(
                                             variant.id,
                                             'available',
-                                            parseInt(e.target.value) || 0
+                                            e.target.value
+                                          )
+                                        }
+                                        onBlur={() =>
+                                          handleInputBlur(
+                                            variant.id,
+                                            'available'
                                           )
                                         }
                                         className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
@@ -1198,13 +1264,20 @@ export const ProductVariantsSection = forwardRef<
                             </span>
                             <input
                               type='number'
-                              value={variant.price}
+                              value={getInputValue(
+                                variant.id,
+                                'price',
+                                variant.price
+                              )}
                               onChange={(e) =>
-                                handleUpdateVariant(
+                                handleInputChange(
                                   variant.id,
                                   'price',
-                                  parseFloat(e.target.value) || 0
+                                  e.target.value
                                 )
+                              }
+                              onBlur={() =>
+                                handleInputBlur(variant.id, 'price')
                               }
                               className='w-full pl-7 pr-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
                             />
@@ -1212,13 +1285,20 @@ export const ProductVariantsSection = forwardRef<
                           <div className='flex items-center'>
                             <input
                               type='number'
-                              value={variant.available}
+                              value={getInputValue(
+                                variant.id,
+                                'available',
+                                variant.available
+                              )}
                               onChange={(e) =>
-                                handleUpdateVariant(
+                                handleInputChange(
                                   variant.id,
                                   'available',
-                                  parseInt(e.target.value) || 0
+                                  e.target.value
                                 )
+                              }
+                              onBlur={() =>
+                                handleInputBlur(variant.id, 'available')
                               }
                               className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
                             />
