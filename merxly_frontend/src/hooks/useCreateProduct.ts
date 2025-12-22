@@ -261,17 +261,26 @@ export const useCreateProduct = (
     if (variants.length === 0) {
       newErrors.variants = 'Please add at least one variant';
     } else {
-      // Validate each variant
-      const invalidVariant = variants.find(
-        (v) =>
-          v.price < 0 ||
-          v.available < 0 ||
-          Object.keys(v.attributeValues).length === 0
+      // Check if all variants are marked for deletion
+      const activeVariants = variants.filter(
+        (v) => !markedForDeletionIds.includes(v.id)
       );
 
-      if (invalidVariant) {
-        newErrors.variants =
-          'All variants must have valid price, stock quantity, and attribute selections';
+      if (activeVariants.length === 0) {
+        newErrors.variants = 'Each product must have at least one variant';
+      } else {
+        // Validate each active variant
+        const invalidVariant = activeVariants.find(
+          (v) =>
+            v.price < 0 ||
+            v.available < 0 ||
+            Object.keys(v.attributeValues).length === 0
+        );
+
+        if (invalidVariant) {
+          newErrors.variants =
+            'All variants must have valid price, stock quantity, and attribute selections';
+        }
       }
     }
 
@@ -300,29 +309,31 @@ export const useCreateProduct = (
           })),
       }));
 
-    // Build variants DTO
-    const variantsDto: CreateProductVariantDto[] = variants.map((variant) => {
-      // Build attribute selections
-      const attributeSelections = Object.entries(variant.attributeValues).map(
-        ([attrId, valueId]) => {
-          const attr = attributes.find((a) => a.id === attrId);
-          const value = attr?.values.find((v) => v.id === valueId);
+    // Build variants DTO (exclude variants marked for deletion)
+    const variantsDto: CreateProductVariantDto[] = variants
+      .filter((variant) => !markedForDeletionIds.includes(variant.id))
+      .map((variant) => {
+        // Build attribute selections
+        const attributeSelections = Object.entries(variant.attributeValues).map(
+          ([attrId, valueId]) => {
+            const attr = attributes.find((a) => a.id === attrId);
+            const value = attr?.values.find((v) => v.id === valueId);
 
-          return {
-            attributeName: attr?.name || '',
-            value: value?.value || '',
-          };
-        }
-      );
+            return {
+              attributeName: attr?.name || '',
+              value: value?.value || '',
+            };
+          }
+        );
 
-      return {
-        sku: variant.sku || null,
-        price: variant.price,
-        stockQuantity: variant.available,
-        attributeSelections,
-        media: variant.media || [],
-      };
-    });
+        return {
+          sku: variant.sku || null,
+          price: variant.price,
+          stockQuantity: variant.available,
+          attributeSelections,
+          media: variant.media || [],
+        };
+      });
 
     return {
       name: productName.trim(),

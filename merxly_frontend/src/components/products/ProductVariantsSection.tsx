@@ -911,8 +911,10 @@ export const ProductVariantsSection = forwardRef<
                             </div>
                             {isGroupFullyMarkedForDeletion(groupVariants) ? (
                               <div className='col-span-3 flex items-center text-sm text-error-600 font-medium'>
-                                {groupVariants.length} variant(s) will be
-                                deleted
+                                {isEditMode
+                                  ? `${groupVariants.length} variant(s) will be
+                                deleted`
+                                  : ''}
                               </div>
                             ) : (
                               <>
@@ -987,7 +989,9 @@ export const ProductVariantsSection = forwardRef<
                                       {getVariantName(variant)}
                                     </div>
                                     <div className='col-span-3 flex items-center text-sm text-error-600 font-medium'>
-                                      This variant will be deleted
+                                      {isEditMode
+                                        ? 'This variant will be deleted'
+                                        : 'This variant will not be created'}
                                     </div>
                                   </>
                                 ) : (
@@ -1116,7 +1120,9 @@ export const ProductVariantsSection = forwardRef<
                             {getVariantName(variant)}
                           </div>
                           <div className='col-span-3 flex items-center text-sm text-error-600 font-medium'>
-                            This variant will be deleted
+                            {isEditMode
+                              ? 'This variant will be deleted'
+                              : 'This variant will not be created'}
                           </div>
                         </>
                       ) : (
