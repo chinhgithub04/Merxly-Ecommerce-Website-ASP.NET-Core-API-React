@@ -53,9 +53,7 @@ export const VariantMediaModal = ({
   // Delete media mutation
   const deleteMutation = useMutation({
     mutationFn: async (publicId: string) => {
-      // Encode publicId for URL (replace / with %2F)
-      const encodedPublicId = encodeURIComponent(publicId);
-      await apiClient.delete(`/Upload/media/${encodedPublicId}`);
+      await apiClient.delete(`/Upload/media/${encodeURIComponent(publicId)}`);
     },
   });
 

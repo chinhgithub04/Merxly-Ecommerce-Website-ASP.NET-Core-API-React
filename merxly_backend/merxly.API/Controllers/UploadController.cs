@@ -33,7 +33,8 @@ namespace merxly.API.Controllers
         [HttpDelete("media/{publicId}")]
         public async Task<ActionResult> DeleteMedia(string publicId)
         {
-            await _fileStorageService.DeleteFileAsync(publicId);
+            var decodedPublicId = Uri.UnescapeDataString(publicId);
+            await _fileStorageService.DeleteFileAsync(decodedPublicId);
             return NoContent();
         }
     }
