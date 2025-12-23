@@ -10,7 +10,6 @@ namespace merxly.Application.DTOs.Product
         public decimal? MinPrice { get; init; }
         public decimal? MaxPrice { get; init; }
         public double? MinRating { get; init; }
-        public bool? IsStoreFeatured { get; init; }
         public bool? IsPlatformFeatured { get; init; }
         public Guid? StoreId { get; init; }
 

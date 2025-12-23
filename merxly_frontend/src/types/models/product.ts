@@ -1,4 +1,8 @@
-import type { StoreProductSortBy, StoreProductSortOrder } from '../enums';
+import type {
+  StoreProductSortBy,
+  StoreProductSortOrder,
+  ProductSortBy,
+} from '../enums';
 import type {
   CreateProductAttributeDto,
   ProductAttributeDto,
@@ -48,6 +52,19 @@ export interface ProductQueryParameters {
   searchTerm?: string;
   sortBy?: StoreProductSortBy;
   sortOrder?: StoreProductSortOrder;
+}
+
+export interface CustomerProductQueryParameters {
+  pageNumber?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  isPlatformFeatured?: boolean;
+  storeId?: string;
+  sortBy?: ProductSortBy;
 }
 
 export interface CreateProductDto {

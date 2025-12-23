@@ -16,6 +16,13 @@ namespace merxly.API.Controllers
             _productService = productService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<ResponseDto<PaginatedResultDto<ProductDto>>>> GetProducts([FromQuery] ProductQueryParameters productQueryParameters, CancellationToken cancellationToken)
+        {
+            var result = await _productService.GetProductsAsync(productQueryParameters, cancellationToken);
+            return OkResponse(result, "Products retrieved successfully");
+        }
+
         [HttpGet("top-10-featured")]
         public async Task<ActionResult<ResponseDto<IEnumerable<ProductDto>>>> GetTop10FeaturedProducts([FromQuery] Guid? categoryId, CancellationToken cancellationToken)
         {

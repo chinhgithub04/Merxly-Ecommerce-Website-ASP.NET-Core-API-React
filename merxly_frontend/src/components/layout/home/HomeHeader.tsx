@@ -4,6 +4,7 @@ import {
   HeartIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 
 export const HomeHeader = () => {
   return (
@@ -11,7 +12,9 @@ export const HomeHeader = () => {
       <div className='flex items-center justify-between h-full px-20'>
         {/* Logo */}
         <div className='flex items-center'>
-          <h1 className='text-3xl font-bold text-primary-600'>Merxly</h1>
+          <Link to='/' className='text-3xl font-bold text-primary-600'>
+            Merxly
+          </Link>
         </div>
 
         {/* Search Bar */}

@@ -4,6 +4,7 @@ import type {
   ProductDto,
   ProductForStore,
   ProductQueryParameters,
+  CustomerProductQueryParameters,
   CreateProductDto,
   StoreDetailProductDto,
   UpdateProductDto,
@@ -32,6 +33,16 @@ import type {
 import apiClient from './apiClient';
 
 // Customer
+export const getProducts = async (
+  params: CustomerProductQueryParameters
+): Promise<Response<PagedResponse<ProductDto>>> => {
+  const response = await apiClient.get<Response<PagedResponse<ProductDto>>>(
+    '/Products',
+    { params }
+  );
+  return response.data;
+};
+
 export const getTop10FeaturedProducts = async (
   categoryId?: string
 ): Promise<Response<ProductDto[]>> => {

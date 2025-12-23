@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/Auth/LoginPage';
 import { HomePage } from './pages/Home';
+import { SearchProductPage } from './pages/Customer';
 import { useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StoreOwnerLayout } from './components/layout';
+import { CustomerLayout } from './components/layout/customer';
 import {
   StoreHomePage,
   StoreOrdersPage,
@@ -56,8 +58,11 @@ function App() {
           }
         />
 
-        {/* Home Route */}
-        <Route path='/' element={<HomePage />} />
+        {/* Customer Routes with Layout */}
+        <Route path='/' element={<CustomerLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path='products' element={<SearchProductPage />} />
+        </Route>
 
         {/* Redirect unknown routes to home */}
         <Route path='*' element={<Navigate to='/' replace />} />

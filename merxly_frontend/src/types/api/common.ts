@@ -13,3 +13,8 @@ export interface PagedResponse<T> {
   pageNumber: number;
   totalPages: number;
 }
+
+export interface PaginationQuery {
+  pageNumber?: number;
+  pageSize?: number;
+}

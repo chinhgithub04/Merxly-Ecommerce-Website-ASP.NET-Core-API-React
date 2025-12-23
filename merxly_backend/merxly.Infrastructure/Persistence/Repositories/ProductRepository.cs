@@ -45,11 +45,6 @@ namespace merxly.Infrastructure.Persistence.Repositories
                 query = query.Where(p => p.AverageRating >= queryParameters.MinRating.Value);
             }
 
-            if (queryParameters.IsStoreFeatured.HasValue)
-            {
-                query = query.Where(p => p.IsStoreFeatured == queryParameters.IsStoreFeatured.Value);
-            }
-
             if (queryParameters.IsPlatformFeatured.HasValue)
             {
                 query = query.Where(p => p.IsPlatformFeatured == queryParameters.IsPlatformFeatured.Value);
