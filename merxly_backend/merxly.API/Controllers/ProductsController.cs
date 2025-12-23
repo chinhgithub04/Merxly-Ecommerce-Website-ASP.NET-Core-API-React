@@ -23,6 +23,13 @@ namespace merxly.API.Controllers
             return OkResponse(result, "Products retrieved successfully");
         }
 
+        [HttpGet("{productId}")]
+        public async Task<ActionResult<ResponseDto<DetailProductDto>>> GetProductById(Guid productId, CancellationToken cancellationToken)
+        {
+            var result = await _productService.GetProductByIdAsync(productId, cancellationToken);
+            return OkResponse(result, "Product retrieved successfully");
+        }
+
         [HttpGet("top-10-featured")]
         public async Task<ActionResult<ResponseDto<IEnumerable<ProductDto>>>> GetTop10FeaturedProducts([FromQuery] Guid? categoryId, CancellationToken cancellationToken)
         {

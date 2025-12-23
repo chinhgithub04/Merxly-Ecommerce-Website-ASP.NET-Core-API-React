@@ -9,6 +9,7 @@ using merxly.Application.DTOs.ProductAttributeValue;
 using merxly.Application.DTOs.ProductAttributeValue.Update;
 using merxly.Application.DTOs.ProductVariant;
 using merxly.Application.DTOs.ProductVariant.Update;
+using merxly.Application.DTOs.ProductVariantAttributeValue;
 using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.DTOs.ProductVariantMedia.Update;
 using merxly.Application.DTOs.Store;
@@ -54,12 +55,12 @@ namespace merxly.Application.Mappings
                 .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom<ThumbnailImageUrlResolver<Product, ProductForStoreDto>, string?>(src => src.MainMediaPublicId))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
-            //CreateMap<Product, DetailProductDto>()
-            //    .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
-            //        _cloudinaryUrlService.GetMediumImageUrl(src.MainMediaPublicId)))
-            //    .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-            //    .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
-            //    .ForMember(dest => dest.StoreIsVerified, opt => opt.MapFrom(src => src.Store.IsVerified));
+            CreateMap<Product, DetailProductDto>()
+               .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+               .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
+               .ForMember(dest => dest.StoreIsVerified, opt => opt.MapFrom(src => src.Store.IsVerified))
+               .ForMember(dest => dest.StoreLogoPublicId, opt => opt.MapFrom(src => src.Store.LogoImagePublicId))
+               .ForMember(dest => dest.ProductAttributes, opt => opt.MapFrom(src => src.ProductAttributes));
 
             CreateMap<Product, StoreDetailProductDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
@@ -84,6 +85,10 @@ namespace merxly.Application.Mappings
                     src.VariantAttributeValues.Select(vav => vav.ProductAttributeValue)))
                 .ForMember(dest => dest.ProductVariantMedia, opt => opt.MapFrom(src => src.Media));
 
+            CreateMap<ProductVariant, ProductVariantForCustomerDto>()
+                .ForMember(dest => dest.ProductAttributeValues, opt => opt.MapFrom(src => src.VariantAttributeValues))
+                .ForMember(dest => dest.ProductVariantMedia, opt => opt.MapFrom(src => src.Media));
+
             CreateMap<CreateProductVariantDto, ProductVariant>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(_ => Guid.NewGuid()))
                 .ForMember(dest => dest.Media, opt => opt.Ignore());
@@ -92,6 +97,11 @@ namespace merxly.Application.Mappings
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<ProductVariant, ResponseUpdateVariantItemDto>();
+
+            // ProductVariantAttributeValue Mappings
+            CreateMap<ProductVariantAttributeValue, ProductVariantAttributeValueDto>()
+                .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.ProductAttributeValue.Value))
+                .ForMember(dest => dest.DisplayOrder, opt => opt.MapFrom(src => src.ProductAttributeValue.DisplayOrder));
 
             // ProductAttribute Mappings
             CreateMap<ProductAttribute, ProductAttributeDto>()

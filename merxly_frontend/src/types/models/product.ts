@@ -10,6 +10,7 @@ import type {
 import type {
   CreateProductVariantDto,
   ProductVariantDto,
+  ProductVariantForCustomerDto,
 } from './productVariant';
 
 export interface ProductDto {
@@ -107,4 +108,26 @@ export interface ResponseUpdateProductDto {
   isStoreFeatured: boolean;
   isActive: boolean;
   categoryId: string;
+}
+
+export interface DetailProductDto {
+  id: string;
+  name: string;
+  description: string | null;
+  isStoreFeatured: boolean;
+  isPlatformFeatured: boolean;
+  isActive: boolean;
+  averageRating: number;
+  reviewCount: number;
+  totalSold: number;
+  createdAt: string;
+  updatedAt: string | null;
+  categoryId: string;
+  categoryName: string;
+  storeId: string;
+  storeName: string;
+  storeLogoPublicId: string;
+  storeIsVerified: boolean;
+  productAttributes: ProductAttributeDto[];
+  variants: ProductVariantForCustomerDto[];
 }

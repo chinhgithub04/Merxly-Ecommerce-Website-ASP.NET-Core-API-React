@@ -1,5 +1,6 @@
 import { StarIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 import type { ProductDto } from '../../types/models/product';
 import { getProductImageUrl } from '../../utils/cloudinaryHelpers';
 
@@ -8,7 +9,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
+  const navigate = useNavigate();
   const {
+    id,
     name,
     minPrice,
     maxPrice,
@@ -16,6 +19,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     averageRating,
     reviewCount,
   } = product;
+
+  const handleClick = () => {
+    navigate(`/products/${id}`);
+  };
 
   // Render star rating
   const renderStars = () => {
@@ -49,7 +56,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className='border-2 border-neutral-200 rounded-lg hover:border-primary-600 transition-colors cursor-pointer p-4'>
+    <div
+      onClick={handleClick}
+      className='border-2 border-neutral-200 rounded-lg hover:border-primary-600 transition-colors cursor-pointer p-4'
+    >
       {/* Product Image */}
       <div className='flex justify-center mb-4'>
         {mainMediaPublicId ? (

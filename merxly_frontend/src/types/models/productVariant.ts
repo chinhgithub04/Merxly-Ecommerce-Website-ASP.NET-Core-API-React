@@ -9,6 +9,13 @@ export interface ProductVariantAttributeSelectionDto {
   value: string;
 }
 
+export interface ProductVariantAttributeValueDto {
+  productVariantId: string;
+  productAttributeValueId: string;
+  value: string;
+  displayOrder: number;
+}
+
 export interface CreateProductVariantDto {
   sku: string | null;
   price: number;
@@ -24,6 +31,16 @@ export interface ProductVariantDto {
   stockQuantity: number;
   isActive: boolean;
   productAttributeValues: ProductAttributeValueDto[];
+  productVariantMedia: ProductVariantMediaDto[];
+}
+
+export interface ProductVariantForCustomerDto {
+  id: string;
+  sku: string | null;
+  price: number;
+  stockQuantity: number;
+  isActive: boolean;
+  productAttributeValues: ProductVariantAttributeValueDto[];
   productVariantMedia: ProductVariantMediaDto[];
 }
 

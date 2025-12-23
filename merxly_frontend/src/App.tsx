@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/Auth/LoginPage';
 import { HomePage } from './pages/Home';
-import { SearchProductPage } from './pages/Customer';
+import { SearchProductPage, ProductDetailPage } from './pages/Customer';
 import { useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StoreOwnerLayout } from './components/layout';
@@ -62,6 +62,7 @@ function App() {
         <Route path='/' element={<CustomerLayout />}>
           <Route index element={<HomePage />} />
           <Route path='products' element={<SearchProductPage />} />
+          <Route path='products/:id' element={<ProductDetailPage />} />
         </Route>
 
         {/* Redirect unknown routes to home */}

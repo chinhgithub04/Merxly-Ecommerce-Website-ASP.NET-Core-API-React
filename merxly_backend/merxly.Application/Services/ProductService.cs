@@ -69,14 +69,11 @@ namespace merxly.Application.Services
         {
             _logger.LogInformation("Getting product by ID: {ProductId}", productId);
 
-            var product = await _unitOfWork.Product.GetFirstOrDefaultAsync(
-                p => p.Id == productId && p.IsActive,
-                cancellationToken,
-                p => p.Category,
-                p => p.Store,
-                p => p.Variants);
+            var product = await _unitOfWork.Product.GetProductDetailsByIdForCustomerAsync(
+                productId,
+                cancellationToken);
 
-            if (product == null)
+            if (product == null || !product.IsActive)
             {
                 _logger.LogWarning("Product not found: {ProductId}", productId);
                 throw new NotFoundException("Product not found.");

@@ -2,6 +2,7 @@ import type { Response, PagedResponse } from '../types/api/common';
 import type { CategoryForStore } from '../types/models/category';
 import type {
   ProductDto,
+  DetailProductDto,
   ProductForStore,
   ProductQueryParameters,
   CustomerProductQueryParameters,
@@ -51,6 +52,15 @@ export const getTop10FeaturedProducts = async (
     {
       params: categoryId ? { categoryId } : {},
     }
+  );
+  return response.data;
+};
+
+export const getProductByIdCustomer = async (
+  productId: string
+): Promise<Response<DetailProductDto>> => {
+  const response = await apiClient.get<Response<DetailProductDto>>(
+    `/Products/${productId}`
   );
   return response.data;
 };
