@@ -43,7 +43,7 @@ export const ProductActions = ({ stockQuantity }: ProductActionsProps) => {
             <button
               onClick={handleDecrement}
               disabled={quantity <= 1}
-              className='p-2 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              className='cursor-pointer p-2 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
             >
               <MinusIcon className='h-5 w-5 text-neutral-700' />
             </button>
@@ -53,25 +53,25 @@ export const ProductActions = ({ stockQuantity }: ProductActionsProps) => {
               onChange={handleQuantityChange}
               min={1}
               max={stockQuantity}
-              className='w-16 text-center border-x border-neutral-300 py-2 text-neutral-900 font-medium focus:outline-none'
+              className='cursor-pointer w-16 text-center border-x border-neutral-300 py-2 text-neutral-900 font-medium focus:outline-none'
             />
             <button
               onClick={handleIncrement}
               disabled={quantity >= stockQuantity}
-              className='p-2 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+              className='cursor-pointer p-2 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
             >
               <PlusIcon className='h-5 w-5 text-neutral-700' />
             </button>
           </div>
 
           {/* Add to Cart Button */}
-          <button className='flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors'>
+          <button className='cursor-pointer flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors'>
             <ShoppingCartIcon className='h-5 w-5' />
             <span>Add to Cart</span>
           </button>
 
           {/* Buy Now Button */}
-          <button className='px-6 py-3 border-2 border-primary-600 text-primary-600 rounded-lg font-medium hover:bg-primary-50 transition-colors'>
+          <button className='cursor-pointer px-6 py-3 border-2 border-primary-600 text-primary-600 rounded-lg font-medium hover:bg-primary-50 transition-colors'>
             Buy now
           </button>
         </div>

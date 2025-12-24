@@ -107,7 +107,7 @@ export const ProductVariantSelector = ({
                       isAvailable && handleValueSelect(attribute.id, value.id)
                     }
                     disabled={!isAvailable}
-                    className={`px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
+                    className={`cursor-pointer px-4 py-2 border rounded-lg text-sm font-medium transition-colors ${
                       isSelected
                         ? 'border-primary-600 bg-primary-50 text-primary-700'
                         : isAvailable

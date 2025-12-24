@@ -8,7 +8,7 @@ import {
   ProductVariantSelector,
   ProductActions,
 } from '../../components/customer/productDetail';
-import type { ProductVariantDto } from '../../types/models/productVariant';
+import type { ProductVariantForCustomerDto } from '../../types/models/productVariant';
 
 export const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +25,7 @@ export const ProductDetailPage = () => {
 
   // Track selected variant
   const [selectedVariant, setSelectedVariant] = useState<
-    ProductVariantDto | undefined
+    ProductVariantForCustomerDto | undefined
   >(() => product?.variants.find((v) => v.isActive));
 
   if (isLoading) {
@@ -45,7 +45,7 @@ export const ProductDetailPage = () => {
           <p className='text-neutral-500 mb-4'>Product not found</p>
           <button
             onClick={() => navigate('/products')}
-            className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors'
+            className='px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors cursor-pointer'
           >
             Back to Products
           </button>
@@ -89,7 +89,7 @@ export const ProductDetailPage = () => {
             <span>Category: </span>
             <button
               onClick={handleCategoryClick}
-              className='text-primary-600 hover:text-primary-700 font-medium underline'
+              className='text-primary-600 hover:text-primary-700 font-medium underline cursor-pointer'
             >
               {product.categoryName}
             </button>
@@ -126,11 +126,12 @@ export const ProductDetailPage = () => {
           {product.description && (
             <div className='pt-6 border-t border-neutral-200'>
               <h3 className='text-lg font-semibold text-neutral-900 mb-3'>
-                Product Description
+                Description
               </h3>
-              <p className='text-neutral-700 whitespace-pre-wrap'>
-                {product.description}
-              </p>
+              <div
+                className='text-neutral-700 prose prose-sm max-w-none'
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
             </div>
           )}
 

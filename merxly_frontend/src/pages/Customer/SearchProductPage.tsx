@@ -20,7 +20,9 @@ export const SearchProductPage = () => {
     pageSize: PRODUCTS_PER_PAGE,
     categoryId: searchParams.get('categoryId') || undefined,
     minPrice: Number(searchParams.get('minPrice')) || 0,
-    maxPrice: Number(searchParams.get('maxPrice')) || 10000000,
+    maxPrice: searchParams.get('maxPrice')
+      ? Number(searchParams.get('maxPrice'))
+      : undefined,
     minRating: Number(searchParams.get('minRating')) || 0,
     sortBy:
       (Number(searchParams.get('sortBy')) as ProductSortBy) ||
@@ -51,6 +53,12 @@ export const SearchProductPage = () => {
     newFilters: Partial<CustomerProductQueryParameters>
   ) => {
     const updated = { ...filters, ...newFilters, pageNumber: 1 };
+
+    // Don't send maxPrice if it's at maximum (10,000,000)
+    if (updated.maxPrice && updated.maxPrice >= 10000000) {
+      updated.maxPrice = undefined;
+    }
+
     setFilters(updated);
 
     // Update URL params
@@ -101,7 +109,7 @@ export const SearchProductPage = () => {
       });
     }
 
-    if (filters.maxPrice && filters.maxPrice < 10000000) {
+    if (filters.maxPrice) {
       active.push({
         key: 'maxPrice',
         label: `Max: ₫${filters.maxPrice.toLocaleString('vi-VN')}`,
