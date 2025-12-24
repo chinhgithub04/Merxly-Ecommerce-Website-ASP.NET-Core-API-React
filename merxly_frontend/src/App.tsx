@@ -18,6 +18,7 @@ import {
   AdminCategoriesPage,
   AdminStoresPage,
   AdminUsersPage,
+  AdminStoreVerificationPage,
 } from './pages/Admin';
 import { CreateProductPage } from './pages/Store/CreateProductPage';
 import { UserRole } from './types/enums';
@@ -47,6 +48,10 @@ function App() {
           <Route index element={<AdminDashboardPage />} />
           <Route path='categories' element={<AdminCategoriesPage />} />
           <Route path='stores' element={<AdminStoresPage />} />
+          <Route
+            path='stores/verification'
+            element={<AdminStoreVerificationPage />}
+          />
           <Route path='users' element={<AdminUsersPage />} />
         </Route>
 
