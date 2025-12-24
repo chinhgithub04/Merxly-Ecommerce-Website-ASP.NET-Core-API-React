@@ -5,6 +5,7 @@ import { SearchProductPage, ProductDetailPage } from './pages/Customer';
 import { useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StoreOwnerLayout } from './components/layout';
+import { AdminLayout } from './components/layout/admin';
 import { CustomerLayout } from './components/layout/customer';
 import {
   StoreHomePage,
@@ -12,6 +13,12 @@ import {
   StoreProductsPage,
   StoreSettingsPage,
 } from './pages/Store';
+import {
+  AdminDashboardPage,
+  AdminCategoriesPage,
+  AdminStoresPage,
+  AdminUsersPage,
+} from './pages/Admin';
 import { CreateProductPage } from './pages/Store/CreateProductPage';
 import { UserRole } from './types/enums';
 import { StoreLocationsPage } from './pages/Store/StoreLocationsPage';
@@ -27,6 +34,21 @@ function App() {
       <Routes>
         <Route path='/login' element={<LoginPage />} />
         <Route path='/sign-up-new-store' element={<SignUpNewStorePage />} />
+
+        {/* Admin Routes with Layout */}
+        <Route
+          path='/admin'
+          element={
+            <ProtectedRoute requiredRoles={[UserRole.Admin]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboardPage />} />
+          <Route path='categories' element={<AdminCategoriesPage />} />
+          <Route path='stores' element={<AdminStoresPage />} />
+          <Route path='users' element={<AdminUsersPage />} />
+        </Route>
 
         {/* Store Owner Routes with Layout */}
         <Route
