@@ -12,10 +12,10 @@ namespace merxly.Domain.Entities
 
         // Foreign Keys
         public Guid CartId { get; set; }
-        public Guid? ProductVariantId { get; set; }
+        public Guid ProductVariantId { get; set; }
 
         // Navigation properties
         public Cart Cart { get; set; }
-        public ProductVariant? ProductVariant { get; set; }
+        public ProductVariant ProductVariant { get; set; }
     }
 }

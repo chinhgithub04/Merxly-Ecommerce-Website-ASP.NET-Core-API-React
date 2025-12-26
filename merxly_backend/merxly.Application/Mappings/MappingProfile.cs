@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using merxly.Application.DTOs.Cart;
 using merxly.Application.DTOs.Category;
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.Product;
@@ -145,6 +146,26 @@ namespace merxly.Application.Mappings
 
             CreateMap<ProductVariantMedia, ResponseUpdateVariantMediaItemDto>()
                 .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom<ProductVariantMediaUrlResolver>());
+
+            // Cart Mappings
+            CreateMap<Cart, CartDto>()
+                .ForMember(dest => dest.TotalItems, opt => opt.MapFrom(src => src.CartItems.Sum(ci => ci.Quantity)))
+                .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.CartItems.Sum(ci => ci.Quantity * ci.PriceAtAdd)));
+
+            CreateMap<CartItem, CartItemDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.ProductVariant.Name))
+                .ForMember(dest => dest.StockQuantity, opt => opt.MapFrom(src => src.ProductVariant.StockQuantity))
+                .ForMember(dest => dest.ProductImagePublicId, opt => opt.MapFrom(src =>
+                    src.ProductVariant.Media.Where(pm => pm.IsMain).Select(pm => pm.MediaPublicId).FirstOrDefault()))
+                .ForMember(dest => dest.SelectedAttributes, opt => opt.MapFrom(src => src.ProductVariant.VariantAttributeValues.ToDictionary(
+                    pav => pav.ProductAttributeValue.ProductAttribute.Name,
+                    pav => pav.ProductAttributeValue.Value
+                )))
+                .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.ProductVariant.IsActive && src.ProductVariant.StockQuantity > 0));
+
+            CreateMap<AddToCartDto, CartItem>();
+
+            CreateMap<UpdateCartItemDto, CartItem>();
         }
     }
 }
