@@ -3,7 +3,11 @@ import { LoginPage } from './pages/Auth/LoginPage';
 import { RegisterPage } from './pages/Auth/RegisterPage';
 import { ForgotPasswordPage } from './pages/Auth/ForgotPasswordPage';
 import { HomePage } from './pages/Home';
-import { SearchProductPage, ProductDetailPage } from './pages/Customer';
+import {
+  SearchProductPage,
+  ProductDetailPage,
+  CartPage,
+} from './pages/Customer';
 import { useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StoreOwnerLayout } from './components/layout';
@@ -102,6 +106,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path='products' element={<SearchProductPage />} />
           <Route path='products/:id' element={<ProductDetailPage />} />
+          <Route path='cart' element={<CartPage />} />
         </Route>
 
         {/* Redirect unknown routes to home */}

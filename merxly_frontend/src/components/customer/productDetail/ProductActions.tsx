@@ -7,9 +7,15 @@ import {
 
 interface ProductActionsProps {
   stockQuantity: number;
+  onAddToCart: (quantity: number) => void;
+  isAddingToCart?: boolean;
 }
 
-export const ProductActions = ({ stockQuantity }: ProductActionsProps) => {
+export const ProductActions = ({
+  stockQuantity,
+  onAddToCart,
+  isAddingToCart,
+}: ProductActionsProps) => {
   const [quantity, setQuantity] = useState(1);
 
   const handleIncrement = () => {
@@ -65,9 +71,13 @@ export const ProductActions = ({ stockQuantity }: ProductActionsProps) => {
           </div>
 
           {/* Add to Cart Button */}
-          <button className='cursor-pointer flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors'>
+          <button
+            onClick={() => onAddToCart(quantity)}
+            disabled={isAddingToCart}
+            className='cursor-pointer flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          >
             <ShoppingCartIcon className='h-5 w-5' />
-            <span>Add to Cart</span>
+            <span>{isAddingToCart ? 'Adding...' : 'Add to Cart'}</span>
           </button>
 
           {/* Buy Now Button */}

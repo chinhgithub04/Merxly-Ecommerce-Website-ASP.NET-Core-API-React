@@ -8,11 +8,14 @@ import {
   ProductVariantSelector,
   ProductActions,
 } from '../../components/customer/productDetail';
+import { AddToCartModal } from '../../components/cart';
+import { useCart } from '../../hooks/useCart';
 import type { ProductVariantForCustomerDto } from '../../types/models/productVariant';
 
 export const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addToCart, isAddingToCart } = useCart();
 
   // Fetch product details
   const { data: productData, isLoading } = useQuery({
@@ -27,6 +30,25 @@ export const ProductDetailPage = () => {
   const [selectedVariant, setSelectedVariant] = useState<
     ProductVariantForCustomerDto | undefined
   >(() => product?.variants.find((v) => v.isActive));
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addedQuantity, setAddedQuantity] = useState(0);
+
+  const handleAddToCart = async (quantity: number) => {
+    if (!selectedVariant) return;
+
+    try {
+      await addToCart({
+        productVariantId: selectedVariant.id,
+        quantity,
+      });
+      setAddedQuantity(quantity);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -119,7 +141,11 @@ export const ProductDetailPage = () => {
 
           {/* Action Buttons */}
           {selectedVariant && (
-            <ProductActions stockQuantity={selectedVariant.stockQuantity} />
+            <ProductActions
+              stockQuantity={selectedVariant.stockQuantity}
+              onAddToCart={handleAddToCart}
+              isAddingToCart={isAddingToCart}
+            />
           )}
 
           {/* Product Description */}
@@ -161,6 +187,37 @@ export const ProductDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Add to Cart Modal */}
+      {selectedVariant && product && (
+        <AddToCartModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          variantData={{
+            imagePublicId:
+              selectedVariant.productVariantMedia.find((m) => m.isMain)
+                ?.mediaPublicId || null,
+            name: product.name,
+            price: selectedVariant.price,
+            quantity: addedQuantity,
+            selectedAttributes: product.productAttributes.reduce(
+              (acc, attr) => {
+                const attrValue = selectedVariant.productAttributeValues.find(
+                  (pav) =>
+                    attr.productAttributeValues.some(
+                      (av) => av.id === pav.productAttributeValueId
+                    )
+                );
+                if (attrValue) {
+                  acc[attr.name] = attrValue.value;
+                }
+                return acc;
+              },
+              {} as Record<string, string>
+            ),
+          }}
+        />
+      )}
     </div>
   );
 };
