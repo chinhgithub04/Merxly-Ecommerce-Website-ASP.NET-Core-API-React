@@ -8,6 +8,7 @@ import {
   ProductDetailPage,
   CartPage,
 } from './pages/Customer';
+import { PaymentMethodsPage } from './pages/User';
 import { useAuth } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StoreOwnerLayout } from './components/layout';
@@ -107,6 +108,14 @@ function App() {
           <Route path='products' element={<SearchProductPage />} />
           <Route path='products/:id' element={<ProductDetailPage />} />
           <Route path='cart' element={<CartPage />} />
+          <Route
+            path='payment-methods'
+            element={
+              <ProtectedRoute>
+                <PaymentMethodsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Redirect unknown routes to home */}
