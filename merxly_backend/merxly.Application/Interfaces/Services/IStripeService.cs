@@ -33,5 +33,25 @@ namespace merxly.Application.Interfaces.Services
         /// Gets a specific payment method by ID
         /// </summary>
         Task<PaymentMethod> GetPaymentMethodAsync(string paymentMethodId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates a payment intent for a customer
+        /// </summary>
+        Task<PaymentIntent> CreatePaymentIntentAsync(string customerId, decimal amount, string currency, string? paymentMethodId = null, Dictionary<string, string>? metadata = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Confirms a payment intent
+        /// </summary>
+        Task<PaymentIntent> ConfirmPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets a payment intent by ID
+        /// </summary>
+        Task<PaymentIntent> GetPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Cancels a payment intent
+        /// </summary>
+        Task<PaymentIntent> CancelPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default);
     }
 }

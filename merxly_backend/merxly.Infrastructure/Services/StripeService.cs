@@ -102,5 +102,67 @@ namespace merxly.Infrastructure.Services
 
             return paymentMethod;
         }
+
+        public async Task<PaymentIntent> CreatePaymentIntentAsync(
+            string customerId,
+            decimal amount,
+            string currency,
+            string? paymentMethodId = null,
+            Dictionary<string, string>? metadata = null,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Creating payment intent for customer {CustomerId} with amount {Amount} {Currency}",
+                customerId, amount, currency);
+
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(amount * 100), // Convert to cents
+                Currency = currency.ToLower(),
+                Customer = customerId,
+                PaymentMethod = paymentMethodId,
+                Metadata = metadata,
+                // If payment method is provided, set it to automatically confirm
+                ConfirmationMethod = "manual",
+                CaptureMethod = "automatic",
+            };
+
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.CreateAsync(options, null, cancellationToken);
+
+            _logger.LogInformation("Payment intent created with ID: {PaymentIntentId}", paymentIntent.Id);
+            return paymentIntent;
+        }
+
+        public async Task<PaymentIntent> ConfirmPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Confirming payment intent {PaymentIntentId}", paymentIntentId);
+
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.ConfirmAsync(paymentIntentId, null, null, cancellationToken);
+
+            _logger.LogInformation("Payment intent confirmed with status: {Status}", paymentIntent.Status);
+            return paymentIntent;
+        }
+
+        public async Task<PaymentIntent> GetPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Retrieving payment intent {PaymentIntentId}", paymentIntentId);
+
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.GetAsync(paymentIntentId, null, null, cancellationToken);
+
+            return paymentIntent;
+        }
+
+        public async Task<PaymentIntent> CancelPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Canceling payment intent {PaymentIntentId}", paymentIntentId);
+
+            var service = new PaymentIntentService();
+            var paymentIntent = await service.CancelAsync(paymentIntentId, null, null, cancellationToken);
+
+            _logger.LogInformation("Payment intent canceled");
+            return paymentIntent;
+        }
     }
 }

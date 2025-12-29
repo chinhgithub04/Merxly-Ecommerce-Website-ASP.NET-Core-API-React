@@ -40,6 +40,11 @@ namespace merxly.Infrastructure.Persistence.Configurations
             builder.Property(st => st.TransferredAt);
 
             // Relationships
+            builder.HasOne(st => st.SubOrder)
+                .WithMany(so => so.StoreTransfers)
+                .HasForeignKey(st => st.SubOrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasOne(st => st.Store)
                 .WithMany(s => s.StoreTransfers)
                 .HasForeignKey(st => st.StoreId)
@@ -49,7 +54,7 @@ namespace merxly.Infrastructure.Persistence.Configurations
             builder.HasIndex(st => st.StripeTransferId)
                 .IsUnique();
 
-            builder.HasIndex(st => new { st.PaymentId, st.StoreId })
+            builder.HasIndex(st => new { st.PaymentId, st.SubOrderId })
                 .IsUnique();
 
             builder.HasIndex(st => st.Status);

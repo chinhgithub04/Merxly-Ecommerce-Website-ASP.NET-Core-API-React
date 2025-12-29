@@ -17,26 +17,9 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(o => o.Status)
-                .IsRequired()
-                .HasConversion<string>();
-
-            builder.Property(o => o.SubTotal)
-                .IsRequired()
-                .HasPrecision(18, 2);
-
-            builder.Property(o => o.Tax)
-                .HasPrecision(18, 2);
-
-            builder.Property(o => o.ShippingCost)
-                .HasPrecision(18, 2);
-
             builder.Property(o => o.TotalAmount)
                 .IsRequired()
                 .HasPrecision(18, 2);
-
-            builder.Property(o => o.Carrier)
-                .HasMaxLength(100);
 
             builder.Property(o => o.Notes)
                 .HasMaxLength(1000);
@@ -50,14 +33,9 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .HasForeignKey(o => o.ShippingAddressId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(o => o.OrderItems)
-                .WithOne(oi => oi.Order)
-                .HasForeignKey(oi => oi.OrderId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasMany(o => o.StatusHistory)
-                .WithOne(sh => sh.Order)
-                .HasForeignKey(sh => sh.OrderId)
+            builder.HasMany(o => o.SubOrders)
+                .WithOne(so => so.Order)
+                .HasForeignKey(so => so.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(o => o.Payment)

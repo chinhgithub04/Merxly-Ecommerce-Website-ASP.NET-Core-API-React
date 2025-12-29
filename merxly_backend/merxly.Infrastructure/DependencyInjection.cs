@@ -147,6 +147,8 @@ namespace merxly.Infrastructure
             services.AddScoped<IReviewMediaRepository, ReviewMediaRepository>();
             services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IStoreAddressRepository, StoreAddressRepository>();
+            services.AddScoped<IStoreTransferRepository, StoreTransferRepository>();
+            services.AddScoped<ISubOrderRepository, SubOrderRepository>();
             services.AddScoped<IWishlistRepository, WishlistRepository>();
             services.AddScoped<IWishlistItemRepository, WishlistItemRepository>();
 

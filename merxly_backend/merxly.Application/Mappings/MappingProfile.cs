@@ -3,6 +3,7 @@ using merxly.Application.DTOs.Cart;
 using merxly.Application.DTOs.Category;
 using merxly.Application.DTOs.Common;
 using merxly.Application.DTOs.CustomerAddress;
+using merxly.Application.DTOs.Order;
 using merxly.Application.DTOs.Product;
 using merxly.Application.DTOs.Product.Update;
 using merxly.Application.DTOs.ProductAttribute;
@@ -177,6 +178,30 @@ namespace merxly.Application.Mappings
 
             CreateMap<UpdateCustomerAddressDto, Address>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            // Order Mappings
+            CreateMap<Order, OrderDto>();
+
+            CreateMap<SubOrder, SubOrderDto>()
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
+                .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
+
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
+                .ForMember(dest => dest.ProductVariant, opt => opt.MapFrom(src => src.ProductVariant));
+
+            CreateMap<ProductVariant, ProductVariantSummaryDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.AttributeValues, opt => opt.MapFrom(src =>
+                    src.VariantAttributeValues.Select(vav => vav.ProductAttributeValue.Value).ToList()))
+                .ForMember(dest => dest.MainMediaUrl, opt => opt.MapFrom(src =>
+                    src.Media.Where(m => m.IsMain).Select(m => m.MediaPublicId).FirstOrDefault()));
+
+            CreateMap<Address, ShippingAddressDto>();
+
+            // Payment Mappings
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(dest => dest.ClientSecret, opt => opt.Ignore()); // Client secret is set separately
         }
     }
 }

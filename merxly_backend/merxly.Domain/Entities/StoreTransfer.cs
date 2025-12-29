@@ -17,10 +17,12 @@ namespace merxly.Domain.Entities
 
         // Foreign Keys
         public Guid PaymentId { get; set; }
+        public Guid SubOrderId { get; set; }
         public Guid StoreId { get; set; }
 
         // Navigation properties
         public Payment Payment { get; set; }
+        public SubOrder SubOrder { get; set; }
         public Store Store { get; set; }
     }
 }

@@ -11,11 +11,11 @@ namespace merxly.Domain.Entities
         public DateTime CreatedAt { get; set; }
 
         // Foreign Keys
-        public Guid OrderId { get; set; }
+        public Guid SubOrderId { get; set; }
         public string? UpdatedByUserId { get; set; }
 
         // Navigation properties
-        public Order Order { get; set; }
+        public SubOrder SubOrder { get; set; }
         public ApplicationUser? UpdatedByUser { get; set; }
     }
 }

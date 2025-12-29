@@ -71,6 +71,7 @@ namespace merxly.Application.Services
                 cartItem = new CartItem
                 {
                     CartId = cart.Id,
+                    PriceAtAdd = productVariant.Price,
                     ProductVariantId = dto.ProductVariantId,
                     Quantity = dto.Quantity
                 };

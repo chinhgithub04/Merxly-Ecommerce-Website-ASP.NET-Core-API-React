@@ -35,6 +35,7 @@ namespace merxly.Infrastructure.Persistence
         public DbSet<StoreTransfer> StoreTransfers { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<SubOrder> SubOrders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

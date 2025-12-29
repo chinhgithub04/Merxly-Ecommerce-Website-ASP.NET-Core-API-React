@@ -30,6 +30,7 @@ namespace merxly.Domain.Entities
         public ApplicationUser Owner { get; set; }
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public ICollection<SubOrder> SubOrders { get; set; } = new List<SubOrder>();
         public StoreAddress? Address { get; set; }
         public ICollection<StoreTransfer> StoreTransfers { get; set; } = new List<StoreTransfer>();
     }

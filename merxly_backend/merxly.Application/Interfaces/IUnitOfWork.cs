@@ -24,6 +24,8 @@ namespace merxly.Application.Interfaces
         IReviewMediaRepository ReviewMedia { get; }
         IStoreRepository Store { get; }
         IStoreAddressRepository StoreAddress { get; }
+        IStoreTransferRepository StoreTransfer { get; }
+        ISubOrderRepository SubOrder { get; }
         IWishlistRepository Wishlist { get; }
         IWishlistItemRepository WishlistItem { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

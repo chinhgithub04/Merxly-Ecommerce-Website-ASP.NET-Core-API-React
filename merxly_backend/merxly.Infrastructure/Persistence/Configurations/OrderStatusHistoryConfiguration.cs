@@ -25,13 +25,18 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             // Relationships
+            builder.HasOne(osh => osh.SubOrder)
+                .WithMany(so => so.StatusHistory)
+                .HasForeignKey(osh => osh.SubOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(osh => osh.UpdatedByUser)
                 .WithMany()
                 .HasForeignKey(osh => osh.UpdatedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
-            builder.HasIndex(osh => new { osh.OrderId, osh.CreatedAt });
+            builder.HasIndex(osh => new { osh.SubOrderId, osh.CreatedAt });
         }
     }
 }

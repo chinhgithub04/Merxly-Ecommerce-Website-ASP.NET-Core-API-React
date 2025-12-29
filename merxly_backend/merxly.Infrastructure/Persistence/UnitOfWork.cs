@@ -27,6 +27,8 @@ namespace merxly.Infrastructure.Persistence
         public IReviewMediaRepository ReviewMedia { get; private set; }
         public IStoreRepository Store { get; private set; }
         public IStoreAddressRepository StoreAddress { get; private set; }
+        public IStoreTransferRepository StoreTransfer { get; private set; }
+        public ISubOrderRepository SubOrder { get; private set; }
         public IWishlistRepository Wishlist { get; private set; }
         public IWishlistItemRepository WishlistItem { get; private set; }
 
@@ -52,6 +54,8 @@ namespace merxly.Infrastructure.Persistence
             IReviewMediaRepository reviewMediaRepository,
             IStoreRepository storeRepository,
             IStoreAddressRepository storeAddressRepository,
+            IStoreTransferRepository storeTransferRepository,
+            ISubOrderRepository subOrderRepository,
             IWishlistRepository wishlistRepository,
             IWishlistItemRepository wishlistItemRepository)
         {
@@ -75,6 +79,8 @@ namespace merxly.Infrastructure.Persistence
             Review = reviewRepository;
             ReviewMedia = reviewMediaRepository;
             Store = storeRepository;
+            StoreTransfer = storeTransferRepository;
+            SubOrder = subOrderRepository;
             StoreAddress = storeAddressRepository;
             Wishlist = wishlistRepository;
             WishlistItem = wishlistItemRepository;

@@ -11,12 +11,12 @@ namespace merxly.Domain.Entities
         public DateTime CreatedAt { get; set; }
 
         // Foreign Keys
-        public Guid OrderId { get; set; }
+        public Guid SubOrderId { get; set; }
         public Guid? ProductVariantId { get; set; }
         public Guid StoreId { get; set; }
 
         // Navigation properties
-        public Order Order { get; set; }
+        public SubOrder SubOrder { get; set; }
         public ProductVariant? ProductVariant { get; set; }
         public Store Store { get; set; }
     }

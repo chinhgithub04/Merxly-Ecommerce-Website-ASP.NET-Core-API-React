@@ -28,10 +28,18 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             // Relationships
+            builder.HasOne(oi => oi.SubOrder)
+                .WithMany(so => so.OrderItems)
+                .HasForeignKey(oi => oi.SubOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(oi => oi.ProductVariant)
                    .WithMany()
                    .HasForeignKey(oi => oi.ProductVariantId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            // Indexes
+            builder.HasIndex(oi => oi.SubOrderId);
         }
     }
 }
