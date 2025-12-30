@@ -41,6 +41,9 @@ namespace merxly.Infrastructure.Persistence.Configurations
             builder.Property(so => so.TrackingNumber)
                 .HasMaxLength(100);
 
+            builder.Property(so => so.Notes)
+                .HasMaxLength(1000);
+
             builder.Property(so => so.CreatedAt)
                 .IsRequired();
 

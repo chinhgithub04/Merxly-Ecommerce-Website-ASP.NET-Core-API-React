@@ -14,6 +14,7 @@ namespace merxly.Domain.Entities
         public decimal TotalAmount { get; set; }
         public string? Carrier { get; set; }
         public string? TrackingNumber { get; set; }
+        public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }

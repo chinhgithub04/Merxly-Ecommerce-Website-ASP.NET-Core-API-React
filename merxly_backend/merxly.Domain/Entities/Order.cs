@@ -7,7 +7,6 @@ namespace merxly.Domain.Entities
         public Guid Id { get; set; }
         public string OrderNumber { get; set; } // Customer-facing order number
         public decimal TotalAmount { get; set; } // Total amount across all sub-orders
-        public string? Notes { get; set; } // Customer notes
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 

@@ -18,9 +18,10 @@ namespace merxly.Application.Validators.Checkout
                 .NotEmpty()
                 .WithMessage("Shipping address is required");
 
-            RuleFor(x => x.Notes)
-                .MaximumLength(500)
-                .WithMessage("Notes cannot exceed 500 characters");
+            RuleFor(x => x.StoreNotes)
+                .Must(notes => notes == null || notes.All(n => n.Value.Length <= 500))
+                .WithMessage("Each store note cannot exceed 500 characters")
+                .When(x => x.StoreNotes != null);
         }
     }
 }

@@ -90,8 +90,7 @@ namespace merxly.Application.Services
                 OrderNumber = orderNumber,
                 TotalAmount = totalAmount,
                 UserId = userId,
-                ShippingAddressId = request.ShippingAddressId,
-                Notes = request.Notes
+                ShippingAddressId = request.ShippingAddressId
             };
 
             await _unitOfWork.Order.AddAsync(order, cancellationToken);
@@ -114,7 +113,8 @@ namespace merxly.Application.Services
                     StoreId = storeId,
                     Status = OrderStatus.Pending,
                     SubTotal = storeTotal,
-                    TotalAmount = storeTotal
+                    TotalAmount = storeTotal,
+                    Notes = request.StoreNotes?.GetValueOrDefault(storeId)
                 };
 
                 subOrders.Add(subOrder);

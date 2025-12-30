@@ -21,9 +21,6 @@ namespace merxly.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasPrecision(18, 2);
 
-            builder.Property(o => o.Notes)
-                .HasMaxLength(1000);
-
             builder.Property(o => o.CreatedAt)
                 .IsRequired();
 
