@@ -11,14 +11,10 @@ namespace merxly.API.Controllers
     public class CheckoutController : BaseApiController
     {
         private readonly ICheckoutService _checkoutService;
-        private readonly ILogger<CheckoutController> _logger;
 
-        public CheckoutController(
-            ICheckoutService checkoutService,
-            ILogger<CheckoutController> logger)
+        public CheckoutController(ICheckoutService checkoutService)
         {
             _checkoutService = checkoutService;
-            _logger = logger;
         }
 
         /// <summary>
@@ -32,21 +28,14 @@ namespace merxly.API.Controllers
             [FromBody] CheckoutRequestDto request,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetUserIdFromClaims();
 
-                _logger.LogInformation("Checkout request received from user {UserId}", userId);
+            var userId = GetUserIdFromClaims();
 
-                var result = await _checkoutService.ProcessCheckoutAsync(userId, request, cancellationToken);
+            var result = await _checkoutService.ProcessCheckoutAsync(userId, request, cancellationToken);
 
-                return OkResponse(result, "Checkout completed successfully");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing checkout");
-                throw;
-            }
+            return OkResponse(result, "Checkout completed successfully");
         }
+
+
     }
 }

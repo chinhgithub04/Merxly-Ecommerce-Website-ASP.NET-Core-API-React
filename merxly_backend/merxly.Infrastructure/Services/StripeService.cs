@@ -164,5 +164,104 @@ namespace merxly.Infrastructure.Services
             _logger.LogInformation("Payment intent canceled");
             return paymentIntent;
         }
+
+        // Stripe Connect Methods
+
+        public async Task<Account> CreateConnectAccountAsync(
+            string email,
+            string country,
+            string businessType,
+            Dictionary<string, string>? metadata = null,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Creating Stripe Connect account for email: {Email}, country: {Country}", email, country);
+
+            var options = new AccountCreateOptions
+            {
+                Type = "express",
+                Country = country,
+                Email = email,
+                Capabilities = new AccountCapabilitiesOptions
+                {
+                    CardPayments = new AccountCapabilitiesCardPaymentsOptions { Requested = true },
+                    Transfers = new AccountCapabilitiesTransfersOptions { Requested = true },
+                },
+                BusinessType = businessType,
+                Metadata = metadata,
+            };
+
+            var service = new AccountService();
+            var account = await service.CreateAsync(options, null, cancellationToken);
+
+            _logger.LogInformation("Stripe Connect account created with ID: {AccountId}", account.Id);
+            return account;
+        }
+
+        public async Task<AccountLink> CreateAccountLinkAsync(
+            string accountId,
+            string returnUrl,
+            string refreshUrl,
+            string type = "account_onboarding",
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Creating account link for account: {AccountId}, type: {Type}", accountId, type);
+
+            var options = new AccountLinkCreateOptions
+            {
+                Account = accountId,
+                RefreshUrl = refreshUrl,
+                ReturnUrl = returnUrl,
+                Type = type,
+            };
+
+            var service = new AccountLinkService();
+            var accountLink = await service.CreateAsync(options, null, cancellationToken);
+
+            _logger.LogInformation("Account link created, expires at: {ExpiresAt}", accountLink.ExpiresAt);
+            return accountLink;
+        }
+
+        public async Task<Account> GetConnectAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Retrieving Stripe Connect account: {AccountId}", accountId);
+
+            var service = new AccountService();
+            var account = await service.GetAsync(accountId, null, null, cancellationToken);
+
+            _logger.LogInformation("Account retrieved: charges_enabled={ChargesEnabled}, payouts_enabled={PayoutsEnabled}",
+                account.ChargesEnabled, account.PayoutsEnabled);
+
+            return account;
+        }
+
+        public async Task<Account> UpdateConnectAccountAsync(
+            string accountId,
+            Dictionary<string, string>? metadata = null,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Updating Stripe Connect account: {AccountId}", accountId);
+
+            var options = new AccountUpdateOptions
+            {
+                Metadata = metadata,
+            };
+
+            var service = new AccountService();
+            var account = await service.UpdateAsync(accountId, options, null, cancellationToken);
+
+            _logger.LogInformation("Account updated successfully");
+            return account;
+        }
+
+        public async Task<Account> DeleteConnectAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Deleting Stripe Connect account: {AccountId}", accountId);
+
+            var service = new AccountService();
+            var account = await service.DeleteAsync(accountId, null, null, cancellationToken);
+
+            _logger.LogInformation("Account deleted successfully");
+            return account;
+        }
     }
 }

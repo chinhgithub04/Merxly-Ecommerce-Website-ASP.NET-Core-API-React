@@ -53,5 +53,32 @@ namespace merxly.Application.Interfaces.Services
         /// Cancels a payment intent
         /// </summary>
         Task<PaymentIntent> CancelPaymentIntentAsync(string paymentIntentId, CancellationToken cancellationToken = default);
+
+        // Stripe Connect Methods
+
+        /// <summary>
+        /// Creates a Stripe Connect account for a store
+        /// </summary>
+        Task<Account> CreateConnectAccountAsync(string email, string country, string businessType, Dictionary<string, string>? metadata = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates an account link for onboarding or updating a Connect account
+        /// </summary>
+        Task<AccountLink> CreateAccountLinkAsync(string accountId, string returnUrl, string refreshUrl, string type = "account_onboarding", CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Retrieves a Stripe Connect account
+        /// </summary>
+        Task<Account> GetConnectAccountAsync(string accountId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Updates a Stripe Connect account
+        /// </summary>
+        Task<Account> UpdateConnectAccountAsync(string accountId, Dictionary<string, string>? metadata = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes (or deactivates) a Stripe Connect account
+        /// </summary>
+        Task<Account> DeleteConnectAccountAsync(string accountId, CancellationToken cancellationToken = default);
     }
 }

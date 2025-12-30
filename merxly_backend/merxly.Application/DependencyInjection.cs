@@ -24,6 +24,7 @@ namespace merxly.Application
             services.AddScoped<IUserPaymentMethodService, UserPaymentMethodService>();
             services.AddScoped<ICustomerAddressService, CustomerAddressService>();
             services.AddScoped<ICheckoutService, CheckoutService>();
+            services.AddScoped<IStorePaymentService, StorePaymentService>();
 
             // AutoMapper Configuration
             services.AddAutoMapper(Assembly.GetExecutingAssembly());

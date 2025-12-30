@@ -16,9 +16,9 @@ using merxly.Application.DTOs.ProductVariantAttributeValue;
 using merxly.Application.DTOs.ProductVariantMedia;
 using merxly.Application.DTOs.ProductVariantMedia.Update;
 using merxly.Application.DTOs.Store;
+using merxly.Application.DTOs.StorePayment;
 using merxly.Application.Mappings.ValueResolvers;
 using merxly.Domain.Entities;
-using merxly.Domain.Enums;
 
 namespace merxly.Application.Mappings
 {
@@ -202,6 +202,9 @@ namespace merxly.Application.Mappings
             // Payment Mappings
             CreateMap<Payment, PaymentDto>()
                 .ForMember(dest => dest.ClientSecret, opt => opt.Ignore()); // Client secret is set separately
+
+            // Store Payment Mappings
+            CreateMap<Store, StorePaymentAccountDto>();
         }
     }
 }
