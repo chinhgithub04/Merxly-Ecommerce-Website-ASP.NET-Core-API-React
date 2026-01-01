@@ -29,6 +29,10 @@ namespace merxly.Infrastructure.Persistence.Repositories
                     .ThenInclude(oi => oi.ProductVariant)
                         .ThenInclude(pv => pv.VariantAttributeValues)
                             .ThenInclude(vav => vav.ProductAttributeValue)
+                                .ThenInclude(pav => pav.ProductAttribute)
+                .Include(so => so.OrderItems)
+                    .ThenInclude(oi => oi.ProductVariant)
+                        .ThenInclude(pv => pv.Media)
                 .Include(so => so.StatusHistory)
                 .Include(so => so.StoreTransfers)
                 .FirstOrDefaultAsync(so => so.Id == id, cancellationToken);
@@ -65,9 +69,11 @@ namespace merxly.Infrastructure.Persistence.Repositories
             CancellationToken cancellationToken = default)
         {
             var query = _dbSet
-                .Where(so => so.StoreId == storeId && so.Status >= OrderStatus.Confirmed)
+                .Where(so => so.StoreId == storeId && so.Status != OrderStatus.Pending)
                 .Include(so => so.Order)
                     .ThenInclude(o => o.ShippingAddress)
+                .Include(so => so.Order)
+                    .ThenInclude(o => o.User)
                 .Include(so => so.OrderItems)
                     .ThenInclude(oi => oi.ProductVariant)
                         .ThenInclude(pv => pv.Product)
@@ -75,6 +81,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
                     .ThenInclude(oi => oi.ProductVariant)
                         .ThenInclude(pv => pv.VariantAttributeValues)
                             .ThenInclude(vav => vav.ProductAttributeValue)
+                                .ThenInclude(pav => pav.ProductAttribute)
                 .AsQueryable();
 
             // Apply filters

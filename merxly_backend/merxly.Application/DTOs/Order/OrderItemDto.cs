@@ -9,6 +9,5 @@ namespace merxly.Application.DTOs.Order
         public Guid? ProductVariantId { get; set; }
         public Guid StoreId { get; set; }
         public string StoreName { get; set; }
-        public ProductVariantSummaryDto? ProductVariant { get; set; }
     }
 }

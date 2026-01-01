@@ -27,5 +27,6 @@ namespace merxly.Application.DTOs.Order
         public DateTime? UpdatedAt { get; init; }
         public DateTime? CompletedAt { get; init; }
         public List<StoreOrderItemDto> OrderItems { get; init; } = new List<StoreOrderItemDto>();
+        public List<OrderStatusHistoryDto> StatusHistory { get; init; } = new List<OrderStatusHistoryDto>();
     }
 }

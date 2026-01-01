@@ -18,6 +18,7 @@ using merxly.Application.DTOs.ProductVariantMedia.Update;
 using merxly.Application.DTOs.Store;
 using merxly.Application.DTOs.StorePayment;
 using merxly.Application.Mappings.ValueResolvers;
+using merxly.Domain.Constants;
 using merxly.Domain.Entities;
 
 namespace merxly.Application.Mappings
@@ -208,11 +209,18 @@ namespace merxly.Application.Mappings
 
 
             CreateMap<OrderItem, OrderItemDto>()
-                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName))
-                .ForMember(dest => dest.ProductVariant, opt => opt.MapFrom(src => src.ProductVariant));
-
+                .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.StoreName));
             CreateMap<OrderItem, StoreOrderItemDto>()
-                .ForMember(dest => dest.ProductVariant, opt => opt.MapFrom(src => src.ProductVariant));
+                .ForMember(dest => dest.ProductVariantName, opt => opt.MapFrom(src => src.ProductVariant.Name))
+                .ForMember(dest => dest.ProductVariantSKU, opt => opt.MapFrom(src => src.ProductVariant.SKU))
+                .ForMember(dest => dest.ProductVariantMainPublicId, opt => opt.MapFrom(src => src.ProductVariant.Media
+                    .Where(m => m.IsMain)
+                    .Select(m => m.MediaPublicId)
+                    .FirstOrDefault()))
+                .ForMember(dest => dest.SelectedAttributes, opt => opt.MapFrom(src => src.ProductVariant.VariantAttributeValues.ToDictionary(
+                    pav => pav.ProductAttributeValue.ProductAttribute.Name,
+                    pav => pav.ProductAttributeValue.Value
+                )));
 
             CreateMap<ProductVariant, ProductVariantSummaryDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
@@ -222,6 +230,11 @@ namespace merxly.Application.Mappings
                     src.Media.Where(m => m.IsMain).Select(m => m.MediaPublicId).FirstOrDefault()));
 
             CreateMap<Address, ShippingAddressDto>();
+
+            CreateMap<OrderStatusHistory, OrderStatusHistoryDto>()
+                .ForMember(dest => dest.ChangedBy, opt => opt.MapFrom(src =>
+                    src.UpdatedByUser == null ? OrderChangedBy.Admin :
+                    src.UpdatedByUser.Id == src.SubOrder.Order.UserId ? OrderChangedBy.Customer : OrderChangedBy.StoreOwner));
 
             // Payment Mappings
             CreateMap<Payment, PaymentDto>()
