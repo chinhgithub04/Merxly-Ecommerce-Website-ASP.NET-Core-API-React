@@ -1,0 +1,179 @@
+import {
+  ClockIcon,
+  CheckCircleIcon,
+  CubeIcon,
+  TruckIcon,
+  HomeIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  ExclamationCircleIcon,
+  UserCircleIcon,
+} from '@heroicons/react/24/outline';
+import { OrderStatus } from '../../../../types/enums';
+import type { OrderStatusHistoryDto } from '../../../../types/models/storeOrder';
+import { OrderChangedBy } from '../../../../types/const/OrderChangedBy';
+
+interface OrderActivityTimelineProps {
+  statusHistory: OrderStatusHistoryDto[];
+}
+
+export const OrderActivityTimeline = ({
+  statusHistory,
+}: OrderActivityTimelineProps) => {
+  // Sort by most recent first
+  const sortedHistory = [...statusHistory].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  const getStatusIcon = (status: OrderStatus) => {
+    switch (status) {
+      case OrderStatus.Pending:
+        return ClockIcon;
+      case OrderStatus.Confirmed:
+        return CheckCircleIcon;
+      case OrderStatus.Processing:
+        return CubeIcon;
+      case OrderStatus.Delivering:
+        return TruckIcon;
+      case OrderStatus.Shipped:
+      case OrderStatus.Completed:
+        return HomeIcon;
+      case OrderStatus.Cancelled:
+        return XCircleIcon;
+      case OrderStatus.Refunded:
+        return ArrowPathIcon;
+      case OrderStatus.Failed:
+        return ExclamationCircleIcon;
+      default:
+        return ClockIcon;
+    }
+  };
+
+  const getStatusLabel = (status: OrderStatus) => {
+    switch (status) {
+      case OrderStatus.Pending:
+        return 'Order Placed';
+      case OrderStatus.Confirmed:
+        return 'Order Confirmed';
+      case OrderStatus.Processing:
+        return 'Packaging Started';
+      case OrderStatus.Delivering:
+        return 'Out for Delivery';
+      case OrderStatus.Shipped:
+        return 'Shipped to Customer';
+      case OrderStatus.Completed:
+        return 'Order Completed';
+      case OrderStatus.Cancelled:
+        return 'Order Cancelled';
+      case OrderStatus.Refunded:
+        return 'Order Refunded';
+      case OrderStatus.Failed:
+        return 'Order Failed';
+      default:
+        return 'Unknown Status';
+    }
+  };
+
+  const getStatusColor = (status: OrderStatus) => {
+    switch (status) {
+      case OrderStatus.Pending:
+        return 'bg-yellow-100 text-yellow-600';
+      case OrderStatus.Confirmed:
+        return 'bg-blue-100 text-blue-600';
+      case OrderStatus.Processing:
+        return 'bg-purple-100 text-purple-600';
+      case OrderStatus.Delivering:
+        return 'bg-indigo-100 text-indigo-600';
+      case OrderStatus.Shipped:
+      case OrderStatus.Completed:
+        return 'bg-green-100 text-green-600';
+      case OrderStatus.Cancelled:
+      case OrderStatus.Failed:
+        return 'bg-red-100 text-red-600';
+      case OrderStatus.Refunded:
+        return 'bg-orange-100 text-orange-600';
+      default:
+        return 'bg-neutral-100 text-neutral-600';
+    }
+  };
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      date: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+      time: date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    };
+  };
+
+  return (
+    <div className='space-y-4'>
+      <h3 className='text-lg font-semibold text-neutral-900'>Order Activity</h3>
+      <div className='relative'>
+        {sortedHistory.map((entry, index) => {
+          const Icon = getStatusIcon(entry.status);
+          const { date, time } = formatDateTime(entry.createdAt);
+          const isLast = index === sortedHistory.length - 1;
+
+          return (
+            <div key={entry.id} className='relative flex gap-4 pb-6'>
+              {/* Timeline Line */}
+              {!isLast && (
+                <div className='absolute left-5 top-10 bottom-0 w-0.5 bg-neutral-200' />
+              )}
+
+              {/* Icon */}
+              <div
+                className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getStatusColor(
+                  entry.status
+                )}`}
+              >
+                <Icon className='h-5 w-5' />
+              </div>
+
+              {/* Content */}
+              <div className='flex-1 min-w-0'>
+                <div className='flex items-center justify-between gap-4'>
+                  <div>
+                    <p className='font-medium text-neutral-900'>
+                      {getStatusLabel(entry.status)}
+                    </p>
+                    {entry.status === OrderStatus.Cancelled && entry.notes && (
+                      <p className='mt-1 text-sm text-neutral-600'>
+                        {entry.notes}
+                      </p>
+                    )}
+                    {entry.status === OrderStatus.Cancelled &&
+                      entry.changedBy && (
+                        <div className='mt-1 flex items-center gap-1 text-xs text-neutral-500'>
+                          <UserCircleIcon className='h-4 w-4' />
+                          <span>
+                            Change by:{' '}
+                            {entry.changedBy === OrderChangedBy.CUSTOMER
+                              ? 'Customer'
+                              : entry.changedBy === OrderChangedBy.STORE_OWNER
+                              ? 'You'
+                              : 'Admin'}
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                  <div className='text-right text-sm text-neutral-500 whitespace-nowrap'>
+                    <div>{date}</div>
+                    <div>{time}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};

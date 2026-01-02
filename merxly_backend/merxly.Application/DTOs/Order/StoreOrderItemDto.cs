@@ -10,6 +10,6 @@ namespace merxly.Application.DTOs.Order
         public string ProductVariantName { get; init; }
         public string? ProductVariantSKU { get; init; }
         public string? ProductVariantMainPublicId { get; init; }
-        public Dictionary<string, string> SelectedAttributes { get; init; }
+        public Dictionary<string, string> SelectedAttributes { get; init; } // Ex: Color: Red, Size: M
     }
 }

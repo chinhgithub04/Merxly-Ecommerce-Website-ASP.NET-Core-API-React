@@ -8,6 +8,6 @@ namespace merxly.Application.DTOs.Order
         public OrderStatus Status { get; init; }
         public string? Notes { get; init; }
         public DateTime CreatedAt { get; init; }
-        public string? ChangedBy { get; init; } // e.g., "Customer", "StoreOwner", "Admin"
+        public string? ChangedBy { get; init; } // e.g., "StoreOwner", "Customer"
     }
 }

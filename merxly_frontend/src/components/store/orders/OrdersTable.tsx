@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import { OrderStatus } from '../../../types/enums/Status';
 
@@ -14,7 +15,6 @@ export interface Order {
 
 interface OrdersTableProps {
   orders: Order[];
-  onViewOrder: (orderId: string) => void;
 }
 
 const getStatusDisplay = (
@@ -62,7 +62,12 @@ const getStatusDisplay = (
   );
 };
 
-export const OrdersTable = ({ orders, onViewOrder }: OrdersTableProps) => {
+export const OrdersTable = ({ orders }: OrdersTableProps) => {
+  const navigate = useNavigate();
+
+  const handleViewOrder = (orderId: string) => {
+    navigate(`/store/orders/${orderId}`);
+  };
   return (
     <div className='bg-white rounded-lg border border-neutral-200 overflow-hidden'>
       <div className='overflow-x-auto'>
@@ -140,7 +145,7 @@ export const OrdersTable = ({ orders, onViewOrder }: OrdersTableProps) => {
                 <td className='py-3 px-4'>
                   <div className='flex items-center justify-center'>
                     <button
-                      onClick={() => onViewOrder(order.id)}
+                      onClick={() => handleViewOrder(order.id)}
                       className='cursor-pointer p-2 text-neutral-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors'
                       title='View Details'
                     >

@@ -125,7 +125,6 @@ namespace merxly.Application.Services
                 SubOrderId = subOrderId,
                 Status = dto.Status,
                 Notes = dto.Notes,
-                UpdatedByUserId = storeId.ToString(),
             };
 
             _unitOfWork.SubOrder.Update(subOrder);

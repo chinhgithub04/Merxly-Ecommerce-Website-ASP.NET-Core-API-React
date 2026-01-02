@@ -233,8 +233,7 @@ namespace merxly.Application.Mappings
 
             CreateMap<OrderStatusHistory, OrderStatusHistoryDto>()
                 .ForMember(dest => dest.ChangedBy, opt => opt.MapFrom(src =>
-                    src.UpdatedByUser == null ? OrderChangedBy.Admin :
-                    src.UpdatedByUser.Id == src.SubOrder.Order.UserId ? OrderChangedBy.Customer : OrderChangedBy.StoreOwner));
+                    src.UpdatedByUser == null ? OrderChangedBy.StoreOwner : OrderChangedBy.Customer));
 
             // Payment Mappings
             CreateMap<Payment, PaymentDto>()

@@ -19,6 +19,7 @@ import { CustomerLayout } from './components/layout/customer';
 import {
   StoreHomePage,
   StoreOrdersPage,
+  StoreOrderDetailPage,
   StoreProductsPage,
   StoreSettingsPage,
 } from './pages/Store';
@@ -79,6 +80,7 @@ function App() {
         >
           <Route index element={<StoreHomePage />} />
           <Route path='orders' element={<StoreOrdersPage />} />
+          <Route path='orders/:subOrderId' element={<StoreOrderDetailPage />} />
           <Route path='products' element={<StoreProductsPage />} />
           <Route path='locations' element={<StoreLocationsPage />} />
           <Route path='payments' element={<StorePaymentsPage />} />

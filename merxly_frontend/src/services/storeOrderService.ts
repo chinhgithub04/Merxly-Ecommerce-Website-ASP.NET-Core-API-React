@@ -3,6 +3,8 @@ import type { Response, PagedResponse } from '../types/api/common';
 import type {
   StoreSubOrderDto,
   StoreSubOrderFilterDto,
+  StoreSubOrderDetailDto,
+  UpdateSubOrderStatusDto,
 } from '../types/models/storeOrder';
 
 export const getStoreOrders = async (
@@ -25,6 +27,36 @@ export const getStoreOrders = async (
 
   if (!response.data.data) {
     throw new Error(response.data.message || 'Failed to fetch store orders');
+  }
+
+  return response.data.data;
+};
+
+export const getStoreOrderById = async (
+  subOrderId: string
+): Promise<StoreSubOrderDetailDto> => {
+  const response = await apiClient.get<Response<StoreSubOrderDetailDto>>(
+    `/store/orders/${subOrderId}`
+  );
+
+  if (!response.data.data) {
+    throw new Error(response.data.message || 'Failed to fetch order details');
+  }
+
+  return response.data.data;
+};
+
+export const updateSubOrderStatus = async (
+  subOrderId: string,
+  dto: UpdateSubOrderStatusDto
+): Promise<StoreSubOrderDetailDto> => {
+  const response = await apiClient.patch<Response<StoreSubOrderDetailDto>>(
+    `/store/orders/${subOrderId}/status`,
+    dto
+  );
+
+  if (!response.data.data) {
+    throw new Error(response.data.message || 'Failed to update order status');
   }
 
   return response.data.data;

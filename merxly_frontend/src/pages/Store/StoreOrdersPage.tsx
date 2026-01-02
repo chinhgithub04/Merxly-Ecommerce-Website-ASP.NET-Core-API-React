@@ -6,7 +6,6 @@ import {
   OrdersTable,
   type Order,
 } from '../../components/store/orders/OrdersTable';
-import { OrderDetailsModal } from '../../components/store/orders/OrderDetailsModal';
 import { useStoreOrders } from '../../hooks/useStoreOrders';
 import { OrderStatus } from '../../types/enums/Status';
 import type { StoreSubOrderFilterDto } from '../../types/models/storeOrder';
@@ -24,7 +23,6 @@ export const StoreOrdersPage = () => {
   const [selectedStatus, setSelectedStatus] =
     useState<OrderStatusFilter>('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 20;
 
@@ -103,10 +101,6 @@ export const StoreOrdersPage = () => {
     };
   }, [orders, data]);
 
-  const handleViewOrder = (orderId: string) => {
-    setSelectedOrderId(orderId);
-  };
-
   return (
     <div className='space-y-6'>
       {/* Page Header */}
@@ -158,7 +152,7 @@ export const StoreOrdersPage = () => {
       {/* Orders Table */}
       {!isLoading && !error && (
         <>
-          <OrdersTable orders={orders} onViewOrder={handleViewOrder} />
+          <OrdersTable orders={orders} />
 
           {/* Pagination Info */}
           {data && (
@@ -190,43 +184,6 @@ export const StoreOrdersPage = () => {
             </div>
           )}
         </>
-      )}
-
-      {/* Order Details Modal - Keep mock data for now */}
-      {selectedOrderId && (
-        <OrderDetailsModal
-          isOpen={true}
-          onClose={() => setSelectedOrderId(null)}
-          order={{
-            orderNumber: 'ORD-2024-1245',
-            customerName: 'John Smith',
-            customerEmail: 'john.smith@example.com',
-            status: 'Processing',
-            totalAmount: 299.99,
-            subTotal: 279.99,
-            tax: 20.0,
-            shippingCost: 0,
-            createdAt: '2024-12-24T10:30:00',
-            shippingAddress: {
-              street: '123 Main Street, Apt 4B',
-              city: 'New York',
-              state: 'NY',
-              zipCode: '10001',
-              country: 'United States',
-            },
-            items: [
-              {
-                id: '1',
-                productName: 'Wireless Headphones Pro',
-                variantDetails: 'Color: Black, Size: Standard',
-                quantity: 1,
-                unitPrice: 149.99,
-                totalPrice: 149.99,
-              },
-            ],
-            notes: 'Please handle with care',
-          }}
-        />
       )}
     </div>
   );
