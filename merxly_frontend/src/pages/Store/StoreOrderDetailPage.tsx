@@ -16,6 +16,7 @@ import {
   OrderSummarySection,
   OrderNotesSection,
 } from '../../components/store/orders/detail';
+import { CustomerOrderShippingInfo } from '../../components/customer/orders/detail/CustomerOrderShippingInfo';
 
 export const StoreOrderDetailPage = () => {
   const { subOrderId } = useParams<{ subOrderId: string }>();
@@ -140,12 +141,10 @@ export const StoreOrderDetailPage = () => {
 
           {/* Customer Information & Address */}
           <div className='border-t border-neutral-200 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
-            <OrderCustomerInfo
+            <CustomerOrderShippingInfo
               fullName={order.customerFullName}
               email={order.customerEmail}
               phoneNumber={order.customerPhoneNumber}
-            />
-            <OrderCustomerAddress
               fullAddress={order.customerFullAddress}
               postalCode={order.customerPostalCode}
             />
