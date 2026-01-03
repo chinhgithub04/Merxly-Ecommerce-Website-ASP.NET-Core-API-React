@@ -46,7 +46,7 @@ export const StoreInfoCard = ({
           </div>
           <button
             onClick={onEdit}
-            className='px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors'
+            className='cursor-pointer px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors'
           >
             Edit
           </button>
@@ -149,7 +149,7 @@ export const StoreInfoCard = ({
                 <>
                   <XCircleIcon className='h-5 w-5 text-yellow-600' />
                   <span className='text-sm font-medium text-yellow-700'>
-                    Pending
+                    Not verified
                   </span>
                 </>
               )}

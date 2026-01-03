@@ -52,7 +52,7 @@ export const EditStoreModal = ({
           </h2>
           <button
             onClick={onClose}
-            className='p-2 hover:bg-neutral-100 rounded-lg transition-colors'
+            className='cursor-pointer p-2 hover:bg-neutral-100 rounded-lg transition-colors'
           >
             <XMarkIcon className='h-6 w-6 text-neutral-600' />
           </button>
@@ -143,13 +143,13 @@ export const EditStoreModal = ({
             <button
               type='button'
               onClick={onClose}
-              className='px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors'
+              className='cursor-pointer px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors'
             >
               Cancel
             </button>
             <button
               type='submit'
-              className='px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors'
+              className='cursor-pointer px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors'
             >
               Save Changes
             </button>

@@ -46,16 +46,16 @@ export const IMAGE_PRESETS = {
    * Used in: Store information display
    */
   logo: {
-    width: 80,
-    height: 80,
+    width: 200,
+    height: 200,
   },
   /**
    * Store banner - 400px width, 120px height
    * Used in: Store banner display
    */
   banner: {
-    width: 400,
-    height: 120,
+    width: 1200,
+    height: 400,
   },
 } as const;
 

@@ -4,16 +4,30 @@ import {
   CheckCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { Modal } from '../../ui/Modal';
 
 interface StoreVerificationCardProps {
   isVerified: boolean;
   isActive: boolean;
+  onToggleActive: (isActive: boolean) => void;
 }
 
 export const StoreVerificationCard = ({
   isVerified,
   isActive,
+  onToggleActive,
 }: StoreVerificationCardProps) => {
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  const handleToggleClick = () => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    onToggleActive(!isActive);
+    setIsConfirmModalOpen(false);
+  };
   return (
     <div className='bg-white rounded-lg border border-neutral-200'>
       <div className='p-6 border-b border-neutral-200'>
@@ -62,7 +76,8 @@ export const StoreVerificationCard = ({
               </p>
             )}
             <button
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              onClick={handleToggleClick}
+              className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-error-600 text-white hover:bg-error-700'
                   : 'bg-success-600 text-white hover:bg-success-700'
@@ -123,7 +138,7 @@ export const StoreVerificationCard = ({
                     <li>Store address verification</li>
                   </ul>
                 </div>
-                <button className='mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium'>
+                <button className='cursor-pointer mt-3 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium'>
                   Request Verification
                 </button>
               </div>
@@ -140,6 +155,57 @@ export const StoreVerificationCard = ({
           </p>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onDone={handleConfirm}
+        title={isActive ? 'Deactivate Store' : 'Activate Store'}
+        doneLabel='Confirm'
+        cancelLabel='Cancel'
+      >
+        <div className='space-y-4'>
+          {isActive ? (
+            <>
+              <p className='text-neutral-700'>
+                Are you sure you want to deactivate your store? When
+                deactivated:
+              </p>
+              <ul className='list-disc list-inside text-sm text-neutral-600 space-y-2 ml-2'>
+                <li>Your store will not be visible to customers</li>
+                <li>Customers cannot place new orders</li>
+                <li>Existing orders will remain active</li>
+                <li>You can reactivate your store at any time</li>
+              </ul>
+              <div className='p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-4'>
+                <p className='text-sm text-yellow-800'>
+                  <span className='font-semibold'>Note:</span> This action will
+                  temporarily suspend your store's operations.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className='text-neutral-700'>
+                Are you sure you want to activate your store? When activated:
+              </p>
+              <ul className='list-disc list-inside text-sm text-neutral-600 space-y-2 ml-2'>
+                <li>Your store will be visible to customers</li>
+                <li>Customers can browse your products</li>
+                <li>You can receive and process orders</li>
+                <li>Your store will appear in search results</li>
+              </ul>
+              <div className='p-3 bg-green-50 border border-green-200 rounded-lg mt-4'>
+                <p className='text-sm text-green-800'>
+                  <span className='font-semibold'>Ready to sell:</span> Make
+                  sure your store information and products are up to date.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

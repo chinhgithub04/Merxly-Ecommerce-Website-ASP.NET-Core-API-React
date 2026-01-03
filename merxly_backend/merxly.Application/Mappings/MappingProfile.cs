@@ -51,6 +51,8 @@ namespace merxly.Application.Mappings
                 .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src =>
                     $"{src.Owner.FirstName} {src.Owner.LastName}"));
             CreateMap<CreateStoreDto, Store>();
+            CreateMap<UpdateStoreDto, Store>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
             // Product Mappings
             CreateMap<Product, ProductDto>()

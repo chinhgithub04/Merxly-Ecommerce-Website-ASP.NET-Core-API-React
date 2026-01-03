@@ -6,5 +6,6 @@ namespace merxly.Application.Interfaces.Services
     {
         Task<DetailStoreDto> CreateStoreAsync(CreateStoreDto createStoreDto, string userId, CancellationToken cancellationToken);
         Task<DetailStoreDto> GetStoreByIdAsync(string userId, CancellationToken cancellationToken);
+        Task<DetailStoreDto> UpdateStoreAsync(UpdateStoreDto updateStoreDto, string userId, CancellationToken cancellationToken);
     }
 }

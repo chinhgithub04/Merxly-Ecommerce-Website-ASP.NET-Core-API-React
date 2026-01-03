@@ -8,6 +8,8 @@ interface StoreImagesCardProps {
   onUpdateBanner: (file: File) => void;
   onRemoveLogo: () => void;
   onRemoveBanner: () => void;
+  isUploadingLogo?: boolean;
+  isUploadingBanner?: boolean;
 }
 
 export const StoreImagesCard = ({
@@ -17,6 +19,8 @@ export const StoreImagesCard = ({
   onUpdateBanner,
   onRemoveLogo,
   onRemoveBanner,
+  isUploadingLogo = false,
+  isUploadingBanner = false,
 }: StoreImagesCardProps) => {
   const [logoPreview, setLogoPreview] = useState<string | undefined>(
     logoImageUrl
@@ -91,31 +95,50 @@ export const StoreImagesCard = ({
                   alt='Store logo'
                   className='w-32 h-32 object-cover rounded-lg border border-neutral-200'
                 />
+                {isUploadingLogo && (
+                  <div className='absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-white'></div>
+                  </div>
+                )}
                 <button
                   onClick={handleRemoveLogo}
-                  className='absolute -top-2 -right-2 p-1 bg-error-600 text-white rounded-full hover:bg-error-700 transition-colors'
+                  disabled={isUploadingLogo}
+                  className='cursor-pointer absolute -top-2 -right-2 p-1 bg-error-600 text-white rounded-full hover:bg-error-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   <XMarkIcon className='h-4 w-4' />
                 </button>
               </div>
             ) : (
               <div className='w-32 h-32 flex items-center justify-center border-2 border-dashed border-neutral-300 rounded-lg bg-neutral-50'>
-                <PhotoIcon className='h-12 w-12 text-neutral-400' />
+                {isUploadingLogo ? (
+                  <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600'></div>
+                ) : (
+                  <PhotoIcon className='h-12 w-12 text-neutral-400' />
+                )}
               </div>
             )}
 
             <div className='flex-1'>
               <label
                 htmlFor='logo-upload'
-                className='inline-block px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer'
+                className={`inline-block px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors ${
+                  isUploadingLogo
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'cursor-pointer'
+                }`}
               >
-                {logoPreview ? 'Change Logo' : 'Upload Logo'}
+                {isUploadingLogo
+                  ? 'Uploading...'
+                  : logoPreview
+                  ? 'Change Logo'
+                  : 'Upload Logo'}
               </label>
               <input
                 id='logo-upload'
                 type='file'
                 accept='image/*'
                 onChange={handleLogoChange}
+                disabled={isUploadingLogo}
                 className='hidden'
               />
               <p className='text-xs text-neutral-500 mt-2'>
@@ -136,36 +159,55 @@ export const StoreImagesCard = ({
                 <img
                   src={bannerPreview}
                   alt='Store banner'
-                  className='w-full h-48 object-cover rounded-lg border border-neutral-200'
+                  className='w-full h-64 object-cover rounded-lg border border-neutral-200'
                 />
+                {isUploadingBanner && (
+                  <div className='absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center'>
+                    <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white'></div>
+                  </div>
+                )}
                 <button
                   onClick={handleRemoveBanner}
-                  className='absolute top-2 right-2 p-1 bg-error-600 text-white rounded-full hover:bg-error-700 transition-colors'
+                  disabled={isUploadingBanner}
+                  className='cursor-pointer absolute top-2 right-2 p-1 bg-error-600 text-white rounded-full hover:bg-error-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   <XMarkIcon className='h-4 w-4' />
                 </button>
               </div>
             ) : (
               <div className='w-full h-48 flex items-center justify-center border-2 border-dashed border-neutral-300 rounded-lg bg-neutral-50'>
-                <div className='text-center'>
-                  <PhotoIcon className='h-12 w-12 text-neutral-400 mx-auto mb-2' />
-                  <p className='text-sm text-neutral-600'>No banner image</p>
-                </div>
+                {isUploadingBanner ? (
+                  <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
+                ) : (
+                  <div className='text-center'>
+                    <PhotoIcon className='h-12 w-12 text-neutral-400 mx-auto mb-2' />
+                    <p className='text-sm text-neutral-600'>No banner image</p>
+                  </div>
+                )}
               </div>
             )}
 
             <div>
               <label
                 htmlFor='banner-upload'
-                className='inline-block px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors cursor-pointer'
+                className={`inline-block px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors ${
+                  isUploadingBanner
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'cursor-pointer'
+                }`}
               >
-                {bannerPreview ? 'Change Banner' : 'Upload Banner'}
+                {isUploadingBanner
+                  ? 'Uploading...'
+                  : bannerPreview
+                  ? 'Change Banner'
+                  : 'Upload Banner'}
               </label>
               <input
                 id='banner-upload'
                 type='file'
                 accept='image/*'
                 onChange={handleBannerChange}
+                disabled={isUploadingBanner}
                 className='hidden'
               />
               <p className='text-xs text-neutral-500 mt-2'>

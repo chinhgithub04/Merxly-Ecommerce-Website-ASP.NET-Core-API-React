@@ -23,7 +23,7 @@ namespace merxly.API.Controllers
         {
             var userId = GetUserIdFromClaims();
             var detailStoreDto = await _storeService.CreateStoreAsync(dto, userId, cancellationToken);
-            
+
             var response = new ResponseDto<DetailStoreDto>
             {
                 Data = detailStoreDto,
@@ -42,6 +42,15 @@ namespace merxly.API.Controllers
             var result = await _storeService.GetStoreByIdAsync(userId, cancellationToken);
 
             return OkResponse(result, "Store retrieved successfully");
+        }
+
+        [HttpPatch("my-store")]
+        public async Task<ActionResult<ResponseDto<DetailStoreDto>>> UpdateStore([FromBody] UpdateStoreDto dto, CancellationToken cancellationToken = default)
+        {
+            var userId = GetUserIdFromClaims();
+            var result = await _storeService.UpdateStoreAsync(dto, userId, cancellationToken);
+
+            return OkResponse(result, "Store updated successfully");
         }
     }
 }

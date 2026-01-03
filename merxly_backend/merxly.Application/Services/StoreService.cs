@@ -90,5 +90,31 @@ namespace merxly.Application.Services
             var detailStoreDto = _mapper.Map<DetailStoreDto>(store);
             return detailStoreDto;
         }
+
+        public async Task<DetailStoreDto> UpdateStoreAsync(UpdateStoreDto updateStoreDto, string userId, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Updating store for user: {UserId}", userId);
+
+            var store = await _unitOfWork.Store.GetFirstOrDefaultAsync(
+                s => s.OwnerId == userId,
+                cancellationToken,
+                s => s.Owner);
+
+            if (store == null)
+            {
+                _logger.LogWarning("No store found for user: {UserId}", userId);
+                throw new NotFoundException("Store not found.");
+            }
+
+            _mapper.Map(updateStoreDto, store);
+
+            _unitOfWork.Store.Update(store);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Store updated successfully: {StoreId} for user: {UserId}", store.Id, userId);
+
+            var detailStoreDto = _mapper.Map<DetailStoreDto>(store);
+            return detailStoreDto;
+        }
     }
 }
