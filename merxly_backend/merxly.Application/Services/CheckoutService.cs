@@ -56,10 +56,17 @@ namespace merxly.Application.Services
             var orderItemsData = await ValidateAndPrepareOrderItemsAsync(request.Items, cancellationToken);
             var itemsByStore = orderItemsData.GroupBy(x => x.StoreId).ToList();
 
-            // 4. Calculate totals
+            // 4. Update stock quantities immediately after validation (while variants are already tracked)
+            foreach (var itemData in orderItemsData)
+            {
+                itemData.ProductVariant.StockQuantity -= itemData.Quantity;
+                _unitOfWork.ProductVariant.Update(itemData.ProductVariant);
+            }
+
+            // 5. Calculate totals
             decimal totalAmount = orderItemsData.Sum(x => x.TotalPrice);
 
-            // 5. Ensure user has Stripe customer ID
+            // 6. Ensure user has Stripe customer ID
             if (string.IsNullOrEmpty(user.StripeCustomerId))
             {
                 _logger.LogInformation("Creating Stripe customer for user {UserId} with email {Email}", userId, user.Email);
@@ -74,17 +81,17 @@ namespace merxly.Application.Services
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
 
-            // 6. Determine payment method
+            // 7. Determine payment method
             string? paymentMethodId = request.PaymentMethodId;
             if (string.IsNullOrEmpty(paymentMethodId))
             {
                 paymentMethodId = user.DefaultPaymentMethodId;
             }
 
-            // 7. Generate order number
+            // 8. Generate order number
             var orderNumber = await _unitOfWork.Order.GenerateOrderNumberAsync(cancellationToken);
 
-            // 8. Create main order (global data only)
+            // 9. Create main order (global data only)
             var order = new Order
             {
                 OrderNumber = orderNumber,
@@ -96,7 +103,7 @@ namespace merxly.Application.Services
             await _unitOfWork.Order.AddAsync(order, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 9. Create sub-orders (one per store)
+            // 10. Create sub-orders (one per store)
             var subOrders = new List<SubOrder>();
             int storeIndex = 1;
 
@@ -124,7 +131,7 @@ namespace merxly.Application.Services
             await _unitOfWork.SubOrder.AddRangeAsync(subOrders, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 10. Create order items for each sub-order
+            // 11. Create order items for each sub-order
             var allOrderItems = new List<OrderItem>();
             var allStatusHistories = new List<OrderStatusHistory>();
 
@@ -160,7 +167,7 @@ namespace merxly.Application.Services
             await _unitOfWork.OrderStatusHistory.AddRangeAsync(allStatusHistories, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 11. Create payment intent with Stripe
+            // 12. Create payment intent with Stripe
             var metadata = new Dictionary<string, string>
             {
                 { "order_id", order.Id.ToString() },
@@ -176,7 +183,7 @@ namespace merxly.Application.Services
                 metadata,
                 cancellationToken);
 
-            // 12. Calculate commission and create payment record
+            // 13. Calculate commission and create payment record
             decimal totalCommission = CalculateTotalCommission(allOrderItems, orderItemsData);
 
             var payment = new Payment
@@ -194,7 +201,7 @@ namespace merxly.Application.Services
             await _unitOfWork.Payment.AddAsync(payment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 13. Create store transfers (one per sub-order)
+            // 14. Create store transfers (one per sub-order)
             var storeTransfers = await CreateStoreTransfersAsync(
                 subOrders,
                 orderItemsData,
@@ -204,10 +211,12 @@ namespace merxly.Application.Services
             await _unitOfWork.StoreTransfer.AddRangeAsync(storeTransfers, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // 14. Load order with all relationships for response
+            // 15. Load order with all relationships for response
             var orderWithDetails = await _unitOfWork.Order.GetByIdWithDetailsAsync(order.Id, cancellationToken);
 
-            // 15. Map to response DTO
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // 16. Map to response DTO
             var orderDto = _mapper.Map<OrderDto>(orderWithDetails);
 
             var response = new CheckoutResponseDto
@@ -275,7 +284,8 @@ namespace merxly.Application.Services
                     UnitPrice = variant.Price,
                     TotalPrice = variant.Price * item.Quantity,
                     StoreId = product.StoreId,
-                    CommissionRate = store.CommissionRate
+                    CommissionRate = store.CommissionRate,
+                    ProductVariant = variant
                 });
             }
 
@@ -343,6 +353,7 @@ namespace merxly.Application.Services
             public decimal TotalPrice { get; set; }
             public Guid StoreId { get; set; }
             public decimal CommissionRate { get; set; }
+            public ProductVariant ProductVariant { get; set; } = null!;
         }
     }
 }
