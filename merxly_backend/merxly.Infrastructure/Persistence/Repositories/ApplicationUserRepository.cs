@@ -16,8 +16,9 @@ namespace merxly.Infrastructure.Persistence.Repositories
 
         public async Task<int> GetTotalOrdersCountAsync(string userId, CancellationToken cancellationToken = default)
         {
-            return await _context.Orders
-                .Where(o => o.UserId == userId)
+            return await _context.SubOrders
+                .Where(o => o.Order.UserId == userId &&
+                             o.Status != OrderStatus.Pending)
                 .CountAsync(cancellationToken);
         }
 
@@ -25,6 +26,7 @@ namespace merxly.Infrastructure.Persistence.Repositories
         {
             return await _context.SubOrders
                 .Where(so => so.Order.UserId == userId &&
+                             so.Status != OrderStatus.Pending &&
                              so.Status != OrderStatus.Completed &&
                              so.Status != OrderStatus.Cancelled)
                 .CountAsync(cancellationToken);

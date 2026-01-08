@@ -13,7 +13,7 @@ import {
   OrderHistoryPage,
   CustomerOrderDetailPage,
 } from './pages/Customer';
-import { DashboardPage } from './pages/User';
+import { DashboardPage, UserProfilePage } from './pages/User';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StoreOwnerLayout } from './components/layout';
 import { AdminLayout } from './components/layout/admin';
@@ -131,6 +131,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='dashboard/profile'
+            element={
+              <ProtectedRoute>
+                <UserProfilePage />
               </ProtectedRoute>
             }
           />

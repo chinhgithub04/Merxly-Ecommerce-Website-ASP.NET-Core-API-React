@@ -42,7 +42,7 @@ export const IMAGE_PRESETS = {
     height: 1200,
   },
   /**
-   * Store logo - 80x80px
+   * Store logo - 200x200px
    * Used in: Store information display
    */
   logo: {
