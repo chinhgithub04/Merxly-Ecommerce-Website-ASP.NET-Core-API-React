@@ -110,9 +110,12 @@ export const HomeHeader = () => {
           </Link>
 
           {/* Favorites */}
-          <button className='relative p-3 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer'>
+          <Link
+            to='/wishlist'
+            className='relative p-3 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer'
+          >
             <HeartIcon className='h-7 w-7' />
-          </button>
+          </Link>
 
           {/* User Account */}
           {!isAuthenticated ? (

@@ -9,6 +9,7 @@ import {
   SearchProductPage,
   ProductDetailPage,
   CartPage,
+  WishlistPage,
   CheckoutPage,
   OrderConfirmationPage,
   OrderHistoryPage,
@@ -125,6 +126,7 @@ function App() {
           <Route path='search' element={<SearchProductPage />} />
           <Route path='products/:id' element={<ProductDetailPage />} />
           <Route path='cart' element={<CartPage />} />
+          <Route path='wishlist' element={<WishlistPage />} />
           <Route
             path='checkout'
             element={
