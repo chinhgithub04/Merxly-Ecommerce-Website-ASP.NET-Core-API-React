@@ -9,11 +9,19 @@ namespace merxly.Domain.Entities
         public string? Description { get; set; }
         public string? LogoImagePublicId { get; set; }
         public string? BannerImagePublicId { get; set; }
+        public string IdentityCardFrontPublicId { get; set; }
+        public string IdentityCardBackPublicId { get; set; }
+        public string BussinessLicensePublicId { get; set; }
+        public string TaxCode { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
+        public string OwnerName { get; set; }
+        public string OwnerEmail { get; set; }
+        public string? OwnerPhoneNumber { get; set; }
         public string? Website { get; set; }
         public bool IsActive { get; set; }
         public bool IsVerified { get; set; }
+        public string? RejectionReason { get; set; }
         public decimal CommissionRate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
