@@ -5,15 +5,32 @@ import {
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { StoreRegistrationForm } from '../components/store/registration/StoreRegistrationForm';
+import { createStore } from '../services/storeService';
+import type { CreateStoreDto } from '../types/models/store';
 
 export const SignUpNewStorePage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (data: any) => {
-    console.log('Store registration data:', data);
-    // In real implementation, this would call the API
-    setIsSubmitted(true);
+  const handleSubmit = async (data: CreateStoreDto) => {
+    try {
+      setError(null);
+
+      const response = await createStore(data);
+
+      if (response.isSuccess) {
+        setIsSubmitted(true);
+      } else {
+        setError(response.message || 'Failed to submit store registration');
+      }
+    } catch (err: any) {
+      console.error('Store registration error:', err);
+      setError(
+        err.response?.data?.message ||
+          'An error occurred while submitting your registration. Please try again.'
+      );
+    }
   };
 
   if (isSubmitted) {
@@ -33,16 +50,10 @@ export const SignUpNewStorePage = () => {
           <div className='space-y-3'>
             <button
               onClick={() => navigate('/')}
-              className='w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium'
+              className='cursor-pointer w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium'
             >
               Go to Home
             </button>
-            <Link
-              to='/login'
-              className='block w-full px-4 py-3 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors font-medium'
-            >
-              Login to Your Account
-            </Link>
           </div>
         </div>
       </div>
@@ -51,32 +62,6 @@ export const SignUpNewStorePage = () => {
 
   return (
     <div className='min-h-screen bg-neutral-50'>
-      {/* Header */}
-      <header className='bg-white border-b border-neutral-200'>
-        <div className='max-w-7xl mx-auto px-4 py-4 flex items-center justify-between'>
-          <Link to='/' className='flex items-center gap-2'>
-            <div className='w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center'>
-              <span className='text-white font-bold text-lg'>M</span>
-            </div>
-            <span className='text-xl font-bold text-neutral-900'>Merxly</span>
-          </Link>
-          <div className='flex items-center gap-4'>
-            <Link
-              to='/login'
-              className='text-sm text-neutral-600 hover:text-neutral-900'
-            >
-              Already have an account?
-            </Link>
-            <Link
-              to='/login'
-              className='px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium'
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className='max-w-4xl mx-auto px-4 py-12'>
         {/* Hero Section */}
@@ -173,6 +158,11 @@ export const SignUpNewStorePage = () => {
 
         {/* Registration Form */}
         <div className='bg-white rounded-lg shadow-lg border border-neutral-200 p-8'>
+          {error && (
+            <div className='mb-6 p-4 bg-red-50 border border-red-200 rounded-lg'>
+              <p className='text-sm text-red-800'>{error}</p>
+            </div>
+          )}
           <StoreRegistrationForm onSubmit={handleSubmit} />
         </div>
 

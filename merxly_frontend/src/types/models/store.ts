@@ -15,6 +15,23 @@ export interface DetailStoreDto {
   ownerName: string;
 }
 
+export interface CreateStoreDto {
+  storeName: string;
+  description?: string | null;
+  logoImagePublicId?: string | null;
+  bannerImagePublicId?: string | null;
+  identityCardFrontPublicId: string;
+  identityCardBackPublicId: string;
+  bussinessLicensePublicId: string;
+  taxCode: string;
+  email: string;
+  phoneNumber: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhoneNumber?: string | null;
+  website?: string | null;
+}
+
 export interface UpdateStoreDto {
   storeName?: string;
   description?: string;

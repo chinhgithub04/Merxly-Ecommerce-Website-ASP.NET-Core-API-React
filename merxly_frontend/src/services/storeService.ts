@@ -1,6 +1,20 @@
 import type { Response } from '../types/api/common';
-import type { DetailStoreDto, UpdateStoreDto } from '../types/models/store';
+import type {
+  CreateStoreDto,
+  DetailStoreDto,
+  UpdateStoreDto,
+} from '../types/models/store';
 import apiClient from './apiClient';
+
+export const createStore = async (
+  dto: CreateStoreDto
+): Promise<Response<DetailStoreDto>> => {
+  const response = await apiClient.post<Response<DetailStoreDto>>(
+    '/stores',
+    dto
+  );
+  return response.data;
+};
 
 export const getMyStore = async (): Promise<Response<DetailStoreDto>> => {
   const response = await apiClient.get<Response<DetailStoreDto>>(

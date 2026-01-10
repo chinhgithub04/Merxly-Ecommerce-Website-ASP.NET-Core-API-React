@@ -60,7 +60,6 @@ function App() {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-        <Route path='/sign-up-new-store' element={<SignUpNewStorePage />} />
 
         {/* Admin Routes with Layout */}
         <Route
@@ -97,7 +96,7 @@ function App() {
           <Route path='locations' element={<StoreLocationsPage />} />
           <Route path='payments' element={<StorePaymentsPage />} />
           <Route path='my-store' element={<StoreMyStorePage />} />
-          <Route path='settings' element={<StoreSettingsPage />} />
+          <Route path='settings' element={<StoreSettingsPage />} />{' '}
         </Route>
 
         {/* Create Product Route - Without Layout */}
@@ -125,6 +124,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path='search' element={<SearchProductPage />} />
           <Route path='products/:id' element={<ProductDetailPage />} />
+          <Route path='sign-up-new-store' element={<SignUpNewStorePage />} />
           <Route path='cart' element={<CartPage />} />
           <Route path='wishlist' element={<WishlistPage />} />
           <Route
