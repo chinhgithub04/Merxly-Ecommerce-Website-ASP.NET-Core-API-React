@@ -18,21 +18,19 @@ export const CategoryActions = ({
 }: CategoryActionsProps) => {
   return (
     <div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-      {/* Add Subcategory (Parent only) */}
-      {isParent && (
-        <button
-          onClick={() => onAddSubcategory(category.id)}
-          className='p-1.5 text-primary-600 hover:bg-primary-50 rounded transition-colors'
-          title='Add subcategory'
-        >
-          <PlusIcon className='h-4 w-4' />
-        </button>
-      )}
+      {/* Add Subcategory */}
+      <button
+        onClick={() => onAddSubcategory(category.id)}
+        className='cursor-pointer p-1.5 text-primary-600 hover:bg-primary-50 rounded transition-colors'
+        title='Add subcategory'
+      >
+        <PlusIcon className='h-4 w-4' />
+      </button>
 
       {/* Edit */}
       <button
         onClick={() => onEdit(category)}
-        className='p-1.5 text-neutral-600 hover:bg-neutral-100 rounded transition-colors'
+        className='cursor-pointer p-1.5 text-neutral-600 hover:bg-neutral-100 rounded transition-colors'
         title='Edit category'
       >
         <PencilIcon className='h-4 w-4' />
@@ -41,7 +39,7 @@ export const CategoryActions = ({
       {/* Delete */}
       <button
         onClick={() => onDelete(category.id)}
-        className='p-1.5 text-error-600 hover:bg-error-50 rounded transition-colors'
+        className='cursor-pointer p-1.5 text-error-600 hover:bg-error-50 rounded transition-colors'
         title='Delete category'
       >
         <TrashIcon className='h-4 w-4' />

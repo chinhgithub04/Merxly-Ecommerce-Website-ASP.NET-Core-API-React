@@ -24,6 +24,14 @@ namespace merxly.API.Controllers
             return OkResponse(result, "Category tree retrieved successfully");
         }
 
+        [HttpGet("admin/tree")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<ActionResult<ResponseDto<PaginatedResultDto<AdminCategoryDto>>>> GetAdminCategoryTree([FromQuery] PaginationQuery paginationQuery, CancellationToken cancellationToken = default)
+        {
+            var result = await _categoryService.GetAdminCategoryTreeAsync(paginationQuery, cancellationToken);
+            return OkResponse(result, "Admin category tree retrieved successfully");
+        }
+
         [HttpGet("parents")]
         public async Task<ActionResult<ResponseDto<PaginatedResultDto<ParentCategoryDto>>>> GetParentCategories([FromQuery] PaginationQuery paginationQuery, CancellationToken cancellationToken = default)
         {

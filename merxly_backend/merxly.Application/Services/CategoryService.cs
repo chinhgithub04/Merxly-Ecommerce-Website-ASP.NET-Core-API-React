@@ -76,6 +76,62 @@ namespace merxly.Application.Services
             return categoryDto;
         }
 
+        /// <summary>
+        /// Retrieves the admin category tree with all details including nested subcategories recursively.
+        /// Includes description, imagePublicId, and isActive status for admin panel.
+        /// </summary>
+        public async Task<PaginatedResultDto<AdminCategoryDto>> GetAdminCategoryTreeAsync(PaginationQuery paginationQuery, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Retrieving admin category tree. PageNumber: {PageNumber}, PageSize: {PageSize}", paginationQuery.PageNumber, paginationQuery.PageSize);
+
+            // Get paginated root categories (include both active and inactive for admin)
+            var paginatedRootCategories = await _unitOfWork.Category.GetPagedAsync(
+                paginationQuery,
+                c => c.ParentCategoryId == null,
+                cancellationToken
+            );
+
+            // Load all categories to build the tree structure (include inactive for admin)
+            var allCategories = await _unitOfWork.Category.FindAsync(
+                c => true, // Get all categories for admin
+                cancellationToken
+            );
+
+            // Build the tree structure recursively
+            var categoryDtos = paginatedRootCategories.Items.Select(root => BuildAdminCategoryTree(root, allCategories)).ToList();
+
+            var paginatedResult = new PaginatedResultDto<AdminCategoryDto>
+            {
+                Items = categoryDtos,
+                TotalCount = paginatedRootCategories.TotalCount,
+                PageNumber = paginatedRootCategories.PageNumber,
+                PageSize = paginatedRootCategories.PageSize
+            };
+
+            _logger.LogInformation("Successfully retrieved {Count} admin categories with full hierarchy.", paginatedResult.Items.Count);
+
+            return paginatedResult;
+        }
+
+        private AdminCategoryDto BuildAdminCategoryTree(Category category, IReadOnlyList<Category> allCategories)
+        {
+            var categoryDto = new AdminCategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+                ImagePublicId = category.ImagePublicId,
+                ParentCategoryId = category.ParentCategoryId,
+                IsActive = category.IsActive,
+                Children = allCategories
+                    .Where(c => c.ParentCategoryId == category.Id)
+                    .Select(child => BuildAdminCategoryTree(child, allCategories))
+                    .ToList()
+            };
+
+            return categoryDto;
+        }
+
         public async Task<PaginatedResultDto<ParentCategoryDto>> GetParentCategoriesAsync(PaginationQuery paginationQuery, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Retrieving parent categories. PageNumber: {PageNumber}, PageSize: {PageSize}", paginationQuery.PageNumber, paginationQuery.PageSize);

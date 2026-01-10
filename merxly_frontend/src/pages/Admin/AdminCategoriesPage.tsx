@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { RectangleGroupIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { CategoryTree } from '../../components/admin/categories/CategoryTree';
 import {
@@ -6,115 +6,46 @@ import {
   type CategoryFormData,
 } from '../../components/admin/categories/AddEditCategoryModal';
 import type { Category } from '../../components/admin/categories/CategoryNode';
+import {
+  useCategoryTree,
+  useAdminCategoryTree,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from '../../hooks/useCategories';
+import type { AdminCategoryDto } from '../../types/models/category';
+import { uploadImage } from '../../services/uploadService';
+import { getCategoryImageUrl } from '../../utils/cloudinaryHelpers';
 
-// Mock categories data with hierarchy
-const mockCategories: Category[] = [
-  {
-    id: '1',
-    name: 'Electronics',
-    description: 'Electronic devices and accessories',
-    imageUrl: 'https://placehold.co/400',
-    isActive: true,
-    subCategories: [
-      {
-        id: '1-1',
-        name: 'Smartphones',
-        description: 'Mobile phones and accessories',
-        parentCategoryId: '1',
-        isActive: true,
-        subCategories: [],
-      },
-      {
-        id: '1-2',
-        name: 'Laptops',
-        description: 'Notebook computers and accessories',
-        parentCategoryId: '1',
-        isActive: true,
-        subCategories: [],
-      },
-      {
-        id: '1-3',
-        name: 'Tablets',
-        description: 'Tablet devices and accessories',
-        parentCategoryId: '1',
-        isActive: true,
-        subCategories: [],
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Fashion',
-    description: 'Clothing, shoes, and accessories',
-    imageUrl: 'https://placehold.co/400',
-    isActive: true,
-    subCategories: [
-      {
-        id: '2-1',
-        name: "Men's Clothing",
-        parentCategoryId: '2',
-        isActive: true,
-        subCategories: [],
-      },
-      {
-        id: '2-2',
-        name: "Women's Clothing",
-        parentCategoryId: '2',
-        isActive: true,
-        subCategories: [],
-      },
-      {
-        id: '2-3',
-        name: 'Shoes',
-        parentCategoryId: '2',
-        isActive: true,
-        subCategories: [],
-      },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Home & Garden',
-    description: 'Home improvement and garden supplies',
-    imageUrl: 'https://placehold.co/400',
-    isActive: true,
-    subCategories: [
-      {
-        id: '3-1',
-        name: 'Furniture',
-        parentCategoryId: '3',
-        isActive: true,
-        subCategories: [],
-      },
-      {
-        id: '3-2',
-        name: 'Kitchen',
-        parentCategoryId: '3',
-        isActive: true,
-        subCategories: [],
-      },
-    ],
-  },
-  {
-    id: '4',
-    name: 'Sports & Outdoors',
-    description: 'Sports equipment and outdoor gear',
-    imageUrl: 'https://placehold.co/400',
-    isActive: false,
-    subCategories: [
-      {
-        id: '4-1',
-        name: 'Exercise & Fitness',
-        parentCategoryId: '4',
-        isActive: false,
-        subCategories: [],
-      },
-    ],
-  },
-];
+// Transform AdminCategoryDto to Category structure for the UI
+const transformAdminCategoryDto = (dto: AdminCategoryDto): Category => {
+  return {
+    id: dto.id,
+    name: dto.name,
+    description: dto.description ?? undefined,
+    imageUrl: dto.imagePublicId
+      ? getCategoryImageUrl(dto.imagePublicId)
+      : undefined,
+    parentCategoryId: dto.parentCategoryId ?? undefined,
+    isActive: dto.isActive,
+    subCategories: dto.children.map((child) =>
+      transformAdminCategoryDto(child)
+    ),
+  };
+};
 
 export const AdminCategoriesPage = () => {
-  const [categories, setCategories] = useState<Category[]>(mockCategories);
+  // Fetch data from API
+  const { data: adminCategoryTreeResponse, isLoading } = useAdminCategoryTree(
+    1,
+    100
+  );
+
+  // Mutations
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [parentCategoryForAdd, setParentCategoryForAdd] = useState<
     Category | undefined
@@ -122,6 +53,43 @@ export const AdminCategoriesPage = () => {
   const [editingCategory, setEditingCategory] = useState<
     Category | undefined
   >();
+
+  // Transform API data to UI structure
+  const categories = useMemo(() => {
+    if (!adminCategoryTreeResponse?.data?.items) {
+      return [];
+    }
+
+    return adminCategoryTreeResponse.data.items.map((dto) =>
+      transformAdminCategoryDto(dto)
+    );
+  }, [adminCategoryTreeResponse]);
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const countAllCategories = (cats: Category[]): number => {
+      return cats.reduce(
+        (sum, cat) => sum + 1 + countAllCategories(cat.subCategories),
+        0
+      );
+    };
+
+    const countActiveCategories = (cats: Category[]): number => {
+      return cats.reduce(
+        (sum, cat) =>
+          sum +
+          (cat.isActive ? 1 : 0) +
+          countActiveCategories(cat.subCategories),
+        0
+      );
+    };
+
+    return {
+      total: countAllCategories(categories),
+      active: countActiveCategories(categories),
+      parents: categories.length,
+    };
+  }, [categories]);
 
   const handleAddTopLevel = () => {
     setParentCategoryForAdd(undefined);
@@ -154,82 +122,60 @@ export const AdminCategoriesPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (categoryId: string) => {
+  const handleDelete = async (categoryId: string) => {
     if (
       confirm(
         'Are you sure you want to delete this category? This will also delete all subcategories.'
       )
     ) {
-      const deleteFromTree = (cats: Category[]): Category[] => {
-        return cats
-          .filter((cat) => cat.id !== categoryId)
-          .map((cat) => ({
-            ...cat,
-            subCategories: deleteFromTree(cat.subCategories),
-          }));
-      };
-
-      setCategories(deleteFromTree(categories));
+      try {
+        await deleteMutation.mutateAsync(categoryId);
+      } catch (error) {
+        console.error('Failed to delete category:', error);
+        alert('Failed to delete category. Please try again.');
+      }
     }
   };
 
-  const handleSubmit = (data: CategoryFormData) => {
-    if (editingCategory) {
-      // Edit existing category
-      const updateInTree = (cats: Category[]): Category[] => {
-        return cats.map((cat) => {
-          if (cat.id === editingCategory.id) {
-            return {
-              ...cat,
-              name: data.name,
-              description: data.description,
-              isActive: data.isActive,
-            };
-          }
-          return {
-            ...cat,
-            subCategories: updateInTree(cat.subCategories),
-          };
-        });
-      };
+  const handleSubmit = async (data: CategoryFormData) => {
+    setIsModalOpen(false);
 
-      setCategories(updateInTree(categories));
-    } else {
-      // Add new category
-      const newCategory: Category = {
-        id: Date.now().toString(),
-        name: data.name,
-        description: data.description,
-        imageUrl: data.imageFile
-          ? URL.createObjectURL(data.imageFile)
-          : undefined,
-        parentCategoryId: data.parentCategoryId,
-        isActive: data.isActive,
-        subCategories: [],
-      };
-
-      if (parentCategoryForAdd) {
-        // Add as subcategory
-        const addToTree = (cats: Category[]): Category[] => {
-          return cats.map((cat) => {
-            if (cat.id === parentCategoryForAdd.id) {
-              return {
-                ...cat,
-                subCategories: [...cat.subCategories, newCategory],
-              };
-            }
-            return {
-              ...cat,
-              subCategories: addToTree(cat.subCategories),
-            };
-          });
-        };
-
-        setCategories(addToTree(categories));
-      } else {
-        // Add as top-level category
-        setCategories([...categories, newCategory]);
+    try {
+      // Upload image if provided
+      let imagePublicId: string | undefined = undefined;
+      if (data.imageFile) {
+        const uploadResult = await uploadImage(
+          data.imageFile,
+          'categories',
+          0 // ImageType.Logo
+        );
+        imagePublicId = uploadResult.data?.publicId;
       }
+
+      if (editingCategory) {
+        // Update existing category
+        await updateMutation.mutateAsync({
+          id: editingCategory.id,
+          data: {
+            name: data.name,
+            description: data.description,
+            imagePublicId,
+            isActive: data.isActive,
+            parentCategoryId: data.parentCategoryId,
+          },
+        });
+      } else {
+        // Create new category
+        await createMutation.mutateAsync({
+          name: data.name,
+          description: data.description,
+          imagePublicId,
+          parentCategoryId: data.parentCategoryId,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to save category:', error);
+      alert('Failed to save category. Please try again.');
     }
   };
 
@@ -250,42 +196,51 @@ export const AdminCategoriesPage = () => {
         </div>
         <button
           onClick={handleAddTopLevel}
-          className='flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium'
+          className='cursor-pointer flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium'
         >
           <PlusIcon className='h-5 w-5' />
           Add Category
         </button>
       </div>
 
-      {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-        <div className='bg-white rounded-lg border border-neutral-200 p-6'>
-          <p className='text-sm text-neutral-600 mb-1'>Total Categories</p>
-          <p className='text-3xl font-bold text-neutral-900'>
-            {categories.length}
-          </p>
+      {/* Loading State */}
+      {isLoading ? (
+        <div className='flex items-center justify-center py-12'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
         </div>
-        <div className='bg-white rounded-lg border border-neutral-200 p-6'>
-          <p className='text-sm text-neutral-600 mb-1'>Active Categories</p>
-          <p className='text-3xl font-bold text-neutral-900'>
-            {categories.filter((c) => c.isActive).length}
-          </p>
-        </div>
-        <div className='bg-white rounded-lg border border-neutral-200 p-6'>
-          <p className='text-sm text-neutral-600 mb-1'>Total Subcategories</p>
-          <p className='text-3xl font-bold text-neutral-900'>
-            {categories.reduce((sum, c) => sum + c.subCategories.length, 0)}
-          </p>
-        </div>
-      </div>
+      ) : (
+        <>
+          {/* Stats */}
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+            <div className='bg-white rounded-lg border border-neutral-200 p-6'>
+              <p className='text-sm text-neutral-600 mb-1'>Total Categories</p>
+              <p className='text-3xl font-bold text-neutral-900'>
+                {stats.total}
+              </p>
+            </div>
+            <div className='bg-white rounded-lg border border-neutral-200 p-6'>
+              <p className='text-sm text-neutral-600 mb-1'>Active Categories</p>
+              <p className='text-3xl font-bold text-neutral-900'>
+                {stats.active}
+              </p>
+            </div>
+            <div className='bg-white rounded-lg border border-neutral-200 p-6'>
+              <p className='text-sm text-neutral-600 mb-1'>Parent Categories</p>
+              <p className='text-3xl font-bold text-neutral-900'>
+                {stats.parents}
+              </p>
+            </div>
+          </div>
 
-      {/* Category Tree */}
-      <CategoryTree
-        categories={categories}
-        onAddSubcategory={handleAddSubcategory}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+          {/* Category Tree */}
+          <CategoryTree
+            categories={categories}
+            onAddSubcategory={handleAddSubcategory}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </>
+      )}
 
       {/* Add/Edit Modal */}
       <AddEditCategoryModal

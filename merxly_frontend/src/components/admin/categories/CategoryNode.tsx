@@ -45,7 +45,7 @@ export const CategoryNode = ({
         {/* Expand/Collapse Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`flex-shrink-0 p-1 rounded hover:bg-neutral-200 transition-colors ${
+          className={`cursor-pointer shrink-0 p-1 rounded hover:bg-neutral-200 transition-colors ${
             hasChildren ? 'visible' : 'invisible'
           }`}
         >
@@ -56,22 +56,20 @@ export const CategoryNode = ({
           )}
         </button>
 
-        {/* Category Image (Parent only) */}
-        {isParent && (
-          <div className='flex-shrink-0'>
-            {category.imageUrl ? (
-              <img
-                src={category.imageUrl}
-                alt={category.name}
-                className='w-10 h-10 object-cover rounded-lg border border-neutral-200'
-              />
-            ) : (
-              <div className='w-10 h-10 flex items-center justify-center bg-neutral-100 rounded-lg border border-neutral-200'>
-                <PhotoIcon className='h-5 w-5 text-neutral-400' />
-              </div>
-            )}
-          </div>
-        )}
+        {/* Category Image */}
+        <div className='flex-shrink-0'>
+          {category.imageUrl ? (
+            <img
+              src={category.imageUrl}
+              alt={category.name}
+              className='w-10 h-10 object-cover rounded-lg border border-neutral-200'
+            />
+          ) : (
+            <div className='w-10 h-10 flex items-center justify-center bg-neutral-100 rounded-lg border border-neutral-200'>
+              <PhotoIcon className='h-5 w-5 text-neutral-400' />
+            </div>
+          )}
+        </div>
 
         {/* Category Info */}
         <div className='flex-1 min-w-0'>
