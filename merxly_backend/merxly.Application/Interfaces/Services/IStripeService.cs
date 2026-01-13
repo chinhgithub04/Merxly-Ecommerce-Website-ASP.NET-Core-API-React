@@ -90,5 +90,10 @@ namespace merxly.Application.Interfaces.Services
         /// Deletes (or deactivates) a Stripe Connect account
         /// </summary>
         Task<Account> DeleteConnectAccountAsync(string accountId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates a transfer to a connected account
+        /// </summary>
+        Task<Transfer> CreateTransferAsync(string destinationAccountId, decimal amount, string currency, string sourceTransaction, Dictionary<string, string>? metadata = null, CancellationToken cancellationToken = default);
     }
 }

@@ -22,6 +22,8 @@ namespace merxly.Infrastructure.Persistence.Repositories
                     .ThenInclude(o => o.ShippingAddress)
                 .Include(so => so.Order)
                     .ThenInclude(o => o.User)
+                .Include(so => so.Order)
+                    .ThenInclude(o => o.Payment)
                 .Include(so => so.Store)
                     .ThenInclude(s => s.Address)
                 .Include(so => so.OrderItems)

@@ -298,5 +298,32 @@ namespace merxly.Infrastructure.Services
             _logger.LogInformation("Account deleted successfully");
             return account;
         }
+        public async Task<Transfer> CreateTransferAsync(string destinationAccountId, decimal amount, string currency, string sourceTransaction, Dictionary<string, string>? metadata = null, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Creating transfer of {Amount} {Currency} to account: {AccountId}", amount, currency, destinationAccountId);
+
+            // Zero-decimal currencies (amounts are in whole units, not cents)
+            var zeroDecimalCurrencies = new HashSet<string> { "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf", "ugx", "vnd", "vuv", "xaf", "xof", "xpf" };
+
+            // Convert amount based on currency type
+            long stripeAmount = zeroDecimalCurrencies.Contains(currency.ToLower())
+                ? (long)amount  // Zero-decimal currencies: use amount as-is
+                : (long)(amount * 100);  // Other currencies: convert to smallest unit (cents)
+
+            var options = new TransferCreateOptions
+            {
+                Amount = stripeAmount,
+                Currency = currency,
+                Destination = destinationAccountId,
+                SourceTransaction = sourceTransaction,
+                Metadata = metadata
+            };
+
+            var service = new TransferService();
+            var transfer = await service.CreateAsync(options, null, cancellationToken);
+
+            _logger.LogInformation("Transfer created successfully with ID: {TransferId}", transfer.Id);
+            return transfer;
+        }
     }
 }
