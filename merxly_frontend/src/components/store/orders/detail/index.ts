@@ -7,4 +7,5 @@ export { OrderCustomerInfo } from './OrderCustomerInfo';
 export { OrderCustomerAddress } from './OrderCustomerAddress';
 export { OrderItemsTable } from './OrderItemsTable';
 export { OrderSummarySection } from './OrderSummarySection';
+export { StoreOrderSummarySection } from './StoreOrderSummarySection';
 export { OrderNotesSection } from './OrderNotesSection';

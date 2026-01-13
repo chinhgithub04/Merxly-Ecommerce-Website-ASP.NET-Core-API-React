@@ -38,6 +38,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               }
               ${isPassword ? 'pr-10' : ''}
               ${className}
+              [&::-ms-reveal]:hidden [&::-ms-clear]:hidden
+              [&::-webkit-credentials-auto-fill-button]:hidden
+              [&::-webkit-contacts-auto-fill-button]:hidden
             `}
             {...props}
           />

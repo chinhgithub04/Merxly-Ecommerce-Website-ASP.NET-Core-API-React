@@ -9,7 +9,7 @@ namespace merxly.Application.DTOs.Order
         public OrderStatus Status { get; init; }
         public decimal SubTotal { get; init; }
         public decimal? Tax { get; init; }
-        public decimal? ShippingCost { get; init; }
+        public decimal TotalCommission { get; init; }
         public decimal TotalAmount { get; init; }
         public string? Carrier { get; init; }
         public string? TrackingNumber { get; init; }

@@ -254,7 +254,9 @@ namespace merxly.Application.Mappings
                 .ForMember(dest => dest.CustomerFullAddress, opt => opt.MapFrom(src =>
                     $"{src.Order.ShippingAddress.AddressLine}, {src.Order.ShippingAddress.WardName}, {src.Order.ShippingAddress.CityName}"))
                 .ForMember(dest => dest.CustomerPostalCode, opt => opt.MapFrom(src => src.Order.ShippingAddress.PostalCode))
-                .ForMember(dest => dest.CustomerPhoneNumber, opt => opt.MapFrom(src => src.Order.ShippingAddress.PhoneNumber));
+                .ForMember(dest => dest.CustomerPhoneNumber, opt => opt.MapFrom(src => src.Order.ShippingAddress.PhoneNumber))
+                .ForMember(dest => dest.TotalCommission, opt => opt.MapFrom(src => src.StoreTransfers.Sum(st => st.Commission)))
+                .ForMember(dest => dest.TotalAmount, opt => opt.MapFrom(src => src.TotalAmount - src.StoreTransfers.Sum(st => st.Commission)));
 
             // Customer Order Mappings
             CreateMap<SubOrder, CustomerSubOrderDto>()

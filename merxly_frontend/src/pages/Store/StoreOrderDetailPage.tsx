@@ -13,7 +13,7 @@ import {
   OrderCustomerInfo,
   OrderCustomerAddress,
   OrderItemsTable,
-  OrderSummarySection,
+  StoreOrderSummarySection,
   OrderNotesSection,
 } from '../../components/store/orders/detail';
 import { CustomerOrderShippingInfo } from '../../components/customer/orders/detail/CustomerOrderShippingInfo';
@@ -157,9 +157,9 @@ export const StoreOrderDetailPage = () => {
 
           {/* Order Summary */}
           <div className='border-t border-neutral-200 pt-6'>
-            <OrderSummarySection
+            <StoreOrderSummarySection
               subTotal={order.subTotal}
-              shippingCost={order.shippingCost}
+              totalCommission={order.totalCommission}
               totalAmount={order.totalAmount}
             />
           </div>

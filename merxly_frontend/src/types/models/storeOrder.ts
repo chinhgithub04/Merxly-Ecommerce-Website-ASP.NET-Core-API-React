@@ -26,8 +26,8 @@ export interface StoreSubOrderDetailDto {
   status: OrderStatus;
   subTotal: number;
   tax?: number;
-  shippingCost?: number;
   totalAmount: number;
+  totalCommission: number;
   carrier?: string;
   trackingNumber?: string;
   notes?: string;
