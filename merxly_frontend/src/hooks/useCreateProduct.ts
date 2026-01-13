@@ -193,9 +193,9 @@ export const useCreateProduct = (
             .filter((m) => m != null && m.mediaPublicId)
             .map((m) => ({
               mediaPublicId: m.mediaPublicId,
-              fileName: '',
-              fileExtension: '',
-              fileSizeInBytes: 0,
+              fileName: m.fileName,
+              fileExtension: m.fileExtension,
+              fileSizeInBytes: m.fileSizeInBytes,
               displayOrder: m.displayOrder,
               isMain: m.isMain,
               mediaType: m.mediaType,
