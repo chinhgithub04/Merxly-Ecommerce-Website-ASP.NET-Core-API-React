@@ -13,6 +13,9 @@ namespace merxly.Infrastructure.Persistence.Configurations
             builder.HasKey(pv => pv.Id);
 
             // Properties
+            builder.Property(pv => pv.Name)
+                .IsRequired();
+
             builder.Property(pv => pv.SKU)
                 .HasMaxLength(100);
 
