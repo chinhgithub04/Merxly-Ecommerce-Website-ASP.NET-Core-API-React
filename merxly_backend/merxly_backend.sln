@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "merxly.Infrastructure", "me
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "merxly.Domain", "merxly.Domain\merxly.Domain.csproj", "{AEF7BC43-1BC5-41B2-AB76-7FB344546EFF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "merxly.Application.Tests", "merxly.Application.Tests\merxly.Application.Tests.csproj", "{AD616406-5490-41A4-903C-242190363959}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AEF7BC43-1BC5-41B2-AB76-7FB344546EFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEF7BC43-1BC5-41B2-AB76-7FB344546EFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEF7BC43-1BC5-41B2-AB76-7FB344546EFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD616406-5490-41A4-903C-242190363959}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD616406-5490-41A4-903C-242190363959}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD616406-5490-41A4-903C-242190363959}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD616406-5490-41A4-903C-242190363959}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
