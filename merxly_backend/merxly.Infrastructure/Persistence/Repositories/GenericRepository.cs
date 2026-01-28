@@ -67,6 +67,19 @@ namespace merxly.Infrastructure.Persistence.Repositories
 
         }
 
+        public async Task<IReadOnlyCollection<T>> GetByIdsAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet.AsNoTracking();
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+            return await query.Where(e => ids.Contains(EF.Property<TKey>(e, "Id"))).ToListAsync(cancellationToken);
+        }
+
         public async Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
         {
             IQueryable<T> query = _dbSet.AsNoTracking();

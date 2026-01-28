@@ -56,11 +56,16 @@ namespace merxly.Application.Services
             var orderItemsData = await ValidateAndPrepareOrderItemsAsync(request.Items, cancellationToken);
             var itemsByStore = orderItemsData.GroupBy(x => x.StoreId).ToList();
 
-            // 4. Update stock quantities immediately after validation (while variants are already tracked)
+            var variantIds = orderItemsData.Select(x => x.ProductVariantId).Distinct().ToList();
+            var variants = await _unitOfWork.ProductVariant.GetByIdsAsync(variantIds, cancellationToken);
+            var variantDict = variants.ToDictionary(x => x.Id);
+
+            // 4. Update stock quantities
             foreach (var itemData in orderItemsData)
             {
-                itemData.ProductVariant.StockQuantity -= itemData.Quantity;
-                _unitOfWork.ProductVariant.Update(itemData.ProductVariant);
+                var variant = variantDict[itemData.ProductVariantId];
+                variant.StockQuantity -= itemData.Quantity;
+                _unitOfWork.ProductVariant.Update(variant);
             }
 
             // 5. Calculate totals
@@ -238,20 +243,36 @@ namespace merxly.Application.Services
             _logger.LogInformation("Validating and preparing {ItemCount} order items", items.Count);
             var orderItemsData = new List<OrderItemData>();
 
+            var variantCheckoutInfos = await _unitOfWork.ProductVariant.GetVariantsForCheckoutAsync(
+                items.Select(i => i.ProductVariantId).Distinct().ToList(),
+                cancellationToken);
+
+            var dict = variantCheckoutInfos.ToDictionary(x => x.VariantId);
+
             foreach (var item in items)
             {
-                var variant = await _unitOfWork.ProductVariant.GetByIdAsync(item.ProductVariantId, cancellationToken);
-
-                if (variant == null)
+                if (!dict.TryGetValue(item.ProductVariantId, out var variant))
                 {
                     _logger.LogWarning("Product variant {ProductVariantId} not found", item.ProductVariantId);
                     throw new NotFoundException($"Product variant {item.ProductVariantId} not found");
                 }
 
-                if (!variant.IsActive)
+                if (!variant.VariantIsActive)
                 {
                     _logger.LogWarning("Product variant {ProductVariantId} is not active", item.ProductVariantId);
                     throw new InvalidOperationException($"Product variant {item.ProductVariantId} is not active");
+                }
+
+                if (!variant.ProductIsActive)
+                {
+                    _logger.LogWarning("Product {ProductId} is not active", variant.ProductId);
+                    throw new InvalidOperationException($"Product {variant.ProductId} is not active");
+                }
+
+                if (!variant.StoreIsActive)
+                {
+                    _logger.LogWarning("Store {StoreId} is not active for product variant {ProductVariantId}", variant.StoreId, item.ProductVariantId);
+                    throw new InvalidOperationException($"Store {variant.StoreId} is not active");
                 }
 
                 if (variant.StockQuantity < item.Quantity)
@@ -261,31 +282,14 @@ namespace merxly.Application.Services
                     throw new InvalidOperationException($"Insufficient stock for product variant {item.ProductVariantId}");
                 }
 
-                // Get product to access store information
-                var product = await _unitOfWork.Product.GetByIdAsync(variant.ProductId, cancellationToken);
-                if (product == null || !product.IsActive)
-                {
-                    _logger.LogWarning("Product for variant {ProductVariantId} not found or inactive", item.ProductVariantId);
-                    throw new NotFoundException($"Product for variant {item.ProductVariantId} not found or inactive");
-                }
-
-                // Get store to access commission rate
-                var store = await _unitOfWork.Store.GetByIdAsync(product.StoreId, cancellationToken);
-                if (store == null || !store.IsActive)
-                {
-                    _logger.LogWarning("Store for product {ProductId} not found or inactive", product.Id);
-                    throw new InvalidOperationException($"Store for product {product.Id} is not active");
-                }
-
                 orderItemsData.Add(new OrderItemData
                 {
                     ProductVariantId = item.ProductVariantId,
                     Quantity = item.Quantity,
                     UnitPrice = variant.Price,
                     TotalPrice = variant.Price * item.Quantity,
-                    StoreId = product.StoreId,
-                    CommissionRate = store.CommissionRate,
-                    ProductVariant = variant
+                    StoreId = variant.StoreId,
+                    CommissionRate = variant.CommissionRate,
                 });
             }
 
@@ -353,7 +357,6 @@ namespace merxly.Application.Services
             public decimal TotalPrice { get; set; }
             public Guid StoreId { get; set; }
             public decimal CommissionRate { get; set; }
-            public ProductVariant ProductVariant { get; set; } = null!;
         }
     }
 }
