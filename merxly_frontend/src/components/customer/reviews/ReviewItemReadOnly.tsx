@@ -69,11 +69,7 @@ export const ReviewItemReadOnly = ({ orderItem }: ReviewItemReadOnlyProps) => {
               className='aspect-square rounded-lg overflow-hidden bg-neutral-100 border border-neutral-200'
             >
               <img
-                src={getMediaUrl(
-                  media.mediaPublicId,
-                  media.mediaType,
-                  'thumbnail',
-                )}
+                src={getMediaUrl(media.mediaPublicId, media.mediaType, 'card')}
                 alt='Review media'
                 className='w-full h-full object-cover'
               />
