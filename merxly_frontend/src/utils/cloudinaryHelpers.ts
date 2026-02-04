@@ -1,5 +1,10 @@
 import { cld } from '../lib/cloudinary';
-import { fill, scale, thumbnail } from '@cloudinary/url-gen/actions/resize';
+import {
+  fill,
+  limitFit,
+  scale,
+  thumbnail,
+} from '@cloudinary/url-gen/actions/resize';
 import { autoGravity } from '@cloudinary/url-gen/qualifiers/gravity';
 import { auto } from '@cloudinary/url-gen/qualifiers/quality';
 import { MediaType } from '../types/enums';
@@ -69,16 +74,14 @@ export type ImagePreset = keyof typeof IMAGE_PRESETS;
  */
 export const getProductImageUrl = (
   publicId: string,
-  preset: ImagePreset = 'card'
+  preset: ImagePreset = 'card',
 ): string => {
   const { width, height } = IMAGE_PRESETS[preset];
 
   const image = cld.image(publicId);
 
   // Apply transformations
-  image
-    .resize(fill().width(width).height(height).gravity(autoGravity()))
-    .quality(auto());
+  image.resize(limitFit().width(width).height(height)).quality(auto());
 
   return image.toURL();
 };
@@ -93,7 +96,7 @@ export const getProductImageUrl = (
 export const getProductImageUrlCustom = (
   publicId: string,
   width: number,
-  height?: number
+  height?: number,
 ): string => {
   const image = cld.image(publicId);
 
@@ -150,7 +153,7 @@ export const getVideoUrl = (publicId: string): string => {
 export const getMediaUrl = (
   publicId: string,
   mediaType: MediaType,
-  preset: ImagePreset = 'card'
+  preset: ImagePreset = 'card',
 ): string => {
   if (mediaType === MediaType.Video) {
     return getVideoThumbnailUrl(publicId);
@@ -167,7 +170,7 @@ export const getMediaUrl = (
  */
 export const getMediaThumbnailUrl = (
   publicId: string,
-  mediaType: MediaType
+  mediaType: MediaType,
 ): string => {
   if (mediaType === MediaType.Video) {
     return getVideoThumbnailUrl(publicId);
@@ -185,7 +188,7 @@ export const getMediaThumbnailUrl = (
 export const getCategoryImageUrl = (
   publicId: string,
   width: number = 200,
-  height: number = 200
+  height: number = 200,
 ): string => {
   const image = cld.image(publicId);
 

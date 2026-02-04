@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import type { CartItemDto } from '../../types/models/cart';
 import { getProductImageUrl } from '../../utils/cloudinaryHelpers';
 
@@ -49,7 +50,7 @@ export const OrderSummary = ({
   const subtotal = useMemo(() => {
     return items.reduce(
       (sum, item) => sum + item.priceAtAdd * item.quantity,
-      0
+      0,
     );
   }, [items]);
 
@@ -82,7 +83,7 @@ export const OrderSummary = ({
                       <img
                         src={getProductImageUrl(
                           item.productImagePublicId,
-                          'thumbnail'
+                          'thumbnail',
                         )}
                         alt={item.productName}
                         className='w-full h-full object-cover'
@@ -114,7 +115,7 @@ export const OrderSummary = ({
                       <span className='text-sm font-medium text-neutral-900'>
                         ₫
                         {(item.priceAtAdd * item.quantity).toLocaleString(
-                          'vi-VN'
+                          'vi-VN',
                         )}
                       </span>
                     </div>
@@ -177,8 +178,9 @@ export const OrderSummary = ({
       <button
         onClick={onPlaceOrder}
         disabled={isPlacingOrder}
-        className='cursor-pointer w-full px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-600'
+        className='cursor-pointer w-full px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-600 flex items-center justify-center gap-2'
       >
+        {isPlacingOrder && <ArrowPathIcon className='h-5 w-5 animate-spin' />}
         {isPlacingOrder ? 'Processing...' : 'Place Order'}
       </button>
     </div>

@@ -23,10 +23,10 @@ export const StoreImagesCard = ({
   isUploadingBanner = false,
 }: StoreImagesCardProps) => {
   const [logoPreview, setLogoPreview] = useState<string | undefined>(
-    logoImageUrl
+    logoImageUrl,
   );
   const [bannerPreview, setBannerPreview] = useState<string | undefined>(
-    bannerImageUrl
+    bannerImageUrl,
   );
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +93,7 @@ export const StoreImagesCard = ({
                 <img
                   src={logoPreview}
                   alt='Store logo'
-                  className='w-32 h-32 object-cover rounded-lg border border-neutral-200'
+                  className='w-32 h-32 object-contain rounded-lg border border-neutral-200'
                 />
                 {isUploadingLogo && (
                   <div className='absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center'>
@@ -130,8 +130,8 @@ export const StoreImagesCard = ({
                 {isUploadingLogo
                   ? 'Uploading...'
                   : logoPreview
-                  ? 'Change Logo'
-                  : 'Upload Logo'}
+                    ? 'Change Logo'
+                    : 'Upload Logo'}
               </label>
               <input
                 id='logo-upload'
@@ -159,7 +159,7 @@ export const StoreImagesCard = ({
                 <img
                   src={bannerPreview}
                   alt='Store banner'
-                  className='w-full h-64 object-cover rounded-lg border border-neutral-200'
+                  className='w-full h-72 object-contain rounded-lg border border-neutral-200'
                 />
                 {isUploadingBanner && (
                   <div className='absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center'>
@@ -199,8 +199,8 @@ export const StoreImagesCard = ({
                 {isUploadingBanner
                   ? 'Uploading...'
                   : bannerPreview
-                  ? 'Change Banner'
-                  : 'Upload Banner'}
+                    ? 'Change Banner'
+                    : 'Upload Banner'}
               </label>
               <input
                 id='banner-upload'

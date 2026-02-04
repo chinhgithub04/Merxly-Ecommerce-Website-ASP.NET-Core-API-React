@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   MapPinIcon,
   PhoneIcon,
@@ -6,6 +7,7 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import type { CustomerAddressDto } from '../../types/models/address';
+import { Modal } from '../ui/Modal';
 
 interface AddressCardProps {
   address: CustomerAddressDto;
@@ -18,11 +20,20 @@ export const AddressCard = ({
   onEdit,
   onDelete,
 }: AddressCardProps) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this address?')) {
-      onDelete(address.id);
-    }
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete(address.id);
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteModalClose = () => {
+    setShowDeleteModal(false);
   };
 
   return (
@@ -84,6 +95,23 @@ export const AddressCard = ({
           <TrashIcon className='h-5 w-5' />
         </button>
       </div>
+
+      {/* Delete Address Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteModalClose}
+        onDone={handleDeleteConfirm}
+        title='Delete Address'
+        doneLabel='Delete'
+        cancelLabel='Cancel'
+      >
+        <div className='space-y-4'>
+          <p className='text-neutral-600'>
+            Are you sure you want to delete this address? This action cannot be
+            undone.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };

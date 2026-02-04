@@ -5,6 +5,7 @@ import {
   removeWishlistItem,
   clearWishlist,
 } from '../services/wishlistService';
+import { toast } from 'react-toastify';
 
 export const useWishlist = () => {
   const queryClient = useQueryClient();
@@ -23,6 +24,9 @@ export const useWishlist = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     },
+    onError: (err: Error) => {
+      toast.error(`Failed to add item to wishlist: ${err.message}`);
+    },
   });
 
   const removeWishlistItemMutation = useMutation({
@@ -30,12 +34,19 @@ export const useWishlist = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
     },
+    onError: (err: Error) => {
+      toast.error(`Failed to remove item from wishlist: ${err.message}`);
+    },
   });
 
   const clearWishlistMutation = useMutation({
     mutationFn: clearWishlist,
     onSuccess: () => {
+      toast.success('Wishlist cleared successfully');
       queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+    },
+    onError: (err: Error) => {
+      toast.error(`Failed to clear wishlist: ${err.message}`);
     },
   });
 

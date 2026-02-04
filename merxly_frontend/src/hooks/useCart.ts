@@ -7,6 +7,7 @@ import {
   clearCart,
 } from '../services/cartService';
 import type { UpdateCartItemDto } from '../types/models/cart';
+import { toast } from 'react-toastify';
 
 export const useCart = () => {
   const queryClient = useQueryClient();
@@ -43,6 +44,7 @@ export const useCart = () => {
   const removeCartItemMutation = useMutation({
     mutationFn: removeCartItem,
     onSuccess: () => {
+      toast.success('Item removed');
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });
@@ -50,6 +52,7 @@ export const useCart = () => {
   const clearCartMutation = useMutation({
     mutationFn: clearCart,
     onSuccess: () => {
+      toast.success('Cart cleared');
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });

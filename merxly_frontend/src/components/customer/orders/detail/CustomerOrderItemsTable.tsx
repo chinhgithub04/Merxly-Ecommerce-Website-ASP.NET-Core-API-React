@@ -53,10 +53,10 @@ export const CustomerOrderItemsTable = ({
                       <img
                         src={getProductImageUrl(
                           item.productVariantMainPublicId,
-                          'thumbnail'
+                          'thumbnail',
                         )}
                         alt={item.productVariantName}
-                        className='w-12 h-12 object-cover rounded-lg'
+                        className='w-12 h-12 object-contain rounded-lg'
                       />
                     ) : (
                       <div className='w-12 h-12 bg-neutral-100 rounded-lg flex items-center justify-center'>

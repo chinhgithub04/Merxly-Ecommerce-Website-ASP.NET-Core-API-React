@@ -60,7 +60,7 @@ export const ReviewApplicationModal = ({
         onSuccess: () => {
           handleClose();
         },
-      }
+      },
     );
   };
 
@@ -82,7 +82,7 @@ export const ReviewApplicationModal = ({
         onSuccess: () => {
           handleClose();
         },
-      }
+      },
     );
   };
 
@@ -122,7 +122,7 @@ export const ReviewApplicationModal = ({
       onClick={handleClose}
     >
       <div
-        className='bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto'
+        className='bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] modal-scrollbar-hide'
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -167,7 +167,7 @@ export const ReviewApplicationModal = ({
                     <img
                       src={logoUrl}
                       alt='Store logo'
-                      className='w-32 h-32 object-cover rounded-lg border-2 border-neutral-200 shadow-md'
+                      className='w-32 h-32 object-contain rounded-lg border-2 border-neutral-200 shadow-md'
                     />
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export const ReviewApplicationModal = ({
                 <img
                   src={bannerUrl}
                   alt='Store banner'
-                  className='w-full h-40 object-cover rounded-lg border border-neutral-200 shadow-sm'
+                  className='w-full h-72 object-contain rounded-lg border border-neutral-200 shadow-sm'
                 />
               </div>
             )}
@@ -399,7 +399,7 @@ export const ReviewApplicationModal = ({
                     </p>
                     <button
                       onClick={() => setShowApproveConfirm(true)}
-                      className='flex items-center gap-2 px-4 py-2 bg-success-600 text-white text-sm font-medium rounded-lg hover:bg-success-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                      className='cursor-pointer flex items-center gap-2 px-4 py-2 bg-success-600 text-white text-sm font-medium rounded-lg hover:bg-success-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                       disabled={isProcessing}
                     >
                       <CheckCircleIcon className='h-5 w-5' />
@@ -423,7 +423,7 @@ export const ReviewApplicationModal = ({
                       </button>
                       <button
                         onClick={() => setShowApproveConfirm(false)}
-                        className='px-4 py-2 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                        className='cursor-pointer px-4 py-2 border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                         disabled={isProcessing}
                       >
                         Cancel
@@ -459,7 +459,7 @@ export const ReviewApplicationModal = ({
                     </p>
                     <button
                       onClick={() => setShowRejectConfirm(true)}
-                      className='flex items-center gap-2 px-4 py-2 bg-error-600 text-white text-sm font-medium rounded-lg hover:bg-error-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                      className='cursor-pointer flex items-center gap-2 px-4 py-2 bg-error-600 text-white text-sm font-medium rounded-lg hover:bg-error-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                       disabled={isProcessing}
                     >
                       <XCircleIcon className='h-5 w-5' />
@@ -475,7 +475,7 @@ export const ReviewApplicationModal = ({
                     <div className='flex gap-3'>
                       <button
                         onClick={handleReject}
-                        className='px-4 py-2 bg-error-600 text-white text-sm font-medium rounded-lg hover:bg-error-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                        className='cursor-pointer px-4 py-2 bg-error-600 text-white text-sm font-medium rounded-lg hover:bg-error-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                         disabled={isProcessing}
                       >
                         {isProcessing ? 'Processing...' : 'Confirm Rejection'}

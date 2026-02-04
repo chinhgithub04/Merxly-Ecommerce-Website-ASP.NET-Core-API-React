@@ -7,6 +7,7 @@ import type {
   SubOrderReviewStatusDto,
   CreateReviewMediaDto,
 } from '../../../types/models/review';
+import { toast } from 'react-toastify';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export const ReviewModal = ({
       rating: number;
       comment: string;
       medias: CreateReviewMediaDto[];
-    }
+    },
   ) => {
     createReview(
       {
@@ -40,22 +41,24 @@ export const ReviewModal = ({
       {
         onSuccess: () => {
           setSubmittedItems((prev) => new Set(prev).add(orderItemId));
-          alert('Review submitted successfully!');
+          toast.success('Review submitted successfully');
         },
         onError: (error: Error) => {
-          alert(error.message || 'Failed to submit review');
+          toast.error(
+            error?.message || 'Failed to submit review. Please try again.',
+          );
         },
-      }
+      },
     );
   };
 
   if (!isOpen) return null;
 
   const unreviewedItems = reviewStatus.orderItems.filter(
-    (item) => !item.hasBeenReviewed && !submittedItems.has(item.orderItemId)
+    (item) => !item.hasBeenReviewed && !submittedItems.has(item.orderItemId),
   );
   const reviewedItems = reviewStatus.orderItems.filter(
-    (item) => item.hasBeenReviewed || submittedItems.has(item.orderItemId)
+    (item) => item.hasBeenReviewed || submittedItems.has(item.orderItemId),
   );
 
   const allItemsReviewed = unreviewedItems.length === 0;
@@ -63,13 +66,13 @@ export const ReviewModal = ({
   return (
     <div className='fixed inset-0 z-50 overflow-y-auto'>
       {/* Overlay */}
-      <div
-        className='fixed inset-0 bg-black/50 transition-opacity'
-        onClick={onClose}
-      />
+      <div className='fixed inset-0 bg-black/50 transition-opacity' />
 
       {/* Modal Container */}
-      <div className='relative min-h-full flex items-center justify-center p-4'>
+      <div
+        className='relative min-h-full flex items-center justify-center p-4'
+        onClick={onClose}
+      >
         <div
           className='bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col pointer-events-auto'
           onClick={(e) => e.stopPropagation()}

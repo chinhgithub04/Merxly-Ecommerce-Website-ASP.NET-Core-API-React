@@ -115,3 +115,14 @@
   color: #9ca3af;
   font-style: normal;
 }
+
+/* Hide scrollbar while maintaining scroll functionality */
+.modal-scrollbar-hide {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+}
+
+.modal-scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

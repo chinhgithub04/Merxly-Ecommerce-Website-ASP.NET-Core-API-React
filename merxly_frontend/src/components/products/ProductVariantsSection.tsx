@@ -65,13 +65,13 @@ export const ProductVariantsSection = forwardRef<
       onMarkedForDeletionChange,
       isEditMode = false,
     },
-    ref
+    ref,
   ) => {
     const [editingAttributeId, setEditingAttributeId] = useState<string | null>(
-      null
+      null,
     );
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-      new Set()
+      new Set(),
     );
     const [validationErrors, setValidationErrors] = useState<{
       name?: string;
@@ -80,20 +80,20 @@ export const ProductVariantsSection = forwardRef<
       duplicateValues?: Set<string>;
     }>({});
     const [draggedAttrIndex, setDraggedAttrIndex] = useState<number | null>(
-      null
+      null,
     );
     const [draggedValueIndex, setDraggedValueIndex] = useState<number | null>(
-      null
+      null,
     );
     const [mediaModalOpen, setMediaModalOpen] = useState(false);
     const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-      null
+      null,
     );
     const [selectedVariants, setSelectedVariants] = useState<Set<string>>(
-      new Set()
+      new Set(),
     );
     const [markedForDeletion, setMarkedForDeletion] = useState<Set<string>>(
-      new Set()
+      new Set(),
     );
     const [editingField, setEditingField] = useState<{
       variantId: string;
@@ -112,7 +112,7 @@ export const ProductVariantsSection = forwardRef<
     // Generate variants based on attributes (Cartesian product)
     const generateVariants = (attrs: Attribute[]): Variant[] => {
       const validAttrs = attrs.filter(
-        (attr) => attr.name && attr.values.some((v) => v.value)
+        (attr) => attr.name && attr.values.some((v) => v.value),
       );
 
       if (validAttrs.length === 0) return [];
@@ -125,7 +125,7 @@ export const ProductVariantsSection = forwardRef<
 
       // Cartesian product
       const cartesian = (
-        arr: Array<{ attrId: string; values: AttributeValue[] }>
+        arr: Array<{ attrId: string; values: AttributeValue[] }>,
       ): Array<Record<string, string>> => {
         if (arr.length === 0) return [{}];
         const [first, ...rest] = arr;
@@ -134,7 +134,7 @@ export const ProductVariantsSection = forwardRef<
           restProduct.map((prod) => ({
             [first.attrId]: val.id,
             ...prod,
-          }))
+          })),
         );
       };
 
@@ -144,7 +144,7 @@ export const ProductVariantsSection = forwardRef<
         // Check if variant already exists
         const existing = variants.find((v) => {
           return Object.keys(combo).every(
-            (attrId) => v.attributeValues[attrId] === combo[attrId]
+            (attrId) => v.attributeValues[attrId] === combo[attrId],
           );
         });
 
@@ -179,7 +179,7 @@ export const ProductVariantsSection = forwardRef<
     // Update attribute name
     const handleUpdateAttributeName = (id: string, name: string) => {
       const updated = attributes.map((attr) =>
-        attr.id === id ? { ...attr, name } : attr
+        attr.id === id ? { ...attr, name } : attr,
       );
       onAttributesChange(updated);
 
@@ -201,12 +201,12 @@ export const ProductVariantsSection = forwardRef<
     const handleUpdateAttributeValue = (
       attributeId: string,
       valueId: string,
-      value: string
+      value: string,
     ) => {
       const updated = attributes.map((attr) => {
         if (attr.id === attributeId) {
           const updatedValues = attr.values.map((v) =>
-            v.id === valueId ? { ...v, value } : v
+            v.id === valueId ? { ...v, value } : v,
           );
 
           // Auto-add new empty value if this is the last one and has value
@@ -239,7 +239,7 @@ export const ProductVariantsSection = forwardRef<
     // Delete attribute value
     const handleDeleteAttributeValue = (
       attributeId: string,
-      valueId: string
+      valueId: string,
     ) => {
       // In edit mode, check if this is an existing value (not a new one with 'val-new-' prefix)
       // If it's existing, track it for deletion on save
@@ -315,7 +315,7 @@ export const ProductVariantsSection = forwardRef<
       // Update groupBy if needed
       if (groupBy) {
         const validAttrs = reordered.filter(
-          (a) => a.name && a.values.some((v) => v.value)
+          (a) => a.name && a.values.some((v) => v.value),
         );
         if (validAttrs.length >= 2) {
           onGroupByChange(validAttrs[0].id);
@@ -339,7 +339,7 @@ export const ProductVariantsSection = forwardRef<
     const handleValueDrop = (
       e: React.DragEvent,
       attributeId: string,
-      targetIndex: number
+      targetIndex: number,
     ) => {
       e.preventDefault();
       if (draggedValueIndex === null || draggedValueIndex === targetIndex)
@@ -381,7 +381,7 @@ export const ProductVariantsSection = forwardRef<
         const isDuplicateName = attributes.some(
           (attr) =>
             attr.id !== currentAttr.id &&
-            attr.name.trim().toLowerCase() === trimmedName.toLowerCase()
+            attr.name.trim().toLowerCase() === trimmedName.toLowerCase(),
         );
         if (isDuplicateName) {
           errors.duplicateName = true;
@@ -433,10 +433,10 @@ export const ProductVariantsSection = forwardRef<
     const handleUpdateVariant = (
       id: string,
       field: 'price' | 'available' | 'sku',
-      value: string | number
+      value: string | number,
     ) => {
       const updated = variants.map((v) =>
-        v.id === id ? { ...v, [field]: value } : v
+        v.id === id ? { ...v, [field]: value } : v,
       );
       onVariantsChange(updated);
     };
@@ -445,7 +445,7 @@ export const ProductVariantsSection = forwardRef<
     const handleInputChange = (
       variantId: string,
       field: 'price' | 'available',
-      value: string
+      value: string,
     ) => {
       setEditingField({ variantId, field, value });
     };
@@ -453,7 +453,7 @@ export const ProductVariantsSection = forwardRef<
     // Handle input blur (convert empty to 0)
     const handleInputBlur = (
       variantId: string,
-      field: 'price' | 'available'
+      field: 'price' | 'available',
     ) => {
       if (
         editingField?.variantId === variantId &&
@@ -472,7 +472,7 @@ export const ProductVariantsSection = forwardRef<
     const getInputValue = (
       variantId: string,
       field: 'price' | 'available',
-      actualValue: number
+      actualValue: number,
     ): string => {
       if (
         editingField?.variantId === variantId &&
@@ -569,13 +569,13 @@ export const ProductVariantsSection = forwardRef<
       if (!selectedVariantId) return;
 
       const updated = variants.map((v) =>
-        v.id === selectedVariantId ? { ...v, media: files } : v
+        v.id === selectedVariantId ? { ...v, media: files } : v,
       );
       onVariantsChange(updated);
     };
 
     const getVariantMedia = (
-      variantId: string
+      variantId: string,
     ): CreateProductVariantMediaDto[] => {
       return variants.find((v) => v.id === variantId)?.media || [];
     };
@@ -629,7 +629,7 @@ export const ProductVariantsSection = forwardRef<
     const isGroupIndeterminate = (groupVariants: Variant[]): boolean => {
       const groupIds = groupVariants.map((v) => v.id);
       const selectedCount = groupIds.filter((id) =>
-        selectedVariants.has(id)
+        selectedVariants.has(id),
       ).length;
       return selectedCount > 0 && selectedCount < groupIds.length;
     };
@@ -644,7 +644,7 @@ export const ProductVariantsSection = forwardRef<
     const isAllIndeterminate = (): boolean => {
       const allIds = variants.map((v) => v.id);
       const selectedCount = allIds.filter((id) =>
-        selectedVariants.has(id)
+        selectedVariants.has(id),
       ).length;
       return selectedCount > 0 && selectedCount < allIds.length;
     };
@@ -671,7 +671,7 @@ export const ProductVariantsSection = forwardRef<
     };
 
     const isGroupFullyMarkedForDeletion = (
-      groupVariants: Variant[]
+      groupVariants: Variant[],
     ): boolean => {
       return (
         groupVariants.length > 0 &&
@@ -751,7 +751,7 @@ export const ProductVariantsSection = forwardRef<
                               handleUpdateAttributeValue(
                                 attr.id,
                                 val.id,
-                                e.target.value
+                                e.target.value,
                               );
                               setValidationErrors({});
                             }}
@@ -937,7 +937,7 @@ export const ProductVariantsSection = forwardRef<
                           >
                             <div className='w-6 flex items-center'>
                               {!isGroupFullyMarkedForDeletion(
-                                groupVariants
+                                groupVariants,
                               ) && (
                                 <input
                                   type='checkbox'
@@ -1042,7 +1042,7 @@ export const ProductVariantsSection = forwardRef<
                                               getMainMediaPreview(variant.id)!
                                             }
                                             alt='Variant media'
-                                            className='w-full h-full object-cover'
+                                            className='w-full h-full object-contain'
                                           />
                                         ) : (
                                           <PhotoIcon className='w-5 h-5 text-neutral-400' />
@@ -1077,7 +1077,7 @@ export const ProductVariantsSection = forwardRef<
                                         type='checkbox'
                                         className='rounded cursor-pointer'
                                         checked={selectedVariants.has(
-                                          variant.id
+                                          variant.id,
                                         )}
                                         onChange={() =>
                                           handleToggleVariant(variant.id)
@@ -1098,7 +1098,7 @@ export const ProductVariantsSection = forwardRef<
                                               getMainMediaPreview(variant.id)!
                                             }
                                             alt='Variant media'
-                                            className='w-full h-full object-cover'
+                                            className='w-full h-full object-contain'
                                           />
                                         ) : (
                                           <PhotoIcon className='w-5 h-5 text-neutral-400' />
@@ -1117,13 +1117,13 @@ export const ProductVariantsSection = forwardRef<
                                         value={getInputValue(
                                           variant.id,
                                           'price',
-                                          variant.price
+                                          variant.price,
                                         )}
                                         onChange={(e) =>
                                           handleInputChange(
                                             variant.id,
                                             'price',
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                         onBlur={() =>
@@ -1138,19 +1138,19 @@ export const ProductVariantsSection = forwardRef<
                                         value={getInputValue(
                                           variant.id,
                                           'available',
-                                          variant.available
+                                          variant.available,
                                         )}
                                         onChange={(e) =>
                                           handleInputChange(
                                             variant.id,
                                             'available',
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                         onBlur={() =>
                                           handleInputBlur(
                                             variant.id,
-                                            'available'
+                                            'available',
                                           )
                                         }
                                         className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
@@ -1164,7 +1164,7 @@ export const ProductVariantsSection = forwardRef<
                                           handleUpdateVariant(
                                             variant.id,
                                             'sku',
-                                            e.target.value
+                                            e.target.value,
                                           )
                                         }
                                         className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
@@ -1176,7 +1176,7 @@ export const ProductVariantsSection = forwardRef<
                             ))}
                         </div>
                       );
-                    }
+                    },
                   )
                 : // Flat view (single attribute or no grouping)
                   variants.map((variant) => (
@@ -1202,7 +1202,7 @@ export const ProductVariantsSection = forwardRef<
                                 <img
                                   src={getMainMediaPreview(variant.id)!}
                                   alt='Variant media'
-                                  className='w-full h-full object-cover'
+                                  className='w-full h-full object-contain'
                                 />
                               ) : (
                                 <PhotoIcon className='w-5 h-5 text-neutral-400' />
@@ -1248,7 +1248,7 @@ export const ProductVariantsSection = forwardRef<
                                 <img
                                   src={getMainMediaPreview(variant.id)!}
                                   alt='Variant media'
-                                  className='w-full h-full object-cover'
+                                  className='w-full h-full object-contain'
                                 />
                               ) : (
                                 <PhotoIcon className='w-5 h-5 text-neutral-400' />
@@ -1267,13 +1267,13 @@ export const ProductVariantsSection = forwardRef<
                               value={getInputValue(
                                 variant.id,
                                 'price',
-                                variant.price
+                                variant.price,
                               )}
                               onChange={(e) =>
                                 handleInputChange(
                                   variant.id,
                                   'price',
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               onBlur={() =>
@@ -1288,13 +1288,13 @@ export const ProductVariantsSection = forwardRef<
                               value={getInputValue(
                                 variant.id,
                                 'available',
-                                variant.available
+                                variant.available,
                               )}
                               onChange={(e) =>
                                 handleInputChange(
                                   variant.id,
                                   'available',
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               onBlur={() =>
@@ -1311,7 +1311,7 @@ export const ProductVariantsSection = forwardRef<
                                 handleUpdateVariant(
                                   variant.id,
                                   'sku',
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className='w-full px-2 py-1.5 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500'
@@ -1339,5 +1339,5 @@ export const ProductVariantsSection = forwardRef<
         />
       </div>
     );
-  }
+  },
 );

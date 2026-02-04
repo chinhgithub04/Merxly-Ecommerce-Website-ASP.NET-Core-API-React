@@ -15,6 +15,7 @@ export const CustomerOrderActionButtons = ({
   onStatusUpdate,
 }: CustomerOrderActionButtonsProps) => {
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showReceivedModal, setShowReceivedModal] = useState(false);
   const [cancelNotes, setCancelNotes] = useState('');
 
   const handleCancelClick = () => {
@@ -33,13 +34,16 @@ export const CustomerOrderActionButtons = ({
   };
 
   const handleReceivedClick = () => {
-    if (
-      confirm(
-        'Please confirm that you have received your order. This action cannot be undone.'
-      )
-    ) {
-      onStatusUpdate(OrderStatus.Completed);
-    }
+    setShowReceivedModal(true);
+  };
+
+  const handleReceivedConfirm = () => {
+    onStatusUpdate(OrderStatus.Completed);
+    setShowReceivedModal(false);
+  };
+
+  const handleReceivedModalClose = () => {
+    setShowReceivedModal(false);
   };
 
   // Show Cancel Order button when status is Confirmed
@@ -50,7 +54,7 @@ export const CustomerOrderActionButtons = ({
           <button
             onClick={handleCancelClick}
             disabled={isUpdating}
-            className='inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-red-50 text-red-600 border border-red-300'
+            className='cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white hover:bg-red-50 text-red-600 border border-red-300'
           >
             <XMarkIcon className='h-5 w-5' />
             {isUpdating ? 'Updating...' : 'Cancel Order'}
@@ -96,16 +100,35 @@ export const CustomerOrderActionButtons = ({
   // Show "I have received the order" button when status is Shipped
   if (status === OrderStatus.Shipped) {
     return (
-      <div className='flex flex-wrap gap-3'>
-        <button
-          onClick={handleReceivedClick}
-          disabled={isUpdating}
-          className='inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-primary-600 hover:bg-primary-700 text-white'
+      <>
+        <div className='flex flex-wrap gap-3'>
+          <button
+            onClick={handleReceivedClick}
+            disabled={isUpdating}
+            className='cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-primary-600 hover:bg-primary-700 text-white'
+          >
+            <CheckCircleIcon className='h-5 w-5' />
+            {isUpdating ? 'Updating...' : 'I have received the order'}
+          </button>
+        </div>
+
+        {/* Received Order Modal */}
+        <Modal
+          isOpen={showReceivedModal}
+          onClose={handleReceivedModalClose}
+          onDone={handleReceivedConfirm}
+          title='Confirm Delivery'
+          doneLabel='Confirm Received'
+          cancelLabel='Go Back'
         >
-          <CheckCircleIcon className='h-5 w-5' />
-          {isUpdating ? 'Updating...' : 'I have received the order'}
-        </button>
-      </div>
+          <div className='space-y-4'>
+            <p className='text-neutral-600'>
+              Please confirm that you have received your order. This action
+              cannot be undone and will mark the order as completed.
+            </p>
+          </div>
+        </Modal>
+      </>
     );
   }
 

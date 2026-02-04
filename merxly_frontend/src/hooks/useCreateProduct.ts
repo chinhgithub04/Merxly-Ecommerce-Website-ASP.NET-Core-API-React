@@ -34,6 +34,7 @@ import type {
   BulkUpdateProductAttributeValuesDto,
   DeleteAttributeValuesWithVariantsDto,
 } from '../types/models/productAttributeValue';
+import { toast } from 'react-toastify';
 
 // Internal types for UI state (matches ProductVariantsSection)
 interface AttributeValue {
@@ -57,7 +58,7 @@ interface Variant {
 }
 
 export const useCreateProduct = (
-  variantsRef?: RefObject<ProductVariantsSectionRef | null>
+  variantsRef?: RefObject<ProductVariantsSectionRef | null>,
 ) => {
   const navigate = useNavigate();
   const { id: productId } = useParams<{ id: string }>();
@@ -92,7 +93,7 @@ export const useCreateProduct = (
 
   // Track variants marked for deletion (variant IDs)
   const [markedForDeletionIds, setMarkedForDeletionIds] = useState<string[]>(
-    []
+    [],
   );
 
   // Initial variants snapshot for edit mode (to track variant changes)
@@ -179,7 +180,7 @@ export const useCreateProduct = (
             .forEach((val) => {
               // Find which attribute this value belongs to
               const attr = mappedAttributes.find((a) =>
-                a.values.some((v) => v.id === val.id)
+                a.values.some((v) => v.id === val.id),
               );
               if (attr) {
                 attributeValues[attr.id] = val.id;
@@ -263,7 +264,7 @@ export const useCreateProduct = (
     } else {
       // Check if all variants are marked for deletion
       const activeVariants = variants.filter(
-        (v) => !markedForDeletionIds.includes(v.id)
+        (v) => !markedForDeletionIds.includes(v.id),
       );
 
       if (activeVariants.length === 0) {
@@ -274,7 +275,7 @@ export const useCreateProduct = (
           (v) =>
             v.price < 0 ||
             v.available < 0 ||
-            Object.keys(v.attributeValues).length === 0
+            Object.keys(v.attributeValues).length === 0,
         );
 
         if (invalidVariant) {
@@ -296,7 +297,7 @@ export const useCreateProduct = (
     // Build product attributes DTO
     const productAttributesDto: CreateProductAttributeDto[] = attributes
       .filter(
-        (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+        (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim()),
       )
       .map((attr, attrIndex) => ({
         name: attr.name.trim(),
@@ -323,7 +324,7 @@ export const useCreateProduct = (
               attributeName: attr?.name || '',
               value: value?.value || '',
             };
-          }
+          },
         );
 
         return {
@@ -361,7 +362,7 @@ export const useCreateProduct = (
     if (!isEditMode || initialAttributes.length === 0) return false;
 
     const currentAttrsFiltered = attributes.filter(
-      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim()),
     );
 
     const initialAttrIds = new Set(initialAttributes.map((a) => a.id));
@@ -373,7 +374,7 @@ export const useCreateProduct = (
     if (!isEditMode || initialAttributes.length === 0) return false;
 
     const currentAttrsFiltered = attributes.filter(
-      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim()),
     );
 
     for (let i = 0; i < currentAttrsFiltered.length; i++) {
@@ -402,7 +403,7 @@ export const useCreateProduct = (
 
     for (const currentAttr of currentAttrsFiltered) {
       const initialAttr = initialAttributes.find(
-        (a) => a.id === currentAttr.id
+        (a) => a.id === currentAttr.id,
       );
       if (!initialAttr) continue;
 
@@ -426,7 +427,7 @@ export const useCreateProduct = (
 
     for (const currentAttr of currentAttrsFiltered) {
       const initialAttr = initialAttributes.find(
-        (a) => a.id === currentAttr.id
+        (a) => a.id === currentAttr.id,
       );
       if (!initialAttr) continue;
 
@@ -458,7 +459,7 @@ export const useCreateProduct = (
 
     // Check for new attributes
     const currentAttrsFiltered = attributes.filter(
-      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim())
+      (attr) => attr.name.trim() && attr.values.some((v) => v.value.trim()),
     );
     const initialAttrIds = new Set(initialAttributes.map((a) => a.id));
     if (currentAttrsFiltered.some((attr) => !initialAttrIds.has(attr.id)))
@@ -485,7 +486,7 @@ export const useCreateProduct = (
 
     for (const currentAttr of currentAttrsWithFilteredValues) {
       const initialAttr = initialAttributes.find(
-        (a) => a.id === currentAttr.id
+        (a) => a.id === currentAttr.id,
       );
       if (!initialAttr) continue;
 
@@ -524,12 +525,12 @@ export const useCreateProduct = (
 
     // Filter out variants marked for deletion
     const activeVariants = variants.filter(
-      (v) => !markedForDeletionIds.includes(v.id)
+      (v) => !markedForDeletionIds.includes(v.id),
     );
 
     for (const currVariant of activeVariants) {
       const initialVariant = initialVariants.find(
-        (v) => v.id === currVariant.id
+        (v) => v.id === currVariant.id,
       );
       if (!initialVariant) continue;
 
@@ -567,6 +568,7 @@ export const useCreateProduct = (
   const createMutation = useMutation({
     mutationFn: createProduct,
     onSuccess: () => {
+      toast.success('Product created successfully');
       navigate('/store/products');
     },
     onError: (error: any) => {
@@ -612,7 +614,7 @@ export const useCreateProduct = (
         const updatedInitialAttrs = initialAttributes.map((attr) => ({
           ...attr,
           values: attr.values.filter(
-            (v) => !data.deletedAttributeValueIds.includes(v.id)
+            (v) => !data.deletedAttributeValueIds.includes(v.id),
           ),
         }));
         setInitialAttributes(updatedInitialAttrs);
@@ -638,7 +640,7 @@ export const useCreateProduct = (
         // Update initialAttributes to include new values
         const updatedInitialAttrs = initialAttributes.map((attr) => {
           const newValues = data.addedAttributeValues.filter(
-            (av) => av.productAttributeId === attr.id
+            (av) => av.productAttributeId === attr.id,
           );
           if (newValues.length > 0) {
             return {
@@ -675,7 +677,7 @@ export const useCreateProduct = (
         // Update initialAttributes with new values and display orders
         const updatedInitialAttrs = initialAttributes.map((attr) => {
           const hasUpdates = data.updatedAttributeValues.some(
-            (av) => av.productAttributeId === attr.id
+            (av) => av.productAttributeId === attr.id,
           );
           if (hasUpdates) {
             return {
@@ -742,10 +744,10 @@ export const useCreateProduct = (
         // Re-sort by updated display order
         const sortedAttrs = updatedInitialAttrs.sort((a, b) => {
           const aOrder = data.updatedAttributes.find(
-            (u) => u.id === a.id
+            (u) => u.id === a.id,
           )?.displayOrder;
           const bOrder = data.updatedAttributes.find(
-            (u) => u.id === b.id
+            (u) => u.id === b.id,
           )?.displayOrder;
           if (aOrder !== undefined && bOrder !== undefined) {
             return aOrder - bOrder;
@@ -772,7 +774,7 @@ export const useCreateProduct = (
       if (data) {
         // Update initialAttributes to remove deleted attributes
         const updatedInitialAttrs = initialAttributes.filter(
-          (attr) => !data.deletedAttributeIds.includes(attr.id)
+          (attr) => !data.deletedAttributeIds.includes(attr.id),
         );
         setInitialAttributes(updatedInitialAttrs);
         // Clear deleted tracking
@@ -803,7 +805,7 @@ export const useCreateProduct = (
 
         // Permanently remove deleted variants from UI
         const activeVariants = variants.filter(
-          (v) => !markedForDeletionIds.includes(v.id)
+          (v) => !markedForDeletionIds.includes(v.id),
         );
         setVariants(activeVariants);
 
@@ -857,7 +859,7 @@ export const useCreateProduct = (
         if (hasUpdatedAttributeValues()) {
           for (const currentAttr of currentAttrsFiltered) {
             const initialAttr = initialAttributes.find(
-              (a) => a.id === currentAttr.id
+              (a) => a.id === currentAttr.id,
             );
             if (!initialAttr) continue;
 
@@ -872,10 +874,10 @@ export const useCreateProduct = (
               if (deletedAttributeValueIds.includes(currVal.id)) return;
 
               const initialVal = initialAttr.values.find(
-                (v) => v.id === currVal.id
+                (v) => v.id === currVal.id,
               );
               const initialIndex = initialAttr.values.findIndex(
-                (v) => v.id === currVal.id
+                (v) => v.id === currVal.id,
               );
               if (
                 initialVal &&
@@ -909,12 +911,12 @@ export const useCreateProduct = (
         if (hasNewAttributeValues()) {
           for (const currentAttr of currentAttrsFiltered) {
             const initialAttr = initialAttributes.find(
-              (a) => a.id === currentAttr.id
+              (a) => a.id === currentAttr.id,
             );
             if (!initialAttr) continue;
 
             const initialValueIds = new Set(
-              initialAttr.values.map((v) => v.id)
+              initialAttr.values.map((v) => v.id),
             );
             const newValues: AttributeValue[] = [];
 
@@ -935,7 +937,7 @@ export const useCreateProduct = (
                     attributeValues: newValues.map((val) => {
                       // Find actual index in reordered list
                       const actualIndex = currentAttr.values.findIndex(
-                        (v) => v.id === val.id
+                        (v) => v.id === val.id,
                       );
                       return {
                         value: val.value,
@@ -970,7 +972,7 @@ export const useCreateProduct = (
 
           const currentAttrsFiltered = attributes.filter(
             (attr) =>
-              attr.name.trim() && attr.values.some((v) => v.value.trim())
+              attr.name.trim() && attr.values.some((v) => v.value.trim()),
           );
 
           currentAttrsFiltered.forEach((currAttr, index) => {
@@ -978,10 +980,10 @@ export const useCreateProduct = (
             if (deletedAttributeIds.includes(currAttr.id)) return;
 
             const initialAttr = initialAttributes.find(
-              (a) => a.id === currAttr.id
+              (a) => a.id === currAttr.id,
             );
             const initialIndex = initialAttributes.findIndex(
-              (a) => a.id === currAttr.id
+              (a) => a.id === currAttr.id,
             );
             if (
               initialAttr &&
@@ -1011,7 +1013,7 @@ export const useCreateProduct = (
         if (hasNewAttributes()) {
           const currentAttrsFiltered = attributes.filter(
             (attr) =>
-              attr.name.trim() && attr.values.some((v) => v.value.trim())
+              attr.name.trim() && attr.values.some((v) => v.value.trim()),
           );
 
           const initialAttrIds = new Set(initialAttributes.map((a) => a.id));
@@ -1031,7 +1033,7 @@ export const useCreateProduct = (
               productAttributes: newAttrs.map((attr) => {
                 // Find actual index in reordered list
                 const actualIndex = currentAttrsFiltered.findIndex(
-                  (a) => a.id === attr.id
+                  (a) => a.id === attr.id,
                 );
                 return {
                   name: attr.name,
@@ -1054,7 +1056,7 @@ export const useCreateProduct = (
         if (hasMarkedForDeletion() || hasVariantChanges()) {
           // Build list of variants to update (exclude marked for deletion)
           const activeVariants = variants.filter(
-            (v) => !markedForDeletionIds.includes(v.id)
+            (v) => !markedForDeletionIds.includes(v.id),
           );
 
           const updatedVariants = activeVariants.map((variant) => ({
@@ -1087,7 +1089,7 @@ export const useCreateProduct = (
           hasMarkedForDeletion() ||
           hasVariantChanges()
         ) {
-          alert('Product saved');
+          toast.success('Product updated successfully');
 
           // Reset dirty state by syncing snapshots with current state
           // This disables Save/Discard buttons after successful save
@@ -1106,7 +1108,7 @@ export const useCreateProduct = (
               ...attr,
               values: attr.values.filter(
                 (v) =>
-                  v.value.trim() && !deletedAttributeValueIds.includes(v.id)
+                  v.value.trim() && !deletedAttributeValueIds.includes(v.id),
               ),
             }));
           setInitialAttributes(JSON.parse(JSON.stringify(syncedAttributes)));

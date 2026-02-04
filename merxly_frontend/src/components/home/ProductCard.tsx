@@ -34,7 +34,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         stars.push(<StarIcon key={i} className='h-4 w-4 text-yellow-400' />);
       } else {
         stars.push(
-          <StarOutlineIcon key={i} className='h-4 w-4 text-neutral-300' />
+          <StarOutlineIcon key={i} className='h-4 w-4 text-neutral-300' />,
         );
       }
     }
@@ -49,10 +49,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }
 
     if (minPrice === maxPrice || !maxPrice) {
-      return `₫${minPrice?.toFixed(2)}`;
+      return `${minPrice?.toLocaleString()}₫`;
     }
 
-    return `₫${minPrice?.toFixed(2)} - ₫${maxPrice?.toFixed(2)}`;
+    return `${minPrice?.toLocaleString()}₫ - ₫${maxPrice?.toLocaleString()}₫`;
   };
 
   return (
@@ -66,7 +66,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <img
             src={getProductImageUrl(mainMediaPublicId, 'card')}
             alt={name}
-            className='w-full h-48 object-cover rounded-md'
+            className='w-full h-48 object-contain rounded-md'
           />
         ) : (
           <div className='w-full h-48 bg-neutral-100 rounded-md flex items-center justify-center'>

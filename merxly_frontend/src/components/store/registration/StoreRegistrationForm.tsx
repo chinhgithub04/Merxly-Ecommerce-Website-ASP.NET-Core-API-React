@@ -60,7 +60,7 @@ export const StoreRegistrationForm = ({
     file: File,
     fieldName: keyof FormData,
     setPreview: (url: string | null) => void,
-    imageType: number = 0
+    imageType: number = 0,
   ) => {
     try {
       setUploadingFile(fieldName);
@@ -124,7 +124,7 @@ export const StoreRegistrationForm = ({
 
   const handleRemoveFile = (
     fieldName: keyof FormData,
-    setPreview: (url: string | null) => void
+    setPreview: (url: string | null) => void,
   ) => {
     setPreview(null);
     setValue(fieldName as any, '');
@@ -155,7 +155,7 @@ export const StoreRegistrationForm = ({
     // Validate required documents before submitting
     if (!idFrontPreview || !idBackPreview || !licensePreview) {
       alert(
-        'Please upload all required documents (Identity Card Front/Back and Business License)'
+        'Please upload all required documents (Identity Card Front/Back and Business License)',
       );
       return;
     }
@@ -184,8 +184,8 @@ export const StoreRegistrationForm = ({
                   step === currentStep
                     ? 'border-primary-600 bg-primary-600 text-white'
                     : step < currentStep
-                    ? 'border-primary-600 bg-primary-600 text-white'
-                    : 'border-neutral-300 bg-white text-neutral-500'
+                      ? 'border-primary-600 bg-primary-600 text-white'
+                      : 'border-neutral-300 bg-white text-neutral-500'
                 }`}
               >
                 {step}
@@ -434,7 +434,7 @@ export const StoreRegistrationForm = ({
                         onClick={() =>
                           handleRemoveFile(
                             'identityCardFrontPublicId',
-                            setIdFrontPreview
+                            setIdFrontPreview,
                           )
                         }
                         className='cursor-pointer absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors'
@@ -461,8 +461,8 @@ export const StoreRegistrationForm = ({
                     {uploadingFile === 'identityCardFrontPublicId'
                       ? 'Uploading...'
                       : idFrontPreview
-                      ? 'Change'
-                      : 'Upload'}
+                        ? 'Change'
+                        : 'Upload'}
                   </label>
                   <input
                     id='id-front-upload'
@@ -493,7 +493,7 @@ export const StoreRegistrationForm = ({
                         onClick={() =>
                           handleRemoveFile(
                             'identityCardBackPublicId',
-                            setIdBackPreview
+                            setIdBackPreview,
                           )
                         }
                         className='cursor-pointer absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors'
@@ -520,8 +520,8 @@ export const StoreRegistrationForm = ({
                     {uploadingFile === 'identityCardBackPublicId'
                       ? 'Uploading...'
                       : idBackPreview
-                      ? 'Change'
-                      : 'Upload'}
+                        ? 'Change'
+                        : 'Upload'}
                   </label>
                   <input
                     id='id-back-upload'
@@ -554,7 +554,7 @@ export const StoreRegistrationForm = ({
                     onClick={() =>
                       handleRemoveFile(
                         'bussinessLicensePublicId',
-                        setLicensePreview
+                        setLicensePreview,
                       )
                     }
                     className='cursor-pointer absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors'
@@ -582,8 +582,8 @@ export const StoreRegistrationForm = ({
                   {uploadingFile === 'bussinessLicensePublicId'
                     ? 'Uploading...'
                     : licensePreview
-                    ? 'Change'
-                    : 'Upload'}
+                      ? 'Change'
+                      : 'Upload'}
                 </label>
                 <input
                   id='license-upload'
@@ -614,7 +614,7 @@ export const StoreRegistrationForm = ({
                     <img
                       src={logoPreview}
                       alt='Store logo preview'
-                      className='w-32 h-32 object-cover rounded-lg border border-neutral-200'
+                      className='w-32 h-32 object-contain rounded-lg border border-neutral-200'
                     />
                     <button
                       type='button'
@@ -641,8 +641,8 @@ export const StoreRegistrationForm = ({
                     {uploadingFile === 'logoImagePublicId'
                       ? 'Uploading...'
                       : logoPreview
-                      ? 'Change Logo'
-                      : 'Upload Logo'}
+                        ? 'Change Logo'
+                        : 'Upload Logo'}
                   </label>
                   <input
                     id='logo-upload'
@@ -670,14 +670,14 @@ export const StoreRegistrationForm = ({
                     <img
                       src={bannerPreview}
                       alt='Store banner preview'
-                      className='w-full h-48 object-cover rounded-lg border border-neutral-200'
+                      className='w-full h-72 object-cover rounded-lg border border-neutral-200'
                     />
                     <button
                       type='button'
                       onClick={() =>
                         handleRemoveFile(
                           'bannerImagePublicId',
-                          setBannerPreview
+                          setBannerPreview,
                         )
                       }
                       className='cursor-pointer absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors'
@@ -704,8 +704,8 @@ export const StoreRegistrationForm = ({
                   {uploadingFile === 'bannerImagePublicId'
                     ? 'Uploading...'
                     : bannerPreview
-                    ? 'Change Banner'
-                    : 'Upload Banner'}
+                      ? 'Change Banner'
+                      : 'Upload Banner'}
                 </label>
                 <input
                   id='banner-upload'

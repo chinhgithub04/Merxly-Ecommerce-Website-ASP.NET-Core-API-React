@@ -14,12 +14,12 @@ export const OrderBasicInfo = ({
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return {
-      date: date.toLocaleDateString('en-US', {
+      date: date.toLocaleDateString('vi-VN', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
       }),
-      time: date.toLocaleTimeString('en-US', {
+      time: date.toLocaleTimeString('vi-VN', {
         hour: '2-digit',
         minute: '2-digit',
       }),

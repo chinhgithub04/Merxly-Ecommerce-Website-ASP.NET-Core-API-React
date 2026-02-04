@@ -18,6 +18,7 @@ import { CustomerOrderItemsTable } from '../../components/customer/orders/detail
 import { OrderSummarySection } from '../../components/store/orders/detail/OrderSummarySection';
 import { OrderNotesSection } from '../../components/store/orders/detail/OrderNotesSection';
 import { ReviewModal } from '../../components/customer/reviews/ReviewModal';
+import { toast } from 'react-toastify';
 
 export const CustomerOrderDetailPage = () => {
   const { subOrderId } = useParams<{ subOrderId: string }>();
@@ -36,16 +37,16 @@ export const CustomerOrderDetailPage = () => {
       { subOrderId, dto: { status: newStatus, notes } },
       {
         onSuccess: () => {
-          alert('Order status updated successfully');
+          toast.success('Order status updated successfully');
           // Invalidate review status to fetch new data when order becomes Completed
           queryClient.invalidateQueries({
             queryKey: ['subOrderReviewStatus', subOrderId],
           });
         },
         onError: (error: Error) => {
-          alert(error.message || 'Failed to update order status');
+          toast.error(`Failed to update order status: ${error.message}`);
         },
-      }
+      },
     );
   };
 
@@ -117,7 +118,7 @@ export const CustomerOrderDetailPage = () => {
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
 
   return (

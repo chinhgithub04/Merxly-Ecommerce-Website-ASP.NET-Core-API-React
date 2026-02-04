@@ -36,7 +36,7 @@ export const AddEditCategoryModal = ({
   });
 
   const [imagePreview, setImagePreview] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   // Reset form when modal opens or category changes
@@ -54,7 +54,7 @@ export const AddEditCategoryModal = ({
   }, [isOpen, editingCategory, parentCategory]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
@@ -90,8 +90,14 @@ export const AddEditCategoryModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'>
-      <div className='bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
+    <div
+      className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'
+      onClick={onClose}
+    >
+      <div
+        className='bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] modal-scrollbar-hide'
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className='sticky top-0 bg-white border-b border-neutral-200 p-6 flex items-center justify-between'>
           <div>
@@ -99,8 +105,8 @@ export const AddEditCategoryModal = ({
               {isEdit
                 ? 'Edit Category'
                 : isSubcategory
-                ? `Add Subcategory to "${parentCategory.name}"`
-                : 'Add New Category'}
+                  ? `Add Subcategory to "${parentCategory.name}"`
+                  : 'Add New Category'}
             </h2>
             {isSubcategory && (
               <p className='text-sm text-neutral-600 mt-1'>

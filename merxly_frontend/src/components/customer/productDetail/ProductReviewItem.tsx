@@ -12,12 +12,12 @@ interface ProductReviewItemProps {
 export const ProductReviewItem = ({ review }: ProductReviewItemProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const dateStr = date.toLocaleDateString('en-US', {
+    const dateStr = date.toLocaleDateString('vi-VN', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
-    const timeStr = date.toLocaleTimeString('en-US', {
+    const timeStr = date.toLocaleTimeString('vi-VN', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
@@ -83,7 +83,7 @@ export const ProductReviewItem = ({ review }: ProductReviewItemProps) => {
               <img
                 src={getMediaUrl(media.mediaPublicId, media.mediaType, 'card')}
                 alt='Review media'
-                className='w-full h-full object-cover'
+                className='w-full h-full object-contain'
               />
             </div>
           ))}

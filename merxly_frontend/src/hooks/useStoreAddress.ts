@@ -8,6 +8,7 @@ import type {
   CreateStoreAddressDto,
   UpdateStoreAddressDto,
 } from '../types/models/storeAddress';
+import { toast } from 'react-toastify';
 
 export const useStoreAddress = () => {
   const queryClient = useQueryClient();
@@ -20,6 +21,7 @@ export const useStoreAddress = () => {
   const createAddressMutation = useMutation({
     mutationFn: createStoreAddress,
     onSuccess: () => {
+      toast.success('Adress created successfully.');
       queryClient.invalidateQueries({ queryKey: ['storeAddress'] });
     },
   });
@@ -27,6 +29,7 @@ export const useStoreAddress = () => {
   const updateAddressMutation = useMutation({
     mutationFn: updateStoreAddress,
     onSuccess: () => {
+      toast.success('Adress updated successfully.');
       queryClient.invalidateQueries({ queryKey: ['storeAddress'] });
     },
   });

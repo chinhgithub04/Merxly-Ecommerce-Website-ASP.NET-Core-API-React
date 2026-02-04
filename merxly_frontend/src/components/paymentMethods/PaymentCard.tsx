@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { CheckCircleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import type { PaymentMethodDto } from '../../types/models/paymentMethod';
+import { Modal } from '../ui/Modal';
 
 interface PaymentCardProps {
   paymentMethod: PaymentMethodDto;
@@ -43,6 +45,7 @@ export const PaymentCard = ({
   onSetDefault,
   onRemove,
 }: PaymentCardProps) => {
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
   const { card } = paymentMethod;
   if (!card) return null;
 
@@ -58,11 +61,16 @@ export const PaymentCard = ({
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (
-      window.confirm('Are you sure you want to remove this payment method?')
-    ) {
-      onRemove(paymentMethod.id);
-    }
+    setShowRemoveModal(true);
+  };
+
+  const handleRemoveConfirm = () => {
+    onRemove(paymentMethod.id);
+    setShowRemoveModal(false);
+  };
+
+  const handleRemoveModalClose = () => {
+    setShowRemoveModal(false);
   };
 
   return (
@@ -127,6 +135,23 @@ export const PaymentCard = ({
           </button>
         </div>
       </div>
+
+      {/* Remove Payment Method Modal */}
+      <Modal
+        isOpen={showRemoveModal}
+        onClose={handleRemoveModalClose}
+        onDone={handleRemoveConfirm}
+        title='Remove Payment Method'
+        doneLabel='Remove'
+        cancelLabel='Cancel'
+      >
+        <div className='space-y-4'>
+          <p className='text-neutral-600'>
+            Are you sure you want to remove this payment method? This action
+            cannot be undone.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };

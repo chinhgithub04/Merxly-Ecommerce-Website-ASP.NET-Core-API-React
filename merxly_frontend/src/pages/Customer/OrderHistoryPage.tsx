@@ -21,6 +21,8 @@ export const OrderHistoryPage = () => {
   const [selectedStatus, setSelectedStatus] =
     useState<OrderStatusFilter>('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 20;
 
@@ -49,8 +51,16 @@ export const OrderHistoryPage = () => {
       apiFilter.searchTerm = searchTerm.trim();
     }
 
+    if (fromDate) {
+      apiFilter.fromDate = fromDate;
+    }
+
+    if (toDate) {
+      apiFilter.toDate = toDate;
+    }
+
     return apiFilter;
-  }, [selectedStatus, searchTerm, pageNumber]);
+  }, [selectedStatus, searchTerm, fromDate, toDate, pageNumber]);
 
   // Fetch orders from API
   const { data, isLoading, error } = useCustomerOrders(filter);
@@ -84,6 +94,10 @@ export const OrderHistoryPage = () => {
         onStatusChange={setSelectedStatus}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        fromDate={fromDate}
+        onFromDateChange={setFromDate}
+        toDate={toDate}
+        onToDateChange={setToDate}
       />
 
       {/* Loading State */}

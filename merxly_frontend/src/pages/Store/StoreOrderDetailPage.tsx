@@ -15,6 +15,7 @@ import {
   OrderNotesSection,
 } from '../../components/store/orders/detail';
 import { CustomerOrderShippingInfo } from '../../components/customer/orders/detail/CustomerOrderShippingInfo';
+import { toast } from 'react-toastify';
 
 export const StoreOrderDetailPage = () => {
   const { subOrderId } = useParams<{ subOrderId: string }>();
@@ -31,10 +32,10 @@ export const StoreOrderDetailPage = () => {
       { subOrderId, dto: { status: newStatus, notes } },
       {
         onSuccess: () => {
-          alert('Order status updated successfully');
+          toast.success('Order status updated successfully');
         },
         onError: (error: Error) => {
-          alert(error.message || 'Failed to update order status');
+          toast.error(`Failed to update order status: ${error.message}`);
         },
       },
     );

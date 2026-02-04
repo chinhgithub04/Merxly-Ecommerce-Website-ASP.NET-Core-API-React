@@ -14,7 +14,11 @@ import { uploadImage, uploadVideo } from '../../services/uploadService';
 import type { CreateProductVariantMediaDto } from '../../types/models/productVariantMedia';
 import { ImageType, MediaType } from '../../types/enums';
 import apiClient from '../../services/apiClient';
-import { getMediaUrl, getVideoUrl } from '../../utils/cloudinaryHelpers';
+import {
+  getMediaUrl,
+  getProductImageUrl,
+  getVideoUrl,
+} from '../../utils/cloudinaryHelpers';
 
 interface MediaFile {
   id: string;
@@ -46,7 +50,7 @@ export const VariantMediaModal = ({
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [error, setError] = useState<string>('');
   const [draggedMediaIndex, setDraggedMediaIndex] = useState<number | null>(
-    null
+    null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,7 +67,7 @@ export const VariantMediaModal = ({
       const result = await uploadImage(
         params.file,
         'products/variants',
-        ImageType.Product
+        ImageType.Product,
       );
       return { result, mediaId: params.mediaId };
     },
@@ -112,8 +116,8 @@ export const VariantMediaModal = ({
     // Mark as uploading
     setMediaFiles((prev) =>
       prev.map((m) =>
-        m.id === media.id ? { ...m, uploadStatus: 'uploading' } : m
-      )
+        m.id === media.id ? { ...m, uploadStatus: 'uploading' } : m,
+      ),
     );
 
     try {
@@ -143,8 +147,8 @@ export const VariantMediaModal = ({
         prev.map((m) =>
           m.id === media.id
             ? { ...m, uploadStatus: 'success', uploadedData: dto }
-            : m
-        )
+            : m,
+        ),
       );
     } catch (err) {
       console.error('Upload failed:', err);
@@ -152,8 +156,8 @@ export const VariantMediaModal = ({
 
       setMediaFiles((prev) =>
         prev.map((m) =>
-          m.id === media.id ? { ...m, uploadStatus: 'error', errorMessage } : m
-        )
+          m.id === media.id ? { ...m, uploadStatus: 'error', errorMessage } : m,
+        ),
       );
     }
   };
@@ -173,10 +177,10 @@ export const VariantMediaModal = ({
     const currentVideoCount = mediaFiles.filter(
       (m) =>
         m.file?.type.startsWith('video/') ||
-        m.uploadedData?.mediaType === MediaType.Video
+        m.uploadedData?.mediaType === MediaType.Video,
     ).length;
     const newVideoCount = Array.from(files).filter((f) =>
-      f.type.startsWith('video/')
+      f.type.startsWith('video/'),
     ).length;
 
     if (currentVideoCount + newVideoCount > 1) {
@@ -255,7 +259,7 @@ export const VariantMediaModal = ({
       mediaFiles.map((f) => ({
         ...f,
         isMain: f.id === id,
-      }))
+      })),
     );
   };
 
@@ -294,7 +298,7 @@ export const VariantMediaModal = ({
   const handleDone = () => {
     // Check if all uploads are complete
     const pendingOrUploading = mediaFiles.filter(
-      (m) => m.uploadStatus === 'pending' || m.uploadStatus === 'uploading'
+      (m) => m.uploadStatus === 'pending' || m.uploadStatus === 'uploading',
     );
 
     if (pendingOrUploading.length > 0) {
@@ -327,7 +331,7 @@ export const VariantMediaModal = ({
   };
 
   const isUploading = mediaFiles.some(
-    (m) => m.uploadStatus === 'uploading' || m.uploadStatus === 'pending'
+    (m) => m.uploadStatus === 'uploading' || m.uploadStatus === 'pending',
   );
   const canSave =
     mediaFiles.length === 0 ||
@@ -436,7 +440,7 @@ export const VariantMediaModal = ({
                           <img
                             src={media.preview}
                             alt={media.file?.name || 'video thumbnail'}
-                            className='w-full h-full object-cover'
+                            className='w-full h-full object-contain'
                           />
                           {media.uploadStatus === 'success' &&
                             media.uploadedData?.mediaPublicId && (
@@ -444,7 +448,7 @@ export const VariantMediaModal = ({
                                 type='button'
                                 onClick={() => {
                                   const videoUrl = getVideoUrl(
-                                    media.uploadedData!.mediaPublicId
+                                    media.uploadedData!.mediaPublicId,
                                   );
                                   window.open(videoUrl, '_blank');
                                 }}
@@ -459,7 +463,13 @@ export const VariantMediaModal = ({
                         <img
                           src={media.preview}
                           alt={media.file?.name || 'media'}
-                          className='w-full h-full object-cover'
+                          className='cursor-pointer w-full h-full object-contain'
+                          onClick={() => {
+                            const imgUrl = getProductImageUrl(
+                              media.uploadedData!.mediaPublicId,
+                            );
+                            window.open(imgUrl, '_blank');
+                          }}
                         />
                       )}
                     </div>

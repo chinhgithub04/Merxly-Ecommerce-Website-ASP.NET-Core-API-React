@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useStripe } from '@stripe/react-stripe-js';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import {
   ShippingSection,
   PaymentSection,
@@ -13,6 +14,7 @@ import { useCart } from '../../hooks/useCart';
 import type { CartItemDto } from '../../types/models/cart';
 import type { CustomerAddressDto } from '../../types/models/address';
 import type { PaymentMethodDto } from '../../types/models/paymentMethod';
+import { toast } from 'react-toastify';
 
 export const CheckoutPage = () => {
   const location = useLocation();
@@ -70,7 +72,7 @@ export const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress || !selectedPaymentMethod || !stripe) {
-      alert('Please select shipping address and payment method');
+      toast.error('Please select a shipping address and payment method.');
       return;
     }
 
@@ -88,17 +90,17 @@ export const CheckoutPage = () => {
       const response = await processCheckout(checkoutRequest);
 
       if (!response.data) {
-        alert('Checkout failed. Please try again.');
+        toast.error('Checkout failed. Please try again.');
         return;
       }
 
       // Confirm payment with Stripe
       const { error } = await stripe.confirmCardPayment(
-        response.data.clientSecret
+        response.data.clientSecret,
       );
 
       if (error) {
-        alert(`Payment failed: ${error.message}`);
+        toast.error(`Payment failed: ${error.message}`);
         return;
       }
 
@@ -106,7 +108,7 @@ export const CheckoutPage = () => {
       const cartItemsToRemove = selectedItems.filter((item) => item.id);
       if (cartItemsToRemove.length > 0) {
         await Promise.all(
-          cartItemsToRemove.map((item) => removeCartItem(item.id))
+          cartItemsToRemove.map((item) => removeCartItem(item.id)),
         );
       }
 
@@ -116,7 +118,7 @@ export const CheckoutPage = () => {
       });
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Checkout failed. Please try again.');
+      toast.error(`Checkout failed. Please try again. ${error}`);
     }
   };
 
@@ -138,7 +140,9 @@ export const CheckoutPage = () => {
     <div className='px-20 py-12'>
       <h1 className='text-2xl font-bold text-neutral-900 mb-8'>Checkout</h1>
 
-      <div className='grid grid-cols-3 gap-6'>
+      <div
+        className={`grid grid-cols-3 gap-6 ${isProcessing ? 'blur-sm pointer-events-none' : ''}`}
+      >
         {/* Left: Shipping & Payment */}
         <div className='col-span-2 space-y-6'>
           <ShippingSection
@@ -163,6 +167,18 @@ export const CheckoutPage = () => {
           />
         </div>
       </div>
+
+      {/* Loading Overlay */}
+      {isProcessing && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center'>
+          <div className='flex flex-col items-center gap-4'>
+            <ArrowPathIcon className='h-12 w-12 text-primary-600 animate-spin' />
+            <p className='text-lg font-medium text-neutral-900'>
+              Processing your order...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

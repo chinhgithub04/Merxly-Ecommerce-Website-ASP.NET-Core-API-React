@@ -23,6 +23,8 @@ export const OrderActionButtons = ({
   onStatusUpdate,
 }: OrderActionButtonsProps) => {
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ActionButton | null>(null);
   const [cancelNotes, setCancelNotes] = useState('');
 
   // Get available actions based on current status
@@ -83,10 +85,25 @@ export const OrderActionButtons = ({
 
   const handleActionClick = (action: ActionButton) => {
     if (action.newStatus === OrderStatus.Cancelled) {
+      setPendingAction(action);
       setShowCancelModal(true);
     } else {
-      onStatusUpdate(action.newStatus);
+      setPendingAction(action);
+      setShowConfirmModal(true);
     }
+  };
+
+  const handleConfirmAction = () => {
+    if (pendingAction) {
+      onStatusUpdate(pendingAction.newStatus);
+      setShowConfirmModal(false);
+      setPendingAction(null);
+    }
+  };
+
+  const handleConfirmModalClose = () => {
+    setShowConfirmModal(false);
+    setPendingAction(null);
   };
 
   const handleCancelConfirm = () => {
@@ -127,7 +144,7 @@ export const OrderActionButtons = ({
             onClick={() => handleActionClick(action)}
             disabled={isUpdating}
             className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${getButtonStyles(
-              action.variant
+              action.variant,
             )}`}
           >
             <Icon className='h-5 w-5' />
@@ -166,6 +183,22 @@ export const OrderActionButtons = ({
               className='w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none'
             />
           </div>
+        </div>
+      </Modal>
+
+      {/* General Confirmation Modal */}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={handleConfirmModalClose}
+        onDone={handleConfirmAction}
+        title='Confirm Action'
+        doneLabel='Confirm'
+        cancelLabel='Cancel'
+      >
+        <div className='space-y-4'>
+          <p className='text-neutral-600'>
+            Are you sure you want to {pendingAction?.label.toLowerCase()}?
+          </p>
         </div>
       </Modal>
     </div>

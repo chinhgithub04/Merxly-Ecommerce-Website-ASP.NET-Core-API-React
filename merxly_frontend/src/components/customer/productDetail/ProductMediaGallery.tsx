@@ -60,7 +60,7 @@ export const ProductMediaGallery = ({ media }: ProductMediaGalleryProps) => {
 
     return (
       <img
-        src={getProductImageUrl(selectedMedia.mediaPublicId, 'detail')}
+        src={getProductImageUrl(selectedMedia.mediaPublicId, 'zoom')}
         alt='Product'
         className='w-full h-[600px] object-contain bg-neutral-50 rounded-lg'
       />
@@ -69,14 +69,14 @@ export const ProductMediaGallery = ({ media }: ProductMediaGalleryProps) => {
 
   const renderThumbnail = (
     mediaItem: ProductVariantMediaDto,
-    index: number
+    index: number,
   ) => {
     const isActive = index === selectedMediaIndex;
     const isVideo = mediaItem.mediaType === MediaType.Video;
 
     const thumbnailUrl = isVideo
       ? getVideoThumbnailUrl(mediaItem.mediaPublicId)
-      : getProductImageUrl(mediaItem.mediaPublicId, 'thumbnail');
+      : getProductImageUrl(mediaItem.mediaPublicId, 'card');
 
     return (
       <button
@@ -91,7 +91,7 @@ export const ProductMediaGallery = ({ media }: ProductMediaGalleryProps) => {
         <img
           src={thumbnailUrl}
           alt={`Thumbnail ${index + 1}`}
-          className='w-full h-full object-cover rounded-md'
+          className='w-full h-full object-contain rounded-md'
         />
         {isVideo && (
           <div className='absolute inset-0 flex items-center justify-center'>

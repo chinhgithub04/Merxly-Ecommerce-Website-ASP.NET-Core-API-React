@@ -16,12 +16,12 @@ export const ReviewItemReadOnly = ({ orderItem }: ReviewItemReadOnlyProps) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const dateStr = date.toLocaleDateString('en-US', {
+    const dateStr = date.toLocaleDateString('vi-VN', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
-    const timeStr = date.toLocaleTimeString('en-US', {
+    const timeStr = date.toLocaleTimeString('vi-VN', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
@@ -35,9 +35,9 @@ export const ReviewItemReadOnly = ({ orderItem }: ReviewItemReadOnlyProps) => {
       <div className='flex items-start gap-4'>
         {orderItem.mainMediaPublicId && (
           <img
-            src={getProductImageUrl(orderItem.mainMediaPublicId, 'thumbnail')}
+            src={getProductImageUrl(orderItem.mainMediaPublicId, 'card')}
             alt={orderItem.productVariantName}
-            className='w-16 h-16 rounded-lg object-cover'
+            className='w-16 h-16 rounded-lg object-contain'
           />
         )}
         <div className='flex-1'>
@@ -72,7 +72,7 @@ export const ReviewItemReadOnly = ({ orderItem }: ReviewItemReadOnlyProps) => {
                 src={getMediaUrl(
                   media.mediaPublicId,
                   media.mediaType,
-                  'thumbnail'
+                  'thumbnail',
                 )}
                 alt='Review media'
                 className='w-full h-full object-cover'

@@ -22,7 +22,7 @@ export const OrderActivityTimeline = ({
 }: OrderActivityTimelineProps) => {
   // Sort by most recent first
   const sortedHistory = [...statusHistory].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
   const getStatusIcon = (status: OrderStatus) => {
@@ -100,12 +100,12 @@ export const OrderActivityTimeline = ({
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return {
-      date: date.toLocaleDateString('en-US', {
+      date: date.toLocaleDateString('vi-VN', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
       }),
-      time: date.toLocaleTimeString('en-US', {
+      time: date.toLocaleTimeString('vi-VN', {
         hour: '2-digit',
         minute: '2-digit',
       }),
@@ -131,7 +131,7 @@ export const OrderActivityTimeline = ({
               {/* Icon */}
               <div
                 className={`relative z-10 shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${getStatusColor(
-                  entry.status
+                  entry.status,
                 )}`}
               >
                 <Icon className='h-5 w-5' />
@@ -158,8 +158,8 @@ export const OrderActivityTimeline = ({
                             {entry.changedBy === OrderChangedBy.CUSTOMER
                               ? 'Customer'
                               : entry.changedBy === OrderChangedBy.STORE_OWNER
-                              ? 'Store'
-                              : 'Admin'}
+                                ? 'Store'
+                                : 'Admin'}
                           </span>
                         </div>
                       )}

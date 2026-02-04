@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { TrashIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 import type { CartItemDto } from '../../types/models/cart';
 import { getProductImageUrl } from '../../utils/cloudinaryHelpers';
+import { Modal } from '../ui/Modal';
 
 interface CartItemRowProps {
   item: CartItemDto;
@@ -20,6 +21,7 @@ export const CartItemRow = ({
   onRemove,
 }: CartItemRowProps) => {
   const [quantity, setQuantity] = useState(item.quantity);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleIncrement = () => {
     if (quantity < item.stockQuantity) {
@@ -46,6 +48,19 @@ export const CartItemRow = ({
   };
 
   const subtotal = item.priceAtAdd * quantity;
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    onRemove(item.id);
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteModalClose = () => {
+    setShowDeleteModal(false);
+  };
 
   return (
     <tr
@@ -139,11 +154,28 @@ export const CartItemRow = ({
       </td>
       <td className='px-4 py-4 w-16'>
         <button
-          onClick={() => onRemove(item.id)}
+          onClick={handleDeleteClick}
           className='cursor-pointer p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors'
         >
           <TrashIcon className='h-5 w-5' />
         </button>
+
+        {/* Delete Item Modal */}
+        <Modal
+          isOpen={showDeleteModal}
+          onClose={handleDeleteModalClose}
+          onDone={handleDeleteConfirm}
+          title='Remove Item'
+          doneLabel='Remove'
+          cancelLabel='Cancel'
+        >
+          <div className='space-y-4'>
+            <p className='text-neutral-600'>
+              Are you sure you want to remove this item from your cart? This
+              action cannot be undone.
+            </p>
+          </div>
+        </Modal>
       </td>
     </tr>
   );

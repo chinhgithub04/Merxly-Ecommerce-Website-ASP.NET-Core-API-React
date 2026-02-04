@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import { CartTotals, StoreCartSection } from '../../components/cart';
+import { Modal } from '../../components/ui/Modal';
 import type { StoreCartGroup } from '../../types/models/cart';
 
 export const CartPage = () => {
@@ -9,6 +10,7 @@ export const CartPage = () => {
   const { cart, isLoading, updateCartItem, removeCartItem, clearCart } =
     useCart();
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // Default select all items when cart loads
   useEffect(() => {
@@ -115,15 +117,22 @@ export const CartPage = () => {
     }
   };
 
-  const handleClearAll = async () => {
-    if (window.confirm('Are you sure you want to clear your entire cart?')) {
-      try {
-        await clearCart();
-        setSelectedItems(new Set());
-      } catch (error) {
-        console.error('Failed to clear cart:', error);
-      }
+  const handleClearAll = () => {
+    setShowClearModal(true);
+  };
+
+  const handleClearConfirm = async () => {
+    try {
+      await clearCart();
+      setSelectedItems(new Set());
+      setShowClearModal(false);
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
     }
+  };
+
+  const handleClearModalClose = () => {
+    setShowClearModal(false);
   };
 
   if (isLoading) {
@@ -192,7 +201,7 @@ export const CartPage = () => {
             selectedItemsCount={selectedItems.size}
             onCheckout={() => {
               const selectedCartItems = cart?.cartItems.filter((item) =>
-                selectedItems.has(item.id)
+                selectedItems.has(item.id),
               );
               navigate('/checkout', {
                 state: { selectedItems: selectedCartItems },
@@ -201,6 +210,23 @@ export const CartPage = () => {
           />
         </div>
       </div>
+
+      {/* Clear Cart Modal */}
+      <Modal
+        isOpen={showClearModal}
+        onClose={handleClearModalClose}
+        onDone={handleClearConfirm}
+        title='Clear Cart'
+        doneLabel='Clear All'
+        cancelLabel='Cancel'
+      >
+        <div className='space-y-4'>
+          <p className='text-neutral-600'>
+            Are you sure you want to clear your entire cart? This action cannot
+            be undone.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };

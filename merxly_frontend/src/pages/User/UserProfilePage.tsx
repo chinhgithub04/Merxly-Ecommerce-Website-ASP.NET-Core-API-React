@@ -13,6 +13,7 @@ import type {
   UpdateUserProfileDto,
   ChangePasswordDto,
 } from '../../types/models/userProfile';
+import { toast } from 'react-toastify';
 
 export const UserProfilePage = () => {
   const { data, isLoading } = useUserProfile();
@@ -66,21 +67,23 @@ export const UserProfilePage = () => {
     setIsPasswordDirty(!!hasPasswordInput);
   }, [passwordFields]);
 
+  const password = watchPassword('newPassword');
+
   const handleAvatarUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.error('Please select a valid image file');
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should not exceed 5MB');
+      toast.error('Image size should not exceed 5MB');
       return;
     }
 
@@ -101,9 +104,13 @@ export const UserProfilePage = () => {
         avatarPublicId: newAvatarPublicId,
       });
 
-      alert('Avatar updated successfully!');
+      toast.success('Avatar updated successfully!');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to upload avatar');
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.errors?.join(', ') ||
+          'Failed to upload avatar',
+      );
     } finally {
       setIsUploadingAvatar(false);
       // Reset file input
@@ -116,27 +123,35 @@ export const UserProfilePage = () => {
   const onSubmitProfile = async (data: UpdateUserProfileDto) => {
     try {
       await updateProfileMutation.mutateAsync(data);
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update profile');
+      toast.error(
+        `Profile update failed: ${
+          error.response?.data?.message ||
+          error.response?.data?.errors?.join(', ') ||
+          'Unknown error'
+        }`,
+      );
     }
   };
 
   const onSubmitPassword = async (data: ChangePasswordDto) => {
     if (data.newPassword !== data.confirmNewPassword) {
-      alert('New password and confirm password do not match');
+      toast.error('New password and confirmation do not match');
       return;
     }
 
     try {
       await changePasswordMutation.mutateAsync(data);
-      alert('Password changed successfully!');
+      toast.success('Password changed successfully!');
       resetPassword();
     } catch (error: any) {
-      alert(
-        error.response?.data?.message ||
+      toast.error(
+        `Password change failed: ${
+          error.response?.data?.message ||
           error.response?.data?.errors?.join(', ') ||
           'Failed to change password'
+        }`,
       );
     }
   };
@@ -290,8 +305,17 @@ export const UserProfilePage = () => {
                   {...registerPassword('newPassword', {
                     required: 'New password is required',
                     minLength: {
-                      value: 6,
-                      message: 'Password must be at least 6 characters',
+                      value: 8,
+                      message: 'Password must be at least 8 characters',
+                    },
+                    maxLength: {
+                      value: 100,
+                      message: 'Password cannot exceed 100 characters',
+                    },
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                      message:
+                        'Password must contain uppercase, lowercase, and number',
                     },
                   })}
                   error={passwordErrors.newPassword?.message}
@@ -302,6 +326,8 @@ export const UserProfilePage = () => {
                   type='password'
                   {...registerPassword('confirmNewPassword', {
                     required: 'Please confirm your new password',
+                    validate: (value) =>
+                      value === password || 'Passwords do not match',
                   })}
                   error={passwordErrors.confirmNewPassword?.message}
                 />

@@ -9,6 +9,7 @@ import type {
   CreateCustomerAddressDto,
   UpdateCustomerAddressDto,
 } from '../types/models/address';
+import { toast } from 'react-toastify';
 
 export const useAddresses = () => {
   const queryClient = useQueryClient();
@@ -21,7 +22,11 @@ export const useAddresses = () => {
   const createAddressMutation = useMutation({
     mutationFn: createCustomerAddress,
     onSuccess: () => {
+      toast.success('Address created successfully');
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to create address: ${error.message}`);
     },
   });
 
@@ -34,14 +39,22 @@ export const useAddresses = () => {
       dto: UpdateCustomerAddressDto;
     }) => updateCustomerAddress(addressId, dto),
     onSuccess: () => {
+      toast.success('Address updated successfully');
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update address: ${error.message}`);
     },
   });
 
   const deleteAddressMutation = useMutation({
     mutationFn: deleteCustomerAddress,
     onSuccess: () => {
+      toast.success('Address deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete address: ${error.message}`);
     },
   });
 
