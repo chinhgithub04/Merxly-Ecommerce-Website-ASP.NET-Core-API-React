@@ -63,7 +63,8 @@ namespace merxly.Application.Services
             if (store.StripeAccountStatus != currentStatus || store.IsPayoutEnabled != currentPayoutEnabled)
             {
                 _unitOfWork.Store.Update(store);
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                var result = await _unitOfWork.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Database SaveChanges result: {Rows} rows affected", result);
 
                 _logger.LogInformation(
                     "Store {StoreId} updated: Status={Status}, PayoutEnabled={PayoutEnabled}",
